@@ -1,7 +1,0 @@
-{
-  "files.associations": {
-    "limits": "c",
-    "*.tcc": "c",
-    "pipeline.h": "c"
-  }
-}
