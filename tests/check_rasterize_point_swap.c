@@ -2,9 +2,9 @@
 
 
 #include <stdlib.h>
+#include <string.h>
 #include "unity.h"
-#include "pipeline.h"
-#include <stdio.h>
+#include "rasterize.h"
 
 void setUp() {}
 
