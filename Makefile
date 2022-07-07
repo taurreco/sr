@@ -12,34 +12,34 @@ INCLUDE_DIR = include
 SRC_DIR = src
 TESTS_DIR = tests
 EXAMPLES_DIR = examples
-TEST_FRAMEWORK_DIR = test-framework
+TEST_FRAMEWORK_DIR = unity
+
+# Test directories
+MATRIX_TESTS_DIR = $(TESTS_DIR)/matrix
+RASTER_TESTS_DIR = $(TESTS_DIR)/raster
 
 # Targets
 # first grab all files in examples.  then sub suffix with nothing, sub prefix with bin/
 EXAMPLES = $(patsubst $(EXAMPLES_DIR)/%, $(BIN_DIR)/%, \
 $(patsubst %.c, %, $(wildcard $(EXAMPLES_DIR)/*.c)))
 
-MATRIX_TESTS = $(patsubst $(TESTS_DIR)/%, $(BIN_DIR)/%, \
-$(patsubst %.c, %, $(wildcard $(TESTS_DIR)/check_matrix_*.c)))
+MATRIX_TESTS = $(patsubst $(MATRIX_TESTS_DIR)/%, $(BIN_DIR)/%, \
+$(patsubst %.c, %, $(wildcard $(MATRIX_TESTS_DIR)/*.c)))
+RASTER_TESTS  = $(patsubst $(RASTER_TESTS_DIR)/%, $(BIN_DIR)/%, \
+$(patsubst %.c, %, $(wildcard $(RASTER_TESTS_DIR)/*.c)))
 
-PIPELINE_TESTS = $(patsubst $(TESTS_DIR)/%, $(BIN_DIR)/%, \
-$(patsubst %.c, %, $(wildcard $(TESTS_DIR)/check_pipeline_*.c)))
+TESTS = $(MATRIX_TESTS) $(RASTER_TESTS)
 
-RASTERIZE_TESTS = $(patsubst $(TESTS_DIR)/%, $(BIN_DIR)/%, \
-$(patsubst %.c, %, $(wildcard $(TESTS_DIR)/check_rasterize_*.c)))
-
-TESTS = $(MATRIX_TESTS) $(PIPELINE_TESTS) $(RASTERIZE_TESTS)
-
-all: $(EXAMPLES) $(TESTS)
+all: $(RASTER_TESTS)
 
 # grab the pattern for the file
-$(EXAMPLES): $(BIN_DIR)/%: $(EXAMPLES_DIR)/%.c $(BIN_DIR)/matrix.o
+$(EXAMPLES): $(BIN_DIR)/%: $(EXAMPLES_DIR)/%.c $(BIN_DIR)/sr_matrix.o
 	mkdir -p $(@D) 
 	$(CC) $(CFLAGS) $^ -o $@ $(SDL2_FLAGS)
 
 
-$(MATRIX_TESTS): $(BIN_DIR)/%: $(TESTS_DIR)/%.c \
-$(BIN_DIR)/matrix.o $(BIN_DIR)/unity.o
+$(MATRIX_TESTS): $(BIN_DIR)/%: $(MATRIX_TESTS_DIR)/%.c \
+$(BIN_DIR)/sr_matrix.o $(BIN_DIR)/unity.o
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR)
 
@@ -48,13 +48,13 @@ $(BIN_DIR)/pipeline.o $(BIN_DIR)/unity.o
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR)
 
-$(RASTERIZE_TESTS): $(BIN_DIR)/%: $(TESTS_DIR)/%.c \
-$(BIN_DIR)/rasterize.o $(BIN_DIR)/unity.o
+$(RASTER_TESTS): $(BIN_DIR)/%: $(RASTER_TESTS_DIR)/%.c \
+$(BIN_DIR)/sr_raster.o $(BIN_DIR)/unity.o
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR) -lm
 
 
-$(BIN_DIR)/matrix.o: $(SRC_DIR)/matrix.c $(SRC_DIR)/matrix.h
+$(BIN_DIR)/sr_matrix.o: $(SRC_DIR)/sr_matrix.c $(SRC_DIR)/sr_matrix.h
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -63,7 +63,7 @@ $(BIN_DIR)/pipeline.o: $(SRC_DIR)/pipeline.c $(SRC_DIR)/pipeline.h $(SRC_DIR)/ra
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # requires -lm flag for linux systems to direct gcc to where linux stores math.h
-$(BIN_DIR)/rasterize.o: $(SRC_DIR)/rasterize.c $(SRC_DIR)/rasterize.h
+$(BIN_DIR)/sr_raster.o: $(SRC_DIR)/sr_raster.c $(SRC_DIR)/sr_raster.h
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@ -lm 
 
