@@ -11,8 +11,8 @@
  *                                                                   *
  *********************************************************************/
 
-static void fs_attr(void* uniform, uint32_t* color_p, point_t* pt_p);
-static void fs_color(void* uniform, uint32_t* color_p, point_t* pt_p);
+static void fs_attr(void* uniform, float* pt, uint32_t* color_p);
+static void fs_color(void* uniform, float* pt, uint32_t* color_p);
 
 /*********************************************************************
  *                                                                   *
@@ -21,11 +21,22 @@ static void fs_color(void* uniform, uint32_t* color_p, point_t* pt_p);
  *********************************************************************/
 
 uint32_t g_color;
-uint32_t g_cbuf[6 * 10];
-float g_zbuf[6 * 10];
+uint32_t g_colors[6 * 10];
+float g_depths[6 * 10];
 
-struct sr_fbuf g_fbuf = {10, 6, g_cbuf, g_zbuf};
-struct raster_data g_rdata = {&g_color, &g_fbuf, fs_color, 4};
+struct sr_framebuffer g_fbuf = {
+    .width = 10, 
+    .height = 6, 
+    .colors = g_colors, 
+    .depths = g_depths
+};
+
+struct raster_context g_rast = {
+    .fbuf = &g_fbuf,
+    .uniform = &g_color, 
+    .fs = (fs_f)fs_color, 
+    .num_attr = 4
+};
 
 /*********************************************************************
  *                                                                   *
@@ -36,15 +47,15 @@ struct raster_data g_rdata = {&g_color, &g_fbuf, fs_color, 4};
 /* whatever is in the fourth attribute slot is the 'color' */
 
 static void
-fs_attr(void* uniform, uint32_t* color_p, point_t* pt_p) 
+fs_attr(void* uniform, float* pt, uint32_t* color_p) 
 {
-    (*color_p) = (*pt_p)[3];
+    (*color_p) = pt[3];
 }
 
 /* the uniform data becomes the 'color' */
 
 static void 
-fs_color(void* uniform, uint32_t* color_p, point_t* pt_p)
+fs_color(void* uniform, float* pt, uint32_t* color_p)
 {
     (*color_p) = *((uint32_t*)(uniform));
 }
@@ -58,13 +69,13 @@ void
 setUp() 
 {
     /* clear framebuffer */
-    memset(g_cbuf, 0, sizeof(uint32_t) * 6 * 10);
+    memset(g_colors, 0, sizeof(uint32_t) * 6 * 10);
     for (int i = 0; i < 6 * 10; i++) {
-        g_zbuf[i] = 1000;
+        g_depths[i] = 1000;
     }
     /* set default color to 1 */
     g_color = 1;
-    g_rdata.fs = fs_color;
+    g_rast.fs = (fs_f)fs_color;
 }
 
 void 
@@ -96,10 +107,10 @@ basic_triangle()
         4.0, 4.0, 1, 0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr, tr + 4, tr + 8);
+    draw_tr(&g_rast, tr, tr + 4, tr + 8);
 
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
         0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
@@ -108,7 +119,39 @@ basic_triangle()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
+}
+
+/******************
+ * degenerate_triangle *
+ ******************/
+
+/* a line basically */
+
+void 
+degenerate_triangle() 
+{
+    /* triangle points */
+
+    float tr[3 * 4] = {
+        3.5, 0, 1, 0,         /* v0 */
+        1.5, 2.5, 1, 0,         /* v1 */
+        1.5, 2.5, 1, 0           /* v2 */
+    };
+
+    draw_tr(&g_rast, tr, tr + 4, tr + 8);
+
+
+    uint32_t target_colors[6 * 10] = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
+
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 /*********************************************************************
@@ -133,9 +176,9 @@ fill_too_small()
         2.1, 2.1, 1, 0             /* v2 */
     };
 
-    draw_tr(&g_rdata, tr, tr + 4, tr + 8);
+    draw_tr(&g_rast, tr, tr + 4, tr + 8);
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -144,7 +187,7 @@ fill_too_small()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 /*******************
@@ -163,9 +206,9 @@ fill_on_centers()
         2.5, 2.5, 1, 0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr, tr + 4, tr + 8);
+    draw_tr(&g_rast, tr, tr + 4, tr + 8);
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -174,7 +217,7 @@ fill_on_centers()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 /************************
@@ -192,11 +235,11 @@ fill_two_right_edges()
         3.5, 2.5, 1, 0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr, tr + 4, tr + 8);
+    draw_tr(&g_rast, tr, tr + 4, tr + 8);
 
     /* none of the pixels touched by right edges are rendered */
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
@@ -205,7 +248,7 @@ fill_two_right_edges()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 /*************************
@@ -226,7 +269,7 @@ fill_joined_triangles()
         3.5, 2.5, 1.0, 0.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr1, tr1 + 4, tr1 + 8);
+    draw_tr(&g_rast, tr1, tr1 + 4, tr1 + 8);
 
     g_color = 2;
 
@@ -238,11 +281,11 @@ fill_joined_triangles()
         3.5, 2.5, 1.0, 0.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr2, tr2 + 4, tr2 + 8);
+    draw_tr(&g_rast, tr2, tr2 + 4, tr2 + 8);
 
     /* only the top triangle is rendered */
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
         0, 0, 1, 1, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -251,7 +294,7 @@ fill_joined_triangles()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 /********************
@@ -269,7 +312,7 @@ fill_unit_quad()
         1.5, 3.5, 1.0, 0.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr1, tr1 + 4, tr1 + 8);
+    draw_tr(&g_rast, tr1, tr1 + 4, tr1 + 8);
 
     g_color = 2;
 
@@ -279,9 +322,9 @@ fill_unit_quad()
         1.5, 3.5, 1.0, 0.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr2, tr2 + 4, tr2 + 8);
+    draw_tr(&g_rast, tr2, tr2 + 4, tr2 + 8);
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
         0, 1, 2, 0, 0, 0, 0, 0, 0, 0,
@@ -290,7 +333,7 @@ fill_unit_quad()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 /*************************
@@ -308,7 +351,7 @@ fill_two_shared_edges()
         4.0, 3.0, 1.0, 0.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr1, tr1 + 4, tr1 + 8);
+    draw_tr(&g_rast, tr1, tr1 + 4, tr1 + 8);
 
     g_color = 2;
 
@@ -318,7 +361,7 @@ fill_two_shared_edges()
         4.0, 3.0, 1.0, 0.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr2, tr2 + 4, tr2 + 8);
+    draw_tr(&g_rast, tr2, tr2 + 4, tr2 + 8);
 
     g_color = 3;
 
@@ -328,9 +371,9 @@ fill_two_shared_edges()
         8.5, 2.5, 1.0, 0.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr3, tr3 + 4, tr3 + 8);
+    draw_tr(&g_rast, tr3, tr3 + 4, tr3 + 8);
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 1, 2, 3, 0, 0, 0,
         0, 1, 1, 1, 2, 2, 3, 3, 0, 0,
@@ -341,7 +384,7 @@ fill_two_shared_edges()
 
 
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 /*********************************************************************
@@ -359,7 +402,7 @@ fill_two_shared_edges()
 void
 attr_same_weights()
 {
-    g_rdata.fs = fs_attr;
+    g_rast.fs = (fs_f)fs_attr;
 
     float tr[3 * 4] = {
         0.0, 3.0, 0.0, 300.0,           /* v0 */
@@ -367,9 +410,9 @@ attr_same_weights()
         2.5, 0.0, 0.0, 300.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr, tr + 4, tr + 8);
+    draw_tr(&g_rast, tr, tr + 4, tr + 8);
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 300, 0, 0, 0, 0, 0, 0, 0,
         0, 300, 300, 300, 0, 0, 0, 0, 0, 0,
         300, 300, 300, 300, 300, 0, 0, 0, 0, 0,
@@ -378,7 +421,7 @@ attr_same_weights()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 /*********************
@@ -390,7 +433,7 @@ attr_same_weights()
 void
 attr_similar_weights()
 {
-    g_rdata.fs = fs_attr;
+    g_rast.fs = (fs_f)fs_attr;
 
     float tr[3 * 4] = {
         0.0, 3.0, 0.0, 300.0,           /* v0 */
@@ -398,9 +441,9 @@ attr_similar_weights()
         2.5, 0.0, 0.0, 280.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr, tr + 4, tr + 8);
+    draw_tr(&g_rast, tr, tr + 4, tr + 8);
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 284, 0, 0, 0, 0, 0, 0, 0,
         0, 290, 292, 294, 0, 0, 0, 0, 0, 0,
         296, 298, 300, 302, 304, 0, 0, 0, 0, 0,
@@ -409,7 +452,7 @@ attr_similar_weights()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 
@@ -422,7 +465,7 @@ attr_similar_weights()
 void
 attr_varied_weights()
 {
-    g_rdata.fs = fs_attr;
+    g_rast.fs = (fs_f)fs_attr;
 
     float tr[3 * 4] = {
         0.0, 3.0, 0.0, 400.0,           /* v0 */
@@ -430,9 +473,9 @@ attr_varied_weights()
         2.5, 0.0, 0.0, 300.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr, tr + 4, tr + 8);
+    draw_tr(&g_rast, tr, tr + 4, tr + 8);
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 358, 0, 0, 0, 0, 0, 0, 0,
         0, 375, 475, 575, 0, 0, 0, 0, 0, 0,
         391, 491, 591, 691, 791, 0, 0, 0, 0, 0,
@@ -441,7 +484,7 @@ attr_varied_weights()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 
@@ -454,7 +497,7 @@ attr_varied_weights()
 void
 attr_negative_weights()
 {
-    g_rdata.fs = fs_attr;
+    g_rast.fs = (fs_f)fs_attr;
 
     float tr[3 * 4] = {
         0.0, 3.0, 0.0, 451.0,           /* v0 */
@@ -462,9 +505,9 @@ attr_negative_weights()
         2.5, 0.0, 0.0, 638.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr, tr + 4, tr + 8);
+    draw_tr(&g_rast, tr, tr + 4, tr + 8);
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 494, 0, 0, 0, 0, 0, 0, 0,
         0, 476, 206, -63, 0, 0, 0, 0, 0, 0,
         459, 189, -81, -351, -621, 0, 0, 0, 0, 0,
@@ -473,7 +516,7 @@ attr_negative_weights()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 /*************************
@@ -485,7 +528,7 @@ attr_negative_weights()
 void
 attr_scalene()
 {
-     g_rdata.fs = fs_attr;
+     g_rast.fs = (fs_f)fs_attr;
 
     float tr[3 * 4] = {
         3.0, 0.0, 0.0, 400.0,           /* v0 */
@@ -493,9 +536,9 @@ attr_scalene()
         5.0, 5.0, 0.0, 300.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr, tr + 4, tr + 8);
+    draw_tr(&g_rast, tr, tr + 4, tr + 8);
     
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 525, 0, 0, 0, 0, 0, 0, 0,
         0, 775, 582, 389, 0, 0, 0, 0, 0, 0,
         0, 0, 639, 446, 0, 0, 0, 0, 0, 0,
@@ -504,7 +547,7 @@ attr_scalene()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 /*********************************************************************
@@ -531,7 +574,7 @@ depth_same()
         2.5, 0.0, 0.0, 300.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr1, tr1 + 4, tr1 + 8);
+    draw_tr(&g_rast, tr1, tr1 + 4, tr1 + 8);
 
     g_color = 2;
     
@@ -541,9 +584,9 @@ depth_same()
         5.0, 5.0, 0.0, 300.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr2, tr2 + 4, tr2 + 8);
+    draw_tr(&g_rast, tr2, tr2 + 4, tr2 + 8);
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
         0, 1, 1, 1, 0, 0, 0, 0, 0, 0,
         1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
@@ -552,7 +595,7 @@ depth_same()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 /**************************
@@ -570,7 +613,7 @@ depth_complete_overlap()
         2.5, 0.0, 10.0, 300.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr1, tr1 + 4, tr1 + 8);
+    draw_tr(&g_rast, tr1, tr1 + 4, tr1 + 8);
 
     g_color = 2;
     
@@ -580,9 +623,9 @@ depth_complete_overlap()
         5.0, 5.0, 0.0, 300.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr2, tr2 + 4, tr2 + 8);
+    draw_tr(&g_rast, tr2, tr2 + 4, tr2 + 8);
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 2, 0, 0, 0, 0, 0, 0, 0,
         0, 2, 2, 2, 0, 0, 0, 0, 0, 0,
         1, 1, 2, 2, 1, 0, 0, 0, 0, 0,
@@ -591,7 +634,7 @@ depth_complete_overlap()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 /****************
@@ -612,7 +655,7 @@ depth_varied()
         2.5, 0.0, 100.0, 300.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr1, tr1 + 4, tr1 + 8);
+    draw_tr(&g_rast, tr1, tr1 + 4, tr1 + 8);
 
     g_color = 2;
     
@@ -622,9 +665,9 @@ depth_varied()
         5.0, 5.0, 0.0, 300.0            /* v2 */
     };
 
-    draw_tr(&g_rdata, tr2, tr2 + 4, tr2 + 8);
+    draw_tr(&g_rast, tr2, tr2 + 4, tr2 + 8);
 
-    uint32_t target_cbuf[6 * 10] = {
+    uint32_t target_colors[6 * 10] = {
         0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
         0, 1, 1, 2, 0, 0, 0, 0, 0, 0,
         1, 1, 2, 2, 1, 0, 0, 0, 0, 0,
@@ -633,7 +676,7 @@ depth_varied()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 6 * 10);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }
 
 
@@ -649,6 +692,7 @@ main()
     UNITY_BEGIN();
     /* base case */
     RUN_TEST(basic_triangle);
+    RUN_TEST(degenerate_triangle);
     /* fill rules */
     RUN_TEST(fill_too_small);
     RUN_TEST(fill_on_centers);

@@ -3,8 +3,8 @@
 #include "sr.h"
 #include "sr_raster.h"
 
-#ifndef _SR_RENDER_H_
-#define _SR_RENDER_H_
+#ifndef SR_RENDER_H
+#define SR_RENDER_H
 
 #if UNIT_TEST
 #define u_static  

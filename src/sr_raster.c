@@ -33,13 +33,21 @@ struct bbox {
 };
 
 /* constructors */
-u_static float edge_init(struct edge* edge, float* v0, float* v1, float* pt);
-u_static void bbox_init(struct bbox* bbox, float* v0, float* v1, float* v2);
+u_static float 
+edge_init(struct edge* edge, float* v0, float* v1, float* pt);
+
+u_static void 
+bbox_init(struct bbox* bbox, float* v0, float* v1, float* v2);
 
 /* utility */
-u_static int is_tl(float* v0, float* v1);
-u_static void swap(float** v0_p, float** v1_p);
-u_static void ccw(float** v0_p, float** v1_p, float** v2_p);
+u_static int 
+is_tl(float* v0, float* v1);
+
+u_static void 
+swap(float** v0_p, float** v1_p);
+
+u_static void 
+ccw(float** v0_p, float** v1_p, float** v2_p);
 
 #endif
 
@@ -58,7 +66,7 @@ void
 draw_pt(struct raster_context* rast, float* pt)
 {
     uint32_t color = 0; /* color dest */
-    rast->fs(rast->uniform, &color, &pt);
+    rast->fs(rast->uniform, pt, &color);
     size_t fb_idx = floorf(pt[1]) * rast->fbuf->width + floorf(pt[0]);
     
     if (pt[2] < rast->fbuf->depths[fb_idx]) {  /* deptth buffer */
@@ -83,13 +91,6 @@ draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2)
 
     struct bbox bbox; 
     bbox_init(&bbox, v0, v1, v2);
-
-    /* clip bounding box */
-
-    bbox.min_x = fmax(bbox.min_x, 0);
-    bbox.min_y = fmax(bbox.min_y, 0);
-    bbox.max_x = fmin(bbox.max_x, rast->fbuf->width - 1);
-    bbox.max_y = fmin(bbox.max_y, rast->fbuf->height - 1);
 
     /* store current point */
 

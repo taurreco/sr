@@ -5,6 +5,19 @@
 
 /*********************************************************************
  *                                                                   *
+ *                       private declarations                        *
+ *                                                                   *
+ *********************************************************************/
+
+/* utility */
+static void 
+split_primitive(size_t prim_type, size_t* prim_sz);
+
+static void 
+ndc(float* pts, size_t num_pts, size_t num_attr);
+
+/*********************************************************************
+ *                                                                   *
  *                         public definition                         *
  *                                                                   *
  *********************************************************************/
@@ -26,7 +39,7 @@ sr_draw_arrays(struct sr_pipeline_context* pipe,
     /* setup variables */
 
     size_t prim_sz;
-    parse_primitve(prim_type, &prim_sz);
+    split_primitve(prim_type, &prim_sz);
     size_t num_prims = num_indices / prim_sz;
     size_t num_attr_in = pipe->num_attr_in;
     size_t num_attr_out = pipe->num_attr_out;
@@ -63,35 +76,77 @@ sr_draw_arrays(struct sr_pipeline_context* pipe,
 
         /* clipping */
         size_t num_pts_clip = prim_sz;
+        int in_frustum = 1;
         if (prim_sz == SR_PRIMITIVE_SIZE_TRIANGLE) {
-            clip(tmp_p, tmp_p, &num_pts_clip);
+            in_frustum = clip(tmp_p, tmp_p, &num_pts_clip);
         }
 
-        /* per clipped prim */
-        for (int j = 0; j < num_prims; j += prim_sz) {
-            float* prim = tmp_p + j * num_attr_out;
+         /* perspective divide */
+        ndc(tmp_p, prim_sz, num_attr_out);
 
-            /* perspective divide */
-            ndc(prim, prim_sz);
-
-            /* send to raster stage */
-            switch (prim_sz) {
-                case SR_PRIMITIVE_SIZE_POINT:
-                    draw_pt(&rast, prim);
-                    break;
-                case SR_PRIMITIVE_SIZE_LINE:
-                    draw_ln(&rast, prim, prim + num_attr_out);
-                    break;
-                case SR_PRIMITIVE_SIZE_TRIANGLE:
-                    if (backface_cull(prim)) {
-                        draw_tr(&rast, 
-                                prim, 
-                                prim + num_attr_out, 
-                                prim + 2 * num_attr_out);
-                    }
-                    break;
-            }
+        /* send to raster stage */
+        switch (prim_sz) {
+            case SR_PRIMITIVE_SIZE_POINT:
+                draw_pt(&rast, tmp_p);
+                break;
+            case SR_PRIMITIVE_SIZE_LINE:
+                draw_ln(&rast, tmp_p, tmp_p + num_attr_out);
+                break;
+            case SR_PRIMITIVE_SIZE_TRIANGLE:
+                int bfc = backface_cull(pipe->winding_order
+                                        tmp_p, 
+                                        tmp_p + num_attr_out, 
+                                        tmp_p + 2 * num_attr_out)
+                if (bfc && in_frustum) {
+                    draw_tr(&rast,
+                            tmp_p, 
+                            tmp_p + num_attr_out,
+                            tmp_p + 2 * num_attr_out);
+                }
+                break;
         }
     }
     free(pts_out);
+}
+
+/*********************************************************************
+ *                                                                   *
+ *                       private definitions                         *
+ *                                                                   *
+ *********************************************************************/
+
+/*******************
+ * split_primitive *
+ *******************/
+
+/* fills relevant traversal data about a primitive type */
+static void
+split_primitive(size_t prim_type, size_t* prim_sz)
+{
+    switch (prim_type) {
+        case SR_PRIMITIVE_TYPE_POINT_LIST:
+            *prim_sz = SR_PRIMITIVE_SIZE_POINT;
+            break;
+        case SR_PRIMITIVE_TYPE_LINE_LIST:
+        case SR_PRIMITIVE_TYPE_LINE_STRIP:
+            *prim_sz = SR_PRIMITIVE_SIZE_LINE;
+            break;
+        case SR_PRIMITIVE_TYPE_TRIANGLE_LIST:
+        case SR_PRIMITIVE_TYPE_TRIANGLE_STRIP:
+            *prim_sz = SR_PRIMITIVE_SIZE_TRIANGLE;
+            break;
+    }
+}
+
+/*******
+ * ndc *
+ *******/
+
+/* moves coordinates from clip space to normalized device space */
+static void
+ndc(float* pts, size_t num_pts, size_t num_attr)
+{
+    for (int i = 0; i < num_pts; i += num_attr) {
+
+    }
 }

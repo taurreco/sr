@@ -10,7 +10,7 @@
  *                                                                   *
  *********************************************************************/
 
-static void fs(void* uniform, uint32_t* color_p, point_t* pt_p);
+static void fs(void* uniform, float* pt, uint32_t* color_p);
 
 /*********************************************************************
  *                                                                   *
@@ -18,11 +18,22 @@ static void fs(void* uniform, uint32_t* color_p, point_t* pt_p);
  *                                                                   *
  *********************************************************************/
 
-uint32_t g_cbuf[5 * 5];
-float g_zbuf[5 * 5];
+uint32_t g_colors[5 * 5];
+float g_depths[5 * 5];
 
-struct sr_fbuf g_fbuf = {5, 5, g_cbuf, g_zbuf};
-struct raster_data g_rdata = {NULL, &g_fbuf, fs, 4};
+struct sr_framebuffer g_fbuf = {
+    .width = 5, 
+    .height = 5, 
+    .colors = g_colors, 
+    .depths = g_depths
+};
+
+struct raster_context g_rast = {
+    .fbuf = &g_fbuf, 
+    .uniform = NULL,
+    .fs = (fs_f)fs, 
+    .num_attr = 4
+};
 
 /*********************************************************************
  *                                                                   *
@@ -32,7 +43,7 @@ struct raster_data g_rdata = {NULL, &g_fbuf, fs, 4};
 
 /* sets color to 1 */
 static void 
-fs(void* uniform, uint32_t* color_p, point_t* pt_p)
+fs(void* uniform, float* pt, uint32_t* color_p)
 {
     (*color_p) = 1;
 }
@@ -47,9 +58,9 @@ void
 setUp() 
 {
     /* clear framebuffer */
-    memset(g_cbuf, 0, sizeof(uint32_t) * 5 * 5);
+    memset(g_colors, 0, sizeof(uint32_t) * 5 * 5);
     for (int i = 0; i < 5 * 5; i++) {
-        g_zbuf[i] = 1000;
+        g_depths[i] = 1000;
     }
 }
 
@@ -75,9 +86,9 @@ void
 one_point() 
 {
     float pt[4] = {0, 0, 0, 0};
-    draw_pt(&g_rdata, pt);
+    draw_pt(&g_rast, pt);
 
-    uint32_t target_cbuf[5 * 5] = {
+    uint32_t target_colors[5 * 5] = {
         1, 0, 0, 0, 0,
         0, 0, 0, 0, 0,
         0, 0, 0, 0, 0,
@@ -85,7 +96,7 @@ one_point()
         0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf, g_rdata.fbuf->cbuf, 5 * 5);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 5 * 5);
 }
 
 /****************
@@ -98,9 +109,9 @@ void
 three_points() 
 {
     float pt1[4] = {1, 1, 0, 0};
-    draw_pt(&g_rdata, pt1);
+    draw_pt(&g_rast, pt1);
 
-    uint32_t target_cbuf_first[5 * 5] = {
+    uint32_t target_colors_first[5 * 5] = {
         0, 0, 0, 0, 0,
         0, 1, 0, 0, 0,
         0, 0, 0, 0, 0,
@@ -108,12 +119,12 @@ three_points()
         0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf_first, g_rdata.fbuf->cbuf, 5 * 5);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors_first, g_rast.fbuf->colors, 5 * 5);
 
     float pt2[4] = {0, 2, 0, 0};
-    draw_pt(&g_rdata, pt2);
+    draw_pt(&g_rast, pt2);
 
-    uint32_t target_cbuf_second[5 * 5] = {
+    uint32_t target_colors_second[5 * 5] = {
         0, 0, 0, 0, 0,
         0, 1, 0, 0, 0,
         1, 0, 0, 0, 0,
@@ -121,12 +132,12 @@ three_points()
         0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf_second, g_rdata.fbuf->cbuf, 5 * 5);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors_second, g_rast.fbuf->colors, 5 * 5);
     
     float pt3[4] = {1, 2, 0, 0};
-    draw_pt(&g_rdata, pt3);
+    draw_pt(&g_rast, pt3);
 
-    uint32_t target_cbuf_third[5 * 5] = {
+    uint32_t target_colors_third[5 * 5] = {
         0, 0, 0, 0, 0,
         0, 1, 0, 0, 0,
         1, 1, 0, 0, 0,
@@ -134,7 +145,7 @@ three_points()
         0, 0, 0, 0, 0
     };
 
-    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_cbuf_third, g_rdata.fbuf->cbuf, 5 * 5);
+    TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors_third, g_rast.fbuf->colors, 5 * 5);
 }
 
 /*********************************************************************
@@ -153,9 +164,9 @@ void
 depth_simple() 
 {
 float pt[4] = {0, 0, 10, 0};
-    draw_pt(&g_rdata, pt);
+    draw_pt(&g_rast, pt);
 
-    float target_zbuf[5 * 5] = {
+    float target_depths[5 * 5] = {
         10, 1000, 1000, 1000, 1000,
         1000, 1000, 1000, 1000, 1000,
         1000, 1000, 1000, 1000, 1000,
@@ -163,7 +174,7 @@ float pt[4] = {0, 0, 10, 0};
         1000, 1000, 1000, 1000, 1000
     };
 
-    TEST_ASSERT_EQUAL_FLOAT_ARRAY(target_zbuf, g_rdata.fbuf->zbuf, 5 * 5);
+    TEST_ASSERT_EQUAL_FLOAT_ARRAY(target_depths, g_rast.fbuf->depths, 5 * 5);
 }
 
 /*****************
@@ -176,12 +187,12 @@ void
 depth_overlap() 
 {
     float pt1[4] = {0, 0, 2, 0};
-    draw_pt(&g_rdata, pt1);
+    draw_pt(&g_rast, pt1);
 
     float pt2[4] = {0, 0, 4, 0};
-    draw_pt(&g_rdata, pt2);
+    draw_pt(&g_rast, pt2);
 
-    float target_zbuf[5 * 5] = {
+    float target_depths[5 * 5] = {
         2, 1000, 1000, 1000, 1000,
         1000, 1000, 1000, 1000, 1000,
         1000, 1000, 1000, 1000, 1000,
@@ -189,7 +200,7 @@ depth_overlap()
         1000, 1000, 1000, 1000, 1000
     };
 
-    TEST_ASSERT_EQUAL_FLOAT_ARRAY(target_zbuf, g_rdata.fbuf->zbuf, 5 * 5);
+    TEST_ASSERT_EQUAL_FLOAT_ARRAY(target_depths, g_rast.fbuf->depths, 5 * 5);
 }
 
 /*********************************************************************
