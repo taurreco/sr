@@ -10,18 +10,18 @@
 #define SR_PRIMITIVE_TYPE_POINT_LIST 0x1
 #define SR_PRIMITIVE_TYPE_LINE_LIST 0x2
 #define SR_PRIMITIVE_TYPE_LINE_STRIP 0x3
-#define SR_PRIMITIVE_TYPE_LINE_LIST_ADJ 0x4
-#define SR_PRIMITIVE_TYPE_LINE_STRIP_ADJ 0x5
-#define SR_PRIMITIVE_TYPE_TRIANGLE_LIST 0x6
-#define SR_PRIMITIVE_TYPE_TRIANGLE_STRIP 0x7
-#define SR_PRIMITIVE_TYPE_TRIANGLE_LIST_ADJ 0x8
-#define SR_PRIMITIVE_TYPE_TRIANGLE_STRIP_ADJ 0x9
+#define SR_PRIMITIVE_TYPE_TRIANGLE_LIST 0x4
+#define SR_PRIMITIVE_TYPE_TRIANGLE_STRIP 0x5
 
 #define SR_PRIMITIVE_SIZE_POINT 1
 #define SR_PRIMITIVE_SIZE_LINE 2
-#define SR_PRIMITIVE_SIZE_LINE_ADJ 4
 #define SR_PRIMITIVE_SIZE_TRIANGLE 3
-#define SR_PRIMITIVE_SIZE_TRIANGLE__ADJ 6
+
+#define SR_CLIP_LEFT_PLANE 1 << 0
+#define SR_CLIP_BOTTOM_PLANE 1 << 1
+#define SR_CLIP_NEAR_PLANE 1 << 2
+#define SR_CLIP_RIGHT_PLANE 1 << 3
+#define SR_CLIP_TOP_PLANE 1 << 4
 
 /*********************************************************************
  *                                                                   *
@@ -64,6 +64,8 @@ struct sr_pipeline_context {
     size_t num_pts;
     size_t num_attr_in;
     size_t num_attr_out;
+
+    size_t winding_order;
 };
 
 /*********************************************************************
@@ -73,10 +75,10 @@ struct sr_pipeline_context {
  *********************************************************************/
 
 /* render interface */
-void sr_draw_arrays(struct sr_pipeline_context* pipe,  
-                    size_t* indices, 
-                    size_t num_indices,
-                    size_t prim_type);
+void sr_draw_indexed(struct sr_pipeline_context* pipe,  
+                     size_t* indices, 
+                     size_t num_indices,
+                     size_t prim_type);
 
 
 #endif /* SR_H */

@@ -43,12 +43,6 @@ bbox_init(struct bbox* bbox, float* v0, float* v1, float* v2);
 u_static int 
 is_tl(float* v0, float* v1);
 
-u_static void 
-swap(float** v0_p, float** v1_p);
-
-u_static void 
-ccw(float** v0_p, float** v1_p, float** v2_p);
-
 #endif
 
 /*********************************************************************
@@ -82,11 +76,7 @@ draw_pt(struct raster_context* rast, float* pt)
 /* rasterize a triangle to framebuffer */
 void 
 draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2)
-{
-    /* orient triangle ccw */
-
-    ccw(&v0, &v1, &v2);
-    
+{   
     /* find bounding box */
 
     struct bbox bbox; 
@@ -126,7 +116,7 @@ draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2)
 
                 float area = w0 + w1 + w2;
                 
-                float w0_nm = w0 / area;            /* nm suffix for 'NorMailzed' */
+                float w0_nm = w0 / area;    /* nm suffix for 'NorMailzed' */
                 float w1_nm = w1 / area;
                 float w2_nm = w2 / area;
 
@@ -156,9 +146,9 @@ draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2)
  *                                                                   *
  *********************************************************************/
 
-/**************
- * edge_alloc *
- **************/
+/*************
+ * edge_init *
+ *************/
 
 /* make an edge struct instance, return the initial determinant */
 u_static float 
@@ -178,15 +168,15 @@ edge_init(struct edge* edge, float* v0, float* v1, float* pt)
     return A * pt[0] + B * pt[1] + C;
 }
 
-/**************
- * bbox_alloc *
- **************/
+/*************
+ * bbox_init *
+ *************/
 
 /* define a pixel-aligned bounding box for triangle rasterization */
 u_static void
 bbox_init(struct bbox* bbox, float* v0, float* v1, float* v2)
 {    
-    /* naive values */
+    /* naiive values */
 
     bbox->min_x = fmin(v0[0], fmin(v1[0], v2[0]));
     bbox->min_y = fmin(v0[1], fmin(v1[1], v2[1]));
@@ -217,49 +207,5 @@ is_tl(float* v0, float* v1)
 {
     int is_top = (v0[1] == v1[1]) && (v0[0] > v1[0]); 
     int is_left = v0[1] < v1[1];
-    return is_top || is_left;
-}
-
-/********
- * swap *
- ********/
-
-/* swap the references of two vertices (of an edge v0 -> v1) */
-u_static void 
-swap(float** v0_p, float** v1_p) 
-{
-    float* tmp = *v0_p;
-    *v0_p = *v1_p;
-    *v1_p = tmp;
-}
-
-/*******
- * ccw *
- *******/
-
-/* swap v0, v1, v2, into couter clockwise orientation */
-u_static void 
-ccw(float** v0_p, float** v1_p, float** v2_p) 
-{
-    if ((*v1_p)[1] > (*v0_p)[1]) {
-        swap(v0_p, v1_p);
-    }
-    if ((*v2_p)[1] > (*v0_p)[1]) {
-        swap(v0_p, v2_p);
-    }
-    if ((*v1_p)[0] < (*v2_p)[0]) {
-        swap(v1_p, v2_p);
-    }
-    if ((*v1_p)[0] == (*v2_p)[0] 
-        && (*v1_p)[1] < (*v2_p)[1]) {
-        swap(v1_p, v2_p);
-    }
-    if ((*v0_p)[1] == (*v1_p)[1] 
-        && (*v0_p)[0] > (*v1_p)[0]) {
-        swap(v0_p, v1_p);
-    }
-    if ((*v0_p)[1] == (*v2_p)[1] 
-        && (*v0_p)[0] < (*v2_p)[0]) {
-        swap(v0_p, v2_p);
-    }
+    return is_top | is_left;
 }
