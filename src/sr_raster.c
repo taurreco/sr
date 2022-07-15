@@ -18,8 +18,8 @@
 
 /* holds the steps sizes / data for barycentric weight for an edge */
 struct edge {
-    float step_x, step_y;       /* steps to increment det by to get the det at new pt */
-    int is_tl;                  /* tracks if the edge is top left */
+    float step_x, step_y;    /* steps to increment to get the det at new pt */
+    int is_tl;               /* tracks if the edge is top left */
 };
 
 /***************

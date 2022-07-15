@@ -29,9 +29,14 @@ struct raster_context {
  *                                                                   *
  *********************************************************************/
 
-void draw_pt(struct raster_context* rast, float* pt);
-void draw_ln(struct raster_context* rast, float* v0, float* v1);
-void draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2);
+void 
+draw_pt(struct raster_context* rast, float* pt);
+
+void 
+draw_ln(struct raster_context* rast, float* v0, float* v1);
+
+void 
+draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2);
 
 /*********************************************************************
  *                                                                   *
@@ -45,11 +50,10 @@ void draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2);
  * struct edge *
  ***************/
 
-/* holds the steps sizes and data for barycentric weight for an edge */
+/* holds the steps sizes / data for barycentric weight for an edge */
 struct edge {
-    float step_x, step_y;       /* steps to increment det by to get the det at new pt */
-    float init_det;             /* the det made by the edge and initial pt */
-    int is_tl;                  /* tracks if the edge is top left */
+    float step_x, step_y;    /* steps to increment to get the det at new pt */
+    int is_tl;               /* tracks if the edge is top left */
 };
 
 /***************
@@ -63,13 +67,15 @@ struct bbox {
 };
 
 /* constructors */
-float edge_init(struct edge* edge, float* v0, float* v1, float* pt);
-void bbox_init(struct bbox* bbox, float* v0, float* v1, float* v2);
+float 
+edge_init(struct edge* edge, float* v0, float* v1, float* pt);
+
+void 
+bbox_init(struct bbox* bbox, float* v0, float* v1, float* v2);
 
 /* utility */
-int is_tl(float* v0, float* v1);
-void swap(float** v0_p, float** v1_p);
-void ccw(float** v0_p, float** v1_p, float** v2_p);
+int
+is_tl(float* v0, float* v1);
 
 #endif
 

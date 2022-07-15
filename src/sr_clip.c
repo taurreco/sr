@@ -12,13 +12,21 @@
 #if !(UNIT_TEST)
 
 u_static void
+clip_routine(float* src, 
+             float* dest, 
+             size_t* num_pts, 
+             size_t num_attr, 
+             size_t axis, 
+             int sign);
+
+u_static void
 lerp(float* from, float* to, float* dest, float a, size_t num_attr);
 
 #endif
 
 /*********************************************************************
  *                                                                   *
- *                         public definition                         *
+ *                        public definitions                         *
  *                                                                   *
  *********************************************************************/
 
@@ -68,6 +76,29 @@ clip_poly(float* src,
     memcpy(src, dest, *num_pts * num_attr);
 }
 
+/*************
+ * clip_test *
+ *************/
+
+/* assigns proper clip flags to a point */
+void
+clip_test(float* pt, uint8_t* flags)
+{
+    uint8_t left = (pt[3] + pt[0] < 0) << 0;
+    uint8_t bottom = (pt[3] + pt[1] < 0) << 1;
+    uint8_t near = (pt[3] + pt[2] < 0) << 2;
+    uint8_t right = (pt[3] - pt[0] < 0) << 3;
+    uint8_t top = (pt[3] - pt[1] < 0) << 4;
+
+    *flags = left | bottom | near | right | top;
+}
+
+/*********************************************************************
+ *                                                                   *
+ *                       private definitions                         *
+ *                                                                   *
+ *********************************************************************/
+
 /****************
  * clip_routine *
  ****************/
@@ -76,7 +107,7 @@ clip_poly(float* src,
  * a variant of cohen-sutherland for one plane
  * as determined by an axis and a sign to indicate direction
  */
-static void
+u_static void
 clip_routine(float* src, 
              float* dest, 
              size_t* num_pts, 
@@ -116,29 +147,6 @@ clip_routine(float* src,
     }
     *num_pts = k;    /* new number of points after clip */
 }
-
-/*************
- * clip_test *
- *************/
-
-/* assigns proper clip flags to a point */
-void
-clip_test(float* pt, uint8_t* flags)
-{
-    uint8_t left = (pt[3] + pt[0] < 0) << 0;
-    uint8_t bottom = (pt[3] + pt[1] < 0) << 1;
-    uint8_t near = (pt[3] + pt[2] < 0) << 2;
-    uint8_t right = (pt[3] - pt[0] < 0) << 3;
-    uint8_t top = (pt[3] - pt[1] < 0) << 4;
-
-    *flags = left | bottom | near | right | top;
-}
-
-/*********************************************************************
- *                                                                   *
- *                       private definitions                         *
- *                                                                   *
- *********************************************************************/
 
 /********
  * lerp *

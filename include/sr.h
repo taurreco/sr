@@ -7,11 +7,11 @@
 
 #define SR_MAX_ATTRIBUTE_COUNT 32                   
 
-#define SR_PRIMITIVE_TYPE_POINT_LIST 0x1
-#define SR_PRIMITIVE_TYPE_LINE_LIST 0x2
-#define SR_PRIMITIVE_TYPE_LINE_STRIP 0x3
-#define SR_PRIMITIVE_TYPE_TRIANGLE_LIST 0x4
-#define SR_PRIMITIVE_TYPE_TRIANGLE_STRIP 0x5
+#define SR_PRIMITIVE_TYPE_POINT_LIST 1
+#define SR_PRIMITIVE_TYPE_LINE_LIST 2
+#define SR_PRIMITIVE_TYPE_LINE_STRIP 3
+#define SR_PRIMITIVE_TYPE_TRIANGLE_LIST 4
+#define SR_PRIMITIVE_TYPE_TRIANGLE_STRIP 5
 
 #define SR_PRIMITIVE_SIZE_POINT 1
 #define SR_PRIMITIVE_SIZE_LINE 2
@@ -40,17 +40,36 @@ typedef void (*fs_f)(void* uniform, float* in, uint32_t* out);
 
 struct sr_std_uniform;      /* hidden from end user bc it uses internal matrix data */
 
+/*************************
+ * struct sr_framebuffer *
+ *************************/
+
+/* interface to whatever writes to the screen */
 struct sr_framebuffer {
-    size_t width, height;                           /* width, height */
-    uint32_t* colors;                                 /* colors */
-    float* depths;                                    /* depths */
+    size_t width, height;    /* width, height */
+    uint32_t* colors;        /* colors */
+    float* depths;           /* depths */
 };
 
+/********************
+ * struct sr_camera *
+ ********************/
+
+/* holds camera model information */
 struct sr_camera {
     size_t vport, nplane;
     size_t fplane, fov;
 };
 
+/******************************
+ * struct sr_pipeline_context *
+ ******************************/
+
+/**
+ * stores all data required to pre-allocate
+ * memory required to render an indexed list of
+ * arbitrary length
+ */
 struct sr_pipeline_context {
     
     struct sr_framebuffer* fbuf;
