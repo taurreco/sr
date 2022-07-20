@@ -31,13 +31,11 @@ ndc(float* pt);
  * refines indexed vertex data to be sent to rasterizer
  */
 void
-sr_draw_indexed(struct sr_pipeline_context* pipe,
-                size_t* indices, 
-                size_t num_indices,
-                size_t prim_type)
+sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices, 
+                size_t num_indices, size_t prim_type)
 {
     /* setup variables */
-
+    
     size_t prim_sz;
     split_primitve(prim_type, &prim_sz);
     size_t num_prims = num_indices / prim_sz;
@@ -76,7 +74,8 @@ sr_draw_indexed(struct sr_pipeline_context* pipe,
 
         /* primitive assembly */
 
-        uint8_t prim_clip_flags = 0;
+        uint8_t clip_and = 0;
+        uint8_t clip_or = 0;
 
         for (int j = 0; j < prim_sz; j++) {
 
@@ -85,23 +84,23 @@ sr_draw_indexed(struct sr_pipeline_context* pipe,
                    pts_out + indices[i + j], 
                    num_attr_out * sizeof(float));
 
-            /* accumulate point clip flags to find face clip flag */
-            prim_clip_flags &= clip_flags[i + j];
+            /* accumulate point clip flags */
+            clip_and &= clip_flags[i + j];
+            clip_or |= clip_flags[i + j];
         }
 
-        if (prim_clip_flags == 0) {
+        /* clipping */
+
+        if (clip_and != 0)    /* outside frustum */
             break;
-        }
-        /* if triangle is entirely within the bbox, skip clipping */
-        /* if its entirely outside w no intersections, skip clipping and discard it */
 
         size_t clip_pts = prim_sz;
-        clip_poly(tmp_p, &clip_pts, num_attr_out, prim_clip_flags);
+        if (clip_or != 0)     /* if not intersect frustum */
+            clip_poly(tmp_p, &clip_pts, num_attr_out, clip_or);
 
         /* perspective divide */
-        for (int j = 0; j < clip_pts; j++) {
-            ndc(tmp_p + j * num_attr_out);
-        }
+        for (int j = 0; j < clip_pts; j++)
+            screen_space(pipe->fbuf, tmp_p + j * num_attr_out);
 
         /* traverse thru a fan of clipped points and draw primitives */
         switch (prim_sz) {
@@ -160,9 +159,18 @@ split_primitive(size_t prim_type, size_t* prim_sz)
  * ndc *
  *******/
 
-/* moves coordinates from clip space to normalized device space */
+/* moves coordinates from clip space to screen space */
 static void
-ndc(float* pt)
+screen_space(struct sr_framebuffer* fbuf, float* pt)
 {
+    /* to ndc space */
+    pt[0] /= pt[3];
+    pt[1] /= pt[3];
+    pt[2] /= pt[3];
+    pt[3] = 1 / pt[3];  /* for perspective correct interpolation */
 
+    /* to screen space */
+    pt[0] = fbuf->width * (pt[0] + 1)/2;
+    pt[1] = fbuf->height * -(pt[0] + 1)/2;
+    pt[2] = (pt[2] + 1) / 2;
 }

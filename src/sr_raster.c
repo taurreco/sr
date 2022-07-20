@@ -106,24 +106,31 @@ draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2)
 
         for (pt[0] = bbox.min_x; pt[0] <= bbox.max_x; pt[0]++) {
 
-            float b0 = (w0 == 0) && !e12.is_tl ? -1 : 0;
-            float b1 = (w1 == 0) && !e20.is_tl ? -1 : 0;
-            float b2 = (w2 == 0) && !e01.is_tl ? -1 : 0;
+            float f0 = (w0 == 0) && !e12.is_tl ? -1 : 0;
+            float f1 = (w1 == 0) && !e20.is_tl ? -1 : 0;
+            float f2 = (w2 == 0) && !e01.is_tl ? -1 : 0;
 
-            if ( (w0 + b0 >= 0) && (w1 + b1 >= 0) && (w2 + b2 >= 0) ) {
+            if ( (w0 + f0 >= 0) && (w1 + f1 >= 0) && (w2 + f2 >= 0) ) {
 
                 /* normalize weights */
 
                 float area = w0 + w1 + w2;
                 
-                float w0_nm = w0 / area;    /* nm suffix for 'NorMailzed' */
-                float w1_nm = w1 / area;
-                float w2_nm = w2 / area;
+                float b0 = w0 / area;
+                float b1 = w1 / area;
+                float b2 = w2 / area;
 
                 /* interpolate attributes */
 
+                float a = b0 * v0[3];
+                float b = b1 * v1[3];
+                float c = b2 * v2[3];
+
+                float Z = a + b + c;
+
                 for (int i = 2; i < (int)rast->num_attr; i++) {
-                    pt[i] = w0_nm * v0[i] + w1_nm * v1[i] + w2_nm * v2[i];
+                    float P = (a * v0[i] + b* v1[i] + c * v2[i]); /* interpolate in screen space */
+                    pt[i] = P / Z; /* to clip space */
                 }
 
                 draw_pt(rast, pt);

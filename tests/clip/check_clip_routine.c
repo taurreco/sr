@@ -31,8 +31,6 @@ tearDown()
  * clip_no_pts *
  **************/
 
-/* v2 is the only vertex outside the negative x clip plane */
-
 /**************************************
  *     -15, 15           15,15        *
  *        y _______________           *
@@ -47,6 +45,7 @@ tearDown()
  *                                    *
  **************************************/
 
+/* v2 is the only vertex outside the negative x clip plane */
 void 
 clip_no_pts()
 {
@@ -60,20 +59,17 @@ clip_no_pts()
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
     size_t num_pts = 3;
-    int inside = clip_routine(src, dest, &num_pts, 4, 0, -1);
+    clip_routine(src, dest, &num_pts, 4, 0, -1);
 
     printf("num_pts %ld", num_pts);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 3);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 3);
-    TEST_ASSERT_TRUE(inside);
 }
 
 /**************
  * cull_triangle *
  **************/
-
-/* v2 is the only vertex outside the negative x clip plane */
 
 /**************************************
  *     -15, 15           15,15        *
@@ -89,6 +85,7 @@ clip_no_pts()
  *                                    *
  **************************************/
 
+/* v2 is the only vertex outside the negative x clip plane */
 void 
 cull_triangle()
 {
@@ -101,12 +98,9 @@ cull_triangle()
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
     size_t num_pts = 3;
-    int inside = clip_routine(src, dest, &num_pts, 4, 0, -1);
-
-    printf("num_pts %ld", num_pts);
+    clip_routine(src, dest, &num_pts, 4, 0, -1);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 0);
-    TEST_ASSERT_FALSE(inside);
 }
 
 /*********************************************************************
@@ -118,11 +112,6 @@ cull_triangle()
 /**************
  * clip_one_pt *
  **************/
-
-/**
- * clipping away only the point outside the negatve 
- * x face of bounding box
- */
 
 /**************************************
  *     -15, 15           15,15        *
@@ -138,6 +127,10 @@ cull_triangle()
  *                                    *
  **************************************/
 
+/**
+ * clipping away only the point outside the negatve 
+ * x face of bounding box
+ */
 void 
 clip_one_pt()
 {
@@ -158,18 +151,15 @@ clip_one_pt()
 
     size_t num_pts = 3;
 
-    int inside = clip_routine(src, dest, &num_pts, 4, 0, -1);
+    clip_routine(src, dest, &num_pts, 4, 0, -1);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 4);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 4);
-    TEST_ASSERT_TRUE(inside);
 }
 
 /****************
  * clip_two_pts *
  ****************/
-
-/* two points are outside of triangle */
 
 /**************************************
  *     -15, 15           15,15        *
@@ -185,6 +175,7 @@ clip_one_pt()
  *                                    *
  **************************************/
 
+/* two points are outside of triangle */
 void 
 clip_two_pts()
 {
@@ -203,18 +194,15 @@ clip_two_pts()
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
     size_t num_pts = 3;
-    int inside = clip_routine(src, dest, &num_pts, 4, 0, -1);
+    clip_routine(src, dest, &num_pts, 4, 0, -1);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 3);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 3);
-    TEST_ASSERT_TRUE(inside);
 }
 
 /******************
  * clip_three_pts *
  ******************/
-
-/* triangle is larger than bounding box, but still inside it */
 
 /**************************************
  *     -15, 15    v1      15,15       *
@@ -230,6 +218,7 @@ clip_two_pts()
  *                                    *
  **************************************/
 
+/* triangle is larger than bounding box, but still inside it */
 void 
 clip_three_pts()
 {
@@ -252,13 +241,12 @@ clip_three_pts()
     float tmp[16 * SR_MAX_ATTRIBUTE_COUNT];
 
     size_t num_pts = 3;
-    int inside = clip_routine(src, dest, &num_pts, 4, 0, -1);  /* clip left */
-    inside = clip_routine(dest, tmp, &num_pts, 4, 1, 1);       /* clip top */
-    inside = clip_routine(tmp, dest, &num_pts, 4, 0, 1);       /* clip right */
+    clip_routine(src, dest, &num_pts, 4, 0, -1);  /* clip left */
+    clip_routine(dest, tmp, &num_pts, 4, 1, 1);       /* clip top */
+    clip_routine(tmp, dest, &num_pts, 4, 0, 1);       /* clip right */
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 6);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 6);
-    TEST_ASSERT_TRUE(inside);
 }
 
 /*********************************************************************
@@ -270,8 +258,6 @@ clip_three_pts()
 /*************
  * clip_attr *
  *************/
-
-/* each point has a lot of data */
 
 /**************************************
  *     -15, 15           15,15        *
@@ -287,6 +273,7 @@ clip_three_pts()
  *                                    *
  **************************************/
 
+/* each point has a lot of data */
 void 
 clip_attr()
 {
@@ -305,11 +292,10 @@ clip_attr()
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
     size_t num_pts = 3;
-    int inside = clip_routine(src, dest, &num_pts, 8, 0, -1);
+    clip_routine(src, dest, &num_pts, 8, 0, -1);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 3);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 8 * 3);
-    TEST_ASSERT_TRUE(inside);
 }
 
 
@@ -322,8 +308,6 @@ clip_attr()
 /*************
  * miss_axes *
  *************/
-
-/* don't even worry about the x or y axes */
 
 /**************************************
  *     -15, 15    v1      15,15       *
@@ -339,6 +323,7 @@ clip_attr()
  *                                    *
  **************************************/
 
+/* don't even worry about the x or y axes */
 void 
 miss_axes()
 {
@@ -358,21 +343,15 @@ miss_axes()
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
     size_t num_pts = 3;
-    int inside = clip_routine(src, dest, &num_pts, 4, 2, 1);  /* clip left */
+    clip_routine(src, dest, &num_pts, 4, 2, 1);  /* clip left */
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 4);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 4);
-    TEST_ASSERT_TRUE(inside);
 }
 
 /*******************
  * clip_pt_on_edge *
  *******************/
-
-/**
- * will produce a degenerate triangle when a point 
- * outside the box connects to a point exactly on the box 
- */
 
 /**************************************
  *     -15, 15           15,15        *
@@ -388,7 +367,9 @@ miss_axes()
  *                                    *
  **************************************/
 
-/** 
+/**
+ * will produce a degenerate triangle when a point 
+ * outside the box connects to a point exactly on the box  
  * note: degenerate triangles are still correct-- 
  * they just waste computation, but this case is so rare,
  * checking for it every time is a bigger waste
@@ -417,18 +398,15 @@ clip_pt_on_edge()
 
     size_t num_pts = 4;
 
-    int inside = clip_routine(src, dest, &num_pts, 4, 0, 1);
+    clip_routine(src, dest, &num_pts, 4, 0, 1);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 5);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 5);
-    TEST_ASSERT_TRUE(inside);
 }
 
 /*******************
  * clip_degenerate *
  *******************/
-
-/* clip on a list containing degenerate triangle */
 
 /**************************************
  *     -15, 15           15,15        *
@@ -444,6 +422,7 @@ clip_pt_on_edge()
  *                                    *
  **************************************/
 
+/* clip on a list containing degenerate triangle */
 void 
 clip_degenerate()
 {
@@ -466,13 +445,10 @@ clip_degenerate()
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
     size_t num_pts = 4;
-    int inside = clip_routine(src, dest, &num_pts, 4, 0, -1);
-
-    printf("num pts is %ld ", num_pts);
+    clip_routine(src, dest, &num_pts, 4, 0, -1);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 5);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 5);
-    TEST_ASSERT_TRUE(inside);
 }
 
 /*********************************************************************

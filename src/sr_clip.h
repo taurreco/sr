@@ -44,6 +44,9 @@ clip_routine(float* src,
 void
 lerp(float* from, float* to, float* dest, float a, size_t num_attr);
 
+void
+swap(float** a, float** b);
+
 #endif
 
 
