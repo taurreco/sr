@@ -1,4 +1,4 @@
-# software-rasterizer
+# software renderer
 
 Perspective correct interpolation.
 

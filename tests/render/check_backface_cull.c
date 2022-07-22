@@ -78,9 +78,9 @@ ccw_v0_top()
     TEST_ASSERT_FALSE(backface_cull(SR_WINDING_ORDER_CW, v0, v1, v2));
 }
 
-/**************
+/********************
  * ccw_diff_heights *
- **************/
+ ********************/
 
 /* ccw triangle whose vertices never share a y coord */
 

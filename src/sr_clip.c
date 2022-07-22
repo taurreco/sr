@@ -12,12 +12,9 @@
 #if !(UNIT_TEST)
 
 u_static void
-clip_routine(float* src, 
-             float* dest, 
-             size_t* num_pts, 
-             size_t num_attr, 
-             size_t axis, 
-             int sign);
+clip_routine(float* src, float* dest, 
+             size_t* num_pts, size_t num_attr, 
+             size_t axis, int sign);
 
 u_static void
 lerp(float* from, float* to, float* dest, float a, size_t num_attr);
