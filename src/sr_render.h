@@ -20,10 +20,8 @@
 
 /* implements the public draw_indexed function */
 void
-sr_draw_indexed(struct sr_pipeline_context* pipe,
-                size_t* indices, 
-                size_t num_indices,
-                size_t prim_type)
+sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices, 
+                size_t num_indices, size_t prim_type);
 
 /*********************************************************************
  *                                                                   *
@@ -33,11 +31,14 @@ sr_draw_indexed(struct sr_pipeline_context* pipe,
 
 #if UNIT_TEST
 
-void 
+void
 split_primitive(size_t prim_type, size_t* prim_sz);
 
+int
+backface_cull(int winding_order, float* v0, float* v1, float* v2);
+
 void 
-ndc(float* pt);
+screen_space(struct sr_framebuffer* fbuf, float* pt);
 
 #endif
 

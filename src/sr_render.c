@@ -1,7 +1,11 @@
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "sr.h"
 #include "sr_raster.h"
 #include "sr_render.h"
+#include "sr_clip.h"
 
 /*********************************************************************
  *                                                                   *
@@ -10,11 +14,14 @@
  *********************************************************************/
 
 /* utility */
-static void 
+u_static void 
 split_primitive(size_t prim_type, size_t* prim_sz);
 
-static void 
-ndc(float* pt);
+u_static int
+backface_cull(int winding_order, float* v0, float* v1, float* v2);
+
+u_static void
+screen_space(struct sr_framebuffer* fbuf, float* pt);
 
 /*********************************************************************
  *                                                                   *
@@ -37,7 +44,7 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices,
     /* setup variables */
     
     size_t prim_sz;
-    split_primitve(prim_type, &prim_sz);
+    split_primitive(prim_type, &prim_sz);
     size_t num_prims = num_indices / prim_sz;
     size_t num_attr_in = pipe->num_attr_in;
     size_t num_attr_out = pipe->num_attr_out;
@@ -59,7 +66,7 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices,
     float* pts_out = (float*)malloc(pts_out_sz * sizeof(float));
     uint8_t* clip_flags = (uint8_t*)malloc(pipe->num_pts  * sizeof(uint8_t));
 
-    for (int i = 0; i < pipe->num_pts; i++) {    /* per point */
+    for (size_t i = 0; i < pipe->num_pts; i++) {    /* per point */
 
         /* vertex shader pass */
         pipe->vs(pipe->uniform, 
@@ -70,17 +77,16 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices,
         clip_test(pts_out + i * num_attr_out, clip_flags + i);
     }
 
-    for (int i = 0; i <= num_prims; i += prim_sz) {    /* per face */
+    for (size_t i = 0; i <= num_prims; i += prim_sz) {    /* per face */
 
         /* primitive assembly */
 
-        uint8_t clip_and = 0;
-        uint8_t clip_or = 0;
+        uint8_t clip_and, clip_or = 0;
 
-        for (int j = 0; j < prim_sz; j++) {
+        for (size_t j = 0; j < prim_sz; j++) {
 
             /* fill buffer with primitive data */
-            memset(tmp_p + j * num_attr_out, 
+            memcpy(tmp_p + j * num_attr_out, 
                    pts_out + indices[i + j], 
                    num_attr_out * sizeof(float));
 
@@ -99,25 +105,28 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices,
             clip_poly(tmp_p, &clip_pts, num_attr_out, clip_or);
 
         /* perspective divide */
-        for (int j = 0; j < clip_pts; j++)
+        for (size_t j = 0; j < clip_pts; j++)
             screen_space(pipe->fbuf, tmp_p + j * num_attr_out);
 
         /* traverse thru a fan of clipped points and draw primitives */
         switch (prim_sz) {
             case 1:    /* point list */
-                for (int j = 0; i < clip_pts; j++) {
-                    draw_pt(&rast, tmp_p + i);
+                for (size_t j = 0; i < clip_pts; j++) {
+                    draw_pt(&rast, tmp_p + i * num_attr_out);
                 }
                 break;
             case 2:    /* line strip */
-                for (int j = 1; i < clip_pts; j++) {
-                    draw_ln(&rast, tmp_p, tmp_p + i);
+                for (size_t j = 1; i < clip_pts; j++) {
+                   /* draw_ln(&rast, tmp_p, tmp_p + i * num_attr_out); */
                 }
                 break;
             case 3:    /* triangle strip */
-                for (int j = 1; i < clip_pts; j += 2) {
-                    if (backface_cull(pipe->winding_order, tmp_p))
-                        draw_tr(&rast, tmp_p, tmp_p + i, tmp_p + i + 1);
+                for (size_t j = 1; i < clip_pts; j += 2) {
+                    float* v0 = tmp_p;
+                    float* v1 = tmp_p + i * num_attr_out;
+                    float* v2 = tmp_p + (i + 1) * num_attr_out;
+                    if (backface_cull(pipe->winding_order, v0, v1, v2))
+                        draw_tr(&rast, v0, v1, v2);
                 }
                 break;
         }
@@ -137,7 +146,7 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices,
  *******************/
 
 /* fills relevant traversal data about a primitive type */
-static void
+u_static void
 split_primitive(size_t prim_type, size_t* prim_sz)
 {
     switch (prim_type) {
@@ -155,22 +164,39 @@ split_primitive(size_t prim_type, size_t* prim_sz)
     }
 }
 
-/*******
- * ndc *
- *******/
+/*****************
+ * backface_cull *
+ *****************/
+
+/* false for triangles against the winding order */
+u_static int
+backface_cull(int winding_order, float* v0, float* v1, float* v2)
+{
+    float e01 = (v1[0] - v0[0]) * (v1[1] + v0[1]);
+    float e12 = (v2[0] - v1[0]) * (v2[1] + v1[1]);
+    float e20 = (v0[0] - v2[0]) * (v0[1] + v2[1]);
+
+    return (e01 + e12 + e20) * winding_order > 0;  /* same sign */
+}
+
+/****************
+ * screen_space *
+ ****************/
 
 /* moves coordinates from clip space to screen space */
-static void
+u_static void
 screen_space(struct sr_framebuffer* fbuf, float* pt)
 {
     /* to ndc space */
-    pt[0] /= pt[3];
-    pt[1] /= pt[3];
-    pt[2] /= pt[3];
-    pt[3] = 1 / pt[3];  /* for perspective correct interpolation */
+
+    pt[3] = 1 / pt[3];
+    pt[0] *= pt[3];
+    pt[1] *= pt[3];
+    pt[2] *= pt[3]; /* should equal 1 now */
 
     /* to screen space */
     pt[0] = fbuf->width * (pt[0] + 1)/2;
     pt[1] = fbuf->height * -(pt[0] + 1)/2;
     pt[2] = (pt[2] + 1) / 2;
 }
+

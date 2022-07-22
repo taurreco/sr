@@ -16,6 +16,7 @@ TEST_FRAMEWORK_DIR = unity
 
 # Test directories
 MATRIX_TESTS_DIR = $(TESTS_DIR)/matrix
+RENDER_TESTS_DIR = $(TESTS_DIR)/render
 RASTER_TESTS_DIR = $(TESTS_DIR)/raster
 CLIP_TESTS_DIR = $(TESTS_DIR)/clip
 
@@ -29,10 +30,12 @@ MATRIX_TESTS = $(patsubst $(MATRIX_TESTS_DIR)/%, $(BIN_DIR)/%, \
 $(patsubst %.c, %, $(wildcard $(MATRIX_TESTS_DIR)/*.c)))
 RASTER_TESTS  = $(patsubst $(RASTER_TESTS_DIR)/%, $(BIN_DIR)/%, \
 $(patsubst %.c, %, $(wildcard $(RASTER_TESTS_DIR)/*.c)))
+RENDER_TESTS  = $(patsubst $(RENDER_TESTS_DIR)/%, $(BIN_DIR)/%, \
+$(patsubst %.c, %, $(wildcard $(RENDER_TESTS_DIR)/*.c)))
 CLIP_TESTS  = $(patsubst $(CLIP_TESTS_DIR)/%, $(BIN_DIR)/%, \
 $(patsubst %.c, %, $(wildcard $(CLIP_TESTS_DIR)/*.c)))
 
-TESTS = $(MATRIX_TESTS) $(RASTER_TESTS) $(CLIP_TESTS)
+TESTS = $(MATRIX_TESTS) $(RASTER_TESTS) $(RENDER_TESTS) $(CLIP_TESTS)
 
 all: $(TESTS)
 
@@ -52,6 +55,11 @@ $(BIN_DIR)/sr_raster.o $(BIN_DIR)/unity.o
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR) -lm
 
+$(RENDER_TESTS): $(BIN_DIR)/%: $(RENDER_TESTS_DIR)/%.c \
+$(BIN_DIR)/sr_render.o $(BIN_DIR)/sr_raster.o $(BIN_DIR)/sr_clip.o $(BIN_DIR)/unity.o
+	mkdir -p $(@D)
+	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR) -lm
+
 $(CLIP_TESTS): $(BIN_DIR)/%: $(CLIP_TESTS_DIR)/%.c \
 $(BIN_DIR)/sr_clip.o $(BIN_DIR)/unity.o
 	mkdir -p $(@D)
@@ -66,6 +74,10 @@ $(BIN_DIR)/sr_matrix.o: $(SRC_DIR)/sr_matrix.c $(SRC_DIR)/sr_matrix.h
 $(BIN_DIR)/sr_raster.o: $(SRC_DIR)/sr_raster.c $(SRC_DIR)/sr_raster.h
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@ -lm 
+
+$(BIN_DIR)/sr_render.o: $(SRC_DIR)/sr_render.c $(SRC_DIR)/sr_render.h
+	mkdir -p $(@D)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BIN_DIR)/sr_clip.o: $(SRC_DIR)/sr_clip.c $(SRC_DIR)/sr_clip.h
 	mkdir -p $(@D)

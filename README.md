@@ -7,7 +7,7 @@ Perspective correct interpolation.
 float Z = b0 * v0[3] + b1 * v1[3] + b2 * v2[3]; /* interpolated 1/z */
 ```
 
-For a given attribute in our vertex at index i, we want to interpolate correspinding attributes in v0, v1, v2 with screen space barycentric weights to find it.  But for now we have every attribute value in homogeneous space.  Our barycentric weights are calbirated for screen space coordinates, so we have to convert the attribute values in v0, v1, v2 to screen space by dividing by their z.  Store these in omega values, where omega_n represents the screen space attribute at triangle vertex_n.  
+For a given attribute in our vertex at index i, we want to interpolate correspinding attributes in v0, v1, v2 with screen space barycentric weights.  But for now we have every attribute value in homogeneous space.  Our barycentric weights are calbirated for screen space coordinates, so we have to convert the attribute values in v0, v1, v2 to screen space by dividing by their z.  Store these in omega values, where omega_n represents the screen space attribute at triangle vertex_n.  
 ```c
 float o0 = v0[i] * v0[3];
 float o1 = v1[i] * v1[3];

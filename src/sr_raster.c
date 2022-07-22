@@ -112,7 +112,7 @@ draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2)
 
             if ( (w0 + f0 >= 0) && (w1 + f1 >= 0) && (w2 + f2 >= 0) ) {
 
-                /* normalize weights */
+                /* normalize barycentric weights */
 
                 float area = w0 + w1 + w2;
                 
@@ -128,9 +128,12 @@ draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2)
 
                 float Z = a + b + c;
 
-                for (int i = 2; i < (int)rast->num_attr; i++) {
-                    float P = (a * v0[i] + b* v1[i] + c * v2[i]); /* interpolate in screen space */
-                    pt[i] = P / Z; /* to clip space */
+                pt[2] = 1 / Z;
+                pt[3] = Z;
+
+                for (int i = 4; i < (int)rast->num_attr; i++) {
+                    float P = (a * v0[i] + b * v1[i] + c * v2[i]);
+                    pt[i] = P * pt[2]; /* to clip space */
                 }
 
                 draw_pt(rast, pt);

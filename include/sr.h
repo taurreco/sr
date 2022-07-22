@@ -23,9 +23,12 @@
 #define SR_CLIP_RIGHT_PLANE 1 << 3
 #define SR_CLIP_TOP_PLANE 1 << 4
 
+#define SR_WINDING_ORDER_CCW 1
+#define SR_WINDING_ORDER_CW -1
+
 /*********************************************************************
  *                                                                   *
- *                             typedefs                              *
+ *                     shader function pointers                      *
  *                                                                   *
  *********************************************************************/
 
