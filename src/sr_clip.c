@@ -12,12 +12,12 @@
 #if !(UNIT_TEST)
 
 u_static void
-clip_routine(float* src, float* dest, 
-             size_t* num_pts, size_t num_attr, 
+clip_routine(float* src, float* dst, 
+             size_t* n_pts, size_t n_attr, 
              size_t axis, int sign);
 
 u_static void
-lerp(float* from, float* to, float* dest, float a, size_t num_attr);
+lerp(float* from, float* to, float* dst, float a, size_t n_attr);
 
 u_static void
 swap(float** a, float** b);
@@ -39,41 +39,41 @@ swap(float** a, float** b);
  * updates source points to the clipped ones in place
  */
 void
-clip_poly(float* src, size_t* num_pts, 
-          size_t num_attr, uint8_t clip_flags)
+clip_poly(float* src, size_t* n_pts, 
+          size_t n_attr, uint8_t clip_flags)
 {
-    float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
+    float dst[16 * SR_MAX_ATTRIBUTE_COUNT];
     float tmp[16 * SR_MAX_ATTRIBUTE_COUNT];
-    memcpy(tmp, src, *num_pts * num_attr * sizeof(float));
+    memcpy(tmp, src, *n_pts * n_attr * sizeof(float));
     float* tmp_src = (float*)tmp;
-    float* tmp_dest = (float*)dest;
+    float* tmp_dst = (float*)dst;
 
     if (clip_flags & SR_CLIP_LEFT_PLANE) {    /* left */
-        clip_routine(tmp_src, tmp_dest, num_pts, num_attr, 0, -1);
-        swap(&tmp_src, &tmp_dest);
+        clip_routine(tmp_src, tmp_dst, n_pts, n_attr, 0, -1);
+        swap(&tmp_src, &tmp_dst);
     }
 
     if (clip_flags & (SR_CLIP_BOTTOM_PLANE)) {    /* bottom */
-         clip_routine(tmp_src, tmp_dest, num_pts, num_attr, 1, -1);
-        swap(&tmp_src, &tmp_dest);
+         clip_routine(tmp_src, tmp_dst, n_pts, n_attr, 1, -1);
+        swap(&tmp_src, &tmp_dst);
     }
 
     if (clip_flags & SR_CLIP_NEAR_PLANE) {    /* near */
-        clip_routine(tmp_src, tmp_dest, num_pts, num_attr, 2, -1);
-        swap(&tmp_src, &tmp_dest);
+        clip_routine(tmp_src, tmp_dst, n_pts, n_attr, 2, -1);
+        swap(&tmp_src, &tmp_dst);
     }
 
     if (clip_flags & SR_CLIP_RIGHT_PLANE) {    /* right */
-        clip_routine(tmp_src, tmp_dest, num_pts, num_attr, 0, 1);
-        swap(&tmp_src, &tmp_dest);
+        clip_routine(tmp_src, tmp_dst, n_pts, n_attr, 0, 1);
+        swap(&tmp_src, &tmp_dst);
     }
 
     if (clip_flags & SR_CLIP_TOP_PLANE) {    /* top */
-        clip_routine(tmp_src, tmp_dest, num_pts, num_attr, 1, 1);
-        swap(&tmp_src, &tmp_dest);
+        clip_routine(tmp_src, tmp_dst, n_pts, n_attr, 1, 1);
+        swap(&tmp_src, &tmp_dst);
     }
 
-    memcpy(src, tmp_src, *num_pts * num_attr * sizeof(float));
+    memcpy(src, tmp_src, *n_pts * n_attr * sizeof(float));
 }
 
 /*************
@@ -108,18 +108,18 @@ clip_test(float* pt, uint8_t* flags)
  * as determined by an axis and a sign to indicate direction
  */
 u_static void
-clip_routine(float* src, float* dest, 
-             size_t* num_pts, size_t num_attr, 
+clip_routine(float* src, float* dst, 
+             size_t* n_pts, size_t n_attr, 
              size_t axis, int sign)
 {
-    size_t k = 0;
+    size_t new_n_pts = 0;
 
-    float* prev = src + (*num_pts - 1) * num_attr;  /* last pt */
+    float* prev = src + (*n_pts - 1) * n_attr;  /* last pt */
     int prev_inside = prev[axis] * sign <= prev[3];
 
-    for (size_t i = 0; i < *num_pts; i++) {
+    for (size_t i = 0; i < *n_pts; i++) {
 
-        float* curr = src + i * num_attr;
+        float* curr = src + i * n_attr;
         int curr_inside = curr[axis] * sign <= curr[3];
 
         /* intersection */
@@ -128,21 +128,23 @@ clip_routine(float* src, float* dest,
             float a = (prev[3] - prev[axis] * sign) / 
                       ((prev[3] - prev[axis] * sign) - 
                       (curr[3] - curr[axis] * sign));
-            lerp(prev, curr, dest + k * num_attr, a, num_attr);
-            k++;
+            lerp(prev, curr, dst + new_n_pts * n_attr, 
+                 a, n_attr);
+            new_n_pts++;
         }
 
         /* point inside */
 
         if (curr_inside) {
-            memcpy(dest + k * num_attr, curr, num_attr * sizeof(float));
-            k++;
+            memcpy(dst + new_n_pts * n_attr, 
+                   curr, n_attr * sizeof(float));
+            new_n_pts++;
         }
         
         prev = curr;
         prev_inside = curr_inside;
     }
-    *num_pts = k;    /* new number of points after clip */
+    *n_pts = new_n_pts;    /* new number of points after clip */
 }
 
 /********
@@ -151,10 +153,10 @@ clip_routine(float* src, float* dest,
 
 /* interpolates a point some length up an edge */
 u_static void
-lerp(float* from, float* to, float* dest, float a, size_t num_attr)
+lerp(float* from, float* to, float* dst, float a, size_t n_attr)
 {
-    for (size_t i = 0; i < num_attr; i++) {
-        dest[i] = from[i] + (to[i] - from[i]) * a;
+    for (size_t i = 0; i < n_attr; i++) {
+        dst[i] = from[i] + (to[i] - from[i]) * a;
     }
 }
 

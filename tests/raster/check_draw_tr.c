@@ -35,7 +35,7 @@ struct raster_context g_rast = {
     .fbuf = &g_fbuf,
     .uniform = &g_color, 
     .fs = (fs_f)fs_color, 
-    .num_attr = 4
+    .n_attr = 4
 };
 
 /*********************************************************************
@@ -76,7 +76,7 @@ setUp()
     /* set default color to 1 */
     g_color = 1;
     g_rast.fs = (fs_f)fs_color;
-    g_rast.num_attr = 4;
+    g_rast.n_attr = 4;
 }
 
 void 
@@ -404,7 +404,7 @@ void
 attr_same_weights()
 {
     g_rast.fs = (fs_f)fs_attr;
-    g_rast.num_attr = 5;
+    g_rast.n_attr = 5;
 
     float tr[3 * 5] = {
         0.0, 3.0, 1.0, 1, 300.0,           /* v0 */
@@ -436,7 +436,7 @@ void
 attr_similar_weights()
 {
     g_rast.fs = (fs_f)fs_attr;
-    g_rast.num_attr = 5;
+    g_rast.n_attr = 5;
 
     float tr[3 * 5] = {
         0.0, 3.0, 1.0, 1, 300.0,           /* v0 */
@@ -469,7 +469,7 @@ void
 attr_varied_weights()
 {
     g_rast.fs = (fs_f)fs_attr;
-    g_rast.num_attr = 5;
+    g_rast.n_attr = 5;
 
     float tr[3 * 5] = {
         0.0, 3.0, 1.0, 1, 400.0,           /* v0 */
@@ -502,7 +502,7 @@ void
 attr_negative_weights()
 {
     g_rast.fs = (fs_f)fs_attr;
-    g_rast.num_attr = 5;
+    g_rast.n_attr = 5;
 
     float tr[3 * 5] = {
         0.0, 3.0, 1.0, 1, 451.0,           /* v0 */
@@ -534,7 +534,7 @@ void
 attr_scalene()
 {
     g_rast.fs = (fs_f)fs_attr;
-    g_rast.num_attr = 5;
+    g_rast.n_attr = 5;
 
     float tr[3 * 5] = {
         3.0, 0.0, 1.0, 1, 400.0,           /* v0 */
@@ -574,7 +574,7 @@ attr_scalene()
 void
 depth_same()
 {
-    g_rast.num_attr = 5;
+    g_rast.n_attr = 5;
 
     float tr1[3 * 5] = {
         0.0, 3.0, 1.0, 1, 400.0,           /* v0 */
@@ -615,7 +615,7 @@ depth_same()
 void
 depth_complete_overlap()
 {
-    g_rast.num_attr = 5;
+    g_rast.n_attr = 5;
 
     float tr1[3 * 5] = {
         0.0, 3.0, 10.0, 1 / 10.0, 400.0,           /* v0 */
@@ -659,7 +659,7 @@ depth_complete_overlap()
 void
 depth_varied()
 {
-    g_rast.num_attr = 5;
+    g_rast.n_attr = 5;
 
     float tr1[3 * 5] = {
         0.0, 3.0, 100.0, 1 / 100.0, 400.0,           /* v0 */

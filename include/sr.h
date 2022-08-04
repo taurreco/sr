@@ -60,8 +60,9 @@ struct sr_framebuffer {
 
 /* holds camera model information */
 struct sr_camera {
-    size_t vport, nplane;
-    size_t fplane, fov;
+    float near, far, top, right, fov;
+    float x, y, z;
+    float roll, pitch, yaw;
 };
 
 /******************************
@@ -82,11 +83,11 @@ struct sr_pipeline_context {
     fs_f fs;
 
     float* pts_in;
-    size_t num_pts;
-    size_t num_attr_in;
-    size_t num_attr_out;
+    size_t n_pts;
+    size_t n_attr_in;
+    size_t n_attr_out;
 
-    int winding_order;
+    int wind_dir;
 };
 
 /*********************************************************************
@@ -96,10 +97,7 @@ struct sr_pipeline_context {
  *********************************************************************/
 
 /* render interface */
-void sr_draw_indexed(struct sr_pipeline_context* pipe,  
-                     size_t* indices, 
-                     size_t num_indices,
-                     size_t prim_type);
-
+void sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices, 
+                     size_t n_indices, size_t prim_type);
 
 #endif /* SR_H */

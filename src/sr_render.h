@@ -21,7 +21,7 @@
 /* implements the public draw_indexed function */
 void
 sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices, 
-                size_t num_indices, size_t prim_type);
+                size_t n_indices, size_t prim_type);
 
 /*********************************************************************
  *                                                                   *
@@ -35,7 +35,7 @@ void
 split_primitive(size_t prim_type, size_t* prim_sz);
 
 int
-backface_cull(int winding_order, float* v0, float* v1, float* v2);
+winding_order(int dir, float* v0, float* v1, float* v2);
 
 void 
 screen_space(struct sr_framebuffer* fbuf, float* pt);

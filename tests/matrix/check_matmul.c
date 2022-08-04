@@ -60,7 +60,7 @@ mmul()
 
     float out[4 * 4];
 
-    mat4_mul(out, mat1, mat2);
+    matmul(out, mat1, mat2);
 
     for (int i = 0; i < 16; i++) {
         if (i % 4 == 0)
@@ -91,7 +91,7 @@ vmul()
 
     float out[4];
 
-    mat4v_mul(out, mat1, mat2);
+    matmul_v(out, mat1, mat2);
 
     for (int i = 0; i < 4; i++) {
         if (i % 4 == 0)

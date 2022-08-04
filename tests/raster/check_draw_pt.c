@@ -32,7 +32,7 @@ struct raster_context g_rast = {
     .fbuf = &g_fbuf, 
     .uniform = NULL,
     .fs = (fs_f)fs, 
-    .num_attr = 4
+    .n_attr = 4
 };
 
 /*********************************************************************

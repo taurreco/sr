@@ -42,10 +42,10 @@ struct sr_pipeline_context g_pipe = {
     .vs = vs_basic,
     .fs = fs_basic,
     .pts_in = NULL,
-    .num_pts = 0,
-    .num_attr_in = 5,
-    .num_attr_out = 5,
-    .winding_order = SR_WINDING_ORDER_CCW
+    .n_pts = 0,
+    .n_attr_in = 5,
+    .n_attr_out = 5,
+    .wind_dir = SR_WINDING_ORDER_CCW
 };
 
 void 
@@ -78,7 +78,7 @@ vs_basic(void* uniform, float* in, float* out)
 static void
 vs_transform(void* uniform, float* in, float* out)
 {
-    mat4v_mul(out, (float*)uniform, in);
+    matmul_v(out, (float*)uniform, in);
     out[4] = in[4];
 }
 
@@ -87,7 +87,6 @@ static void
 fs_basic(void* uniform, float* in, uint32_t* out)
 {
     *out = ceil(in[4]);
-    *out = 1;
 }
 
 /*********************************************************************
@@ -106,7 +105,7 @@ one_point()
 {
     float pts_in[5] = {0, 0, 0, 1, 1};
     g_pipe.pts_in = pts_in;
-    g_pipe.num_pts = 1;
+    g_pipe.n_pts = 1;
     size_t indices[1] = {0};
     sr_draw_indexed(&g_pipe, indices, 1, SR_PRIMITIVE_TYPE_POINT_LIST);
 
@@ -142,7 +141,7 @@ three_points()
     };
 
     g_pipe.pts_in = pts_in;
-    g_pipe.num_pts = 3;
+    g_pipe.n_pts = 3;
 
     size_t indices[3] = {0, 1, 2};
     sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_POINT_LIST);
@@ -188,7 +187,7 @@ one_triangle()
     };
 
     g_pipe.pts_in = pts_in;
-    g_pipe.num_pts = 3;
+    g_pipe.n_pts = 3;
 
     size_t indices[3] = {0, 1, 2};
     sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
@@ -240,7 +239,7 @@ three_triangles()
     };
 
     g_pipe.pts_in = pts_in;
-    g_pipe.num_pts = 9;
+    g_pipe.n_pts = 9;
 
     size_t indices[9] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     sr_draw_indexed(&g_pipe, indices, 9, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
@@ -289,7 +288,7 @@ triangle_fan()
     };
 
     g_pipe.pts_in = pts_in;
-    g_pipe.num_pts = 5;
+    g_pipe.n_pts = 5;
 
     size_t indices[9] = {0, 1, 2, 0, 2, 3, 0, 3, 4};
     sr_draw_indexed(&g_pipe, indices, 9, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
@@ -339,7 +338,7 @@ flat_depth()
     };
 
     g_pipe.pts_in = pts_in;
-    g_pipe.num_pts = 3;
+    g_pipe.n_pts = 3;
 
     size_t indices[3] = {0, 1, 2};
     sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
@@ -384,7 +383,7 @@ near_depth()
     };
 
     g_pipe.pts_in = pts_in;
-    g_pipe.num_pts = 3;
+    g_pipe.n_pts = 3;
 
     size_t indices[3] = {0, 1, 2};
     sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
@@ -428,7 +427,7 @@ far_depth()
     };
 
     g_pipe.pts_in = pts_in;
-    g_pipe.num_pts = 3;
+    g_pipe.n_pts = 3;
 
     size_t indices[3] = {0, 1, 2};
     sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
@@ -456,9 +455,6 @@ far_depth()
 
     TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_colors, 10 * 10);
 }
-
-
-
 
 /*********************************************************************
  *                                                                   *
@@ -506,7 +502,7 @@ projection_matrix()
      */
 
     g_pipe.pts_in = pts_in;
-    g_pipe.num_pts = 3;
+    g_pipe.n_pts = 3;
 
     size_t indices[3] = {0, 1, 2};
     sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
@@ -567,7 +563,7 @@ another_projection_test()
     };
 
     g_pipe.pts_in = pts_in;
-    g_pipe.num_pts = 3;
+    g_pipe.n_pts = 3;
 
     size_t indices[3] = {0, 1, 2};
     sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
@@ -669,7 +665,7 @@ clip_three_triangles()
     };
 
     g_pipe.pts_in = pts_in;
-    g_pipe.num_pts = 9;
+    g_pipe.n_pts = 9;
 
     size_t indices[9] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     sr_draw_indexed(&g_pipe, indices, 9, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
@@ -709,7 +705,7 @@ int
 main() 
 {
     UNITY_BEGIN();
-        RUN_TEST(three_triangles);
+    RUN_TEST(three_triangles);
     RUN_TEST(one_point);
     RUN_TEST(three_points);
     RUN_TEST(one_triangle);

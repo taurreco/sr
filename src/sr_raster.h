@@ -20,7 +20,8 @@ struct raster_context {
     struct sr_framebuffer* fbuf;
     void* uniform;
     fs_f fs;
-    size_t num_attr;
+    size_t n_attr;
+    int wind_dir;
 };
 
 /*********************************************************************

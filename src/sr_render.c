@@ -14,11 +14,15 @@
  *********************************************************************/
 
 /* utility */
+u_static void
+draw_prim(struct raster_context* rast, float* pts, 
+          size_t n_pts, size_t prim_type);
+
 u_static void 
-split_primitive(size_t prim_type, size_t* prim_sz);
+split_prim(size_t prim_type, size_t* prim_sz);
 
 u_static int
-backface_cull(int winding_order, float* v0, float* v1, float* v2);
+winding_order(int dir, float* v0, float* v1, float* v2);
 
 u_static void
 screen_space(struct sr_framebuffer* fbuf, float* pt);
@@ -39,56 +43,53 @@ screen_space(struct sr_framebuffer* fbuf, float* pt);
  */
 void
 sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices, 
-                size_t num_indices, size_t prim_type)
+                size_t n_indices, size_t prim_type)
 {
     /* setup variables */
     
-    size_t prim_sz;
-    split_primitive(prim_type, &prim_sz);
-    size_t num_prims = num_indices / prim_sz;
-    size_t num_attr_in = pipe->num_attr_in;
-    size_t num_attr_out = pipe->num_attr_out;
-
-    float tmp[16 * SR_MAX_ATTRIBUTE_COUNT];
-    float* tmp_p = (float*)tmp;
-
     struct raster_context rast = {
         .fbuf = pipe->fbuf, 
         .uniform = pipe->uniform, 
         .fs = pipe->fs, 
-        .num_attr = pipe->num_attr_out
+        .n_attr = pipe->n_attr_out,
+        .wind_dir = pipe->wind_dir
     };
+
+    size_t prim_sz;
+    split_prim(prim_type, &prim_sz);
+    size_t n_prims = n_indices / prim_sz;
 
     /* vertex processing */
 
-    size_t pts_out_sz = pipe->num_pts * num_attr_out;
+    size_t pts_out_sz = pipe->n_pts * pipe->n_attr_out;
+    
+    float* pts_out = malloc(pts_out_sz * sizeof(float));
+    uint8_t* clip_flags = malloc(pipe->n_pts * sizeof(uint8_t));
 
-    float* pts_out = (float*)malloc(pts_out_sz * sizeof(float));
-    uint8_t* clip_flags = (uint8_t*)malloc(pipe->num_pts  * sizeof(uint8_t));
-
-    for (size_t i = 0; i < pipe->num_pts; i++) {    /* per point */
+    for (size_t i = 0; i < pipe->n_pts; i++) {    /* per point */
 
         /* vertex shader pass */
         pipe->vs(pipe->uniform, 
-                 pipe->pts_in + i * num_attr_in, 
-                 pts_out + i * num_attr_out);
+                 pipe->pts_in + i * pipe->n_attr_in, 
+                 pts_out + i * pipe->n_attr_out);
 
         /* grab clip flags while still hot */
-        clip_test(pts_out + i * num_attr_out, clip_flags + i);
+        clip_test(pts_out + i * pipe->n_attr_out, clip_flags + i);
     }
 
-    for (size_t i = 0; i < num_prims * prim_sz; i += prim_sz) {    /* per face */
+    float tmp[16 * SR_MAX_ATTRIBUTE_COUNT]; /* holds current face */
+
+    for (size_t i = 0; i < n_prims * prim_sz; i += prim_sz) {
 
         /* primitive assembly */
 
         uint8_t clip_and, clip_or = 0;
 
         for (size_t j = 0; j < prim_sz; j++) {
-
             /* fill buffer with primitive data */
-            memcpy(tmp_p + j * num_attr_out, 
-                   pts_out + indices[i + j] * num_attr_out, 
-                   num_attr_out * sizeof(float));
+            memcpy(tmp + j * pipe->n_attr_out,
+                   pts_out + indices[i + j] * pipe->n_attr_out, 
+                   pipe->n_attr_out * sizeof(float));
 
             /* accumulate point clip flags */
             clip_and &= clip_flags[i + j];
@@ -97,42 +98,18 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices,
 
         /* clipping */
 
-        if (clip_and != 0)    /* outside frustum */
+        if (clip_and != 0)  /* outside frustum */
             break;
 
-        size_t clip_pts = prim_sz;
+        size_t prim_clip_sz = prim_sz;
         if (clip_or != 0)     /* if not intersect frustum */
-            clip_poly(tmp_p, &clip_pts, num_attr_out, clip_or);
+            clip_poly(tmp, &prim_clip_sz, pipe->n_attr_out, clip_or);
 
         /* perspective divide */
-        for (size_t j = 0; j < clip_pts; j++)
-            screen_space(pipe->fbuf, tmp_p + j * num_attr_out);
-
-        /* traverse thru a fan of clipped points and draw primitives */
-        switch (prim_sz) {
-            case 1:    /* point list */
-                for (size_t j = 0; j < clip_pts; j++) {
-                    draw_pt(&rast, tmp_p + j * num_attr_out);
-                }
-                break;
-            case 2:    /* line list */
-                for (size_t j = 1; j < clip_pts; j++) {
-                   /* draw_ln(&rast, tmp_p, tmp_p + i * num_attr_out); */
-                }
-                break;
-            case 3:    /* triangle fan */
-                {
-                    float* v0 = tmp_p;
-                    float* v1 = tmp_p + 1 * num_attr_out;
-                    for (size_t j = 2; j < clip_pts; j ++) {
-                        float* v2 = tmp_p + j * num_attr_out;
-                        //if (backface_cull(pipe->winding_order, v0, v1, v2))
-                            draw_tr(&rast, v0, v1, v2);
-                        v1 = v2;
-                    }
-                }
-                break;
-        }
+        for (size_t j = 0; j < prim_clip_sz; j++)
+            screen_space(pipe->fbuf, tmp + j * pipe->n_attr_out);
+        
+        draw_prim(&rast, tmp, prim_clip_sz, prim_type);
     }
     free(pts_out);
     free(clip_flags);
@@ -144,13 +121,50 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices,
  *                                                                   *
  *********************************************************************/
 
-/*******************
- * split_primitive *
- *******************/
+/*************
+ * draw_prim *
+ *************/
+
+/* matches the correct drawing routine with the primitive type */
+u_static void 
+draw_prim(struct raster_context* rast, float* pts, 
+          size_t n_pts, size_t prim_type)
+{
+        switch (prim_type) {
+            case SR_PRIMITIVE_TYPE_POINT_LIST:    /* point list */
+                for (size_t i = 0; i < n_pts; i++) {
+                    draw_pt(rast, pts + i * rast->n_attr);
+                }
+                break;
+            case SR_PRIMITIVE_TYPE_LINE_LIST:
+            case SR_PRIMITIVE_TYPE_LINE_STRIP:    /* line list */
+                for (size_t i = 1; i < n_pts; i++) {
+                   /* draw_ln(rast, tmp_p, tmp_p + i * n_attr_out); */
+                }
+                break;
+            case SR_PRIMITIVE_TYPE_TRIANGLE_LIST:
+            case SR_PRIMITIVE_TYPE_TRIANGLE_STRIP:    /* triangle fan */
+                {
+                    float* v0 = pts;
+                    float* v1 = pts + 1 * rast->n_attr;
+                    for (size_t i = 2; i < n_pts; i++) {
+                        float* v2 = pts + i * rast->n_attr;
+                        if (winding_order(rast->wind_dir, v0, v1, v2))
+                            draw_tr(rast, v0, v1, v2);
+                        v1 = v2;
+                    }
+                }
+                break;
+        }
+}
+
+/**************
+ * split_prim *
+ **************/
 
 /* fills relevant traversal data about a primitive type */
 u_static void
-split_primitive(size_t prim_type, size_t* prim_sz)
+split_prim(size_t prim_type, size_t* prim_sz)
 {
     switch (prim_type) {
         case SR_PRIMITIVE_TYPE_POINT_LIST:
@@ -168,18 +182,18 @@ split_primitive(size_t prim_type, size_t* prim_sz)
 }
 
 /*****************
- * backface_cull *
+ * winding_order *
  *****************/
 
 /* false for triangles against the winding order */
 u_static int
-backface_cull(int winding_order, float* v0, float* v1, float* v2)
+winding_order(int dir, float* v0, float* v1, float* v2)
 {
     float e01 = (v1[0] - v0[0]) * (v1[1] + v0[1]);
     float e12 = (v2[0] - v1[0]) * (v2[1] + v1[1]);
     float e20 = (v0[0] - v2[0]) * (v0[1] + v2[1]);
 
-    return (e01 + e12 + e20) * winding_order > 0;  /* same sign */
+    return (e01 + e12 + e20) * dir > 0;  /* same sign */
 }
 
 /****************

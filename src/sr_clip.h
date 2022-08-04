@@ -32,12 +32,12 @@ clip_test(float* pt, uint8_t* flags);
 #if UNIT_TEST
 
 void
-clip_routine(float* src, float* dest, 
+clip_routine(float* src, float* dst, 
              size_t* num_pts, size_t num_attr, 
              size_t axis, int sign);
 
 void
-lerp(float* from, float* to, float* dest, float a, size_t num_attr);
+lerp(float* from, float* to, float* dst, float a, size_t num_attr);
 
 void
 swap(float** a, float** b);

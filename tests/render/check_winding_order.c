@@ -49,8 +49,8 @@ ccw_basic()
         0, 0, 1, 1
     };
 
-    TEST_ASSERT_TRUE(backface_cull(SR_WINDING_ORDER_CCW, v0, v1, v2));
-    TEST_ASSERT_FALSE(backface_cull(SR_WINDING_ORDER_CW, v0, v1, v2));
+    TEST_ASSERT_TRUE(winding_order(SR_WINDING_ORDER_CCW, v0, v1, v2));
+    TEST_ASSERT_FALSE(winding_order(SR_WINDING_ORDER_CW, v0, v1, v2));
 }
 
 /**************
@@ -74,8 +74,8 @@ ccw_v0_top()
         0, 0, 1, 1
     };
 
-    TEST_ASSERT_TRUE(backface_cull(SR_WINDING_ORDER_CCW, v0, v1, v2));
-    TEST_ASSERT_FALSE(backface_cull(SR_WINDING_ORDER_CW, v0, v1, v2));
+    TEST_ASSERT_TRUE(winding_order(SR_WINDING_ORDER_CCW, v0, v1, v2));
+    TEST_ASSERT_FALSE(winding_order(SR_WINDING_ORDER_CW, v0, v1, v2));
 }
 
 /********************
@@ -99,8 +99,8 @@ ccw_diff_heights()
         6, 7, 1, 1
     };
 
-    TEST_ASSERT_TRUE(backface_cull(SR_WINDING_ORDER_CCW, v0, v1, v2));
-    TEST_ASSERT_FALSE(backface_cull(SR_WINDING_ORDER_CW, v0, v1, v2));
+    TEST_ASSERT_TRUE(winding_order(SR_WINDING_ORDER_CCW, v0, v1, v2));
+    TEST_ASSERT_FALSE(winding_order(SR_WINDING_ORDER_CW, v0, v1, v2));
 }
 
 
@@ -131,8 +131,8 @@ cw_basic()
         0, 0, 1, 1
     };
 
-    TEST_ASSERT_FALSE(backface_cull(SR_WINDING_ORDER_CCW, v0, v1, v2));
-    TEST_ASSERT_TRUE(backface_cull(SR_WINDING_ORDER_CW, v0, v1, v2));
+    TEST_ASSERT_FALSE(winding_order(SR_WINDING_ORDER_CCW, v0, v1, v2));
+    TEST_ASSERT_TRUE(winding_order(SR_WINDING_ORDER_CW, v0, v1, v2));
 }
 
 /**************
@@ -156,8 +156,8 @@ cw_v0_top()
         0, 0, 1, 1
     };
 
-    TEST_ASSERT_FALSE(backface_cull(SR_WINDING_ORDER_CCW, v0, v1, v2));
-    TEST_ASSERT_TRUE(backface_cull(SR_WINDING_ORDER_CW, v0, v1, v2));
+    TEST_ASSERT_FALSE(winding_order(SR_WINDING_ORDER_CCW, v0, v1, v2));
+    TEST_ASSERT_TRUE(winding_order(SR_WINDING_ORDER_CW, v0, v1, v2));
 }
 
 /*******************
@@ -181,8 +181,8 @@ cw_diff_heights()
         6, 7, 1, 1
     };
 
-    TEST_ASSERT_FALSE(backface_cull(SR_WINDING_ORDER_CCW, v0, v1, v2));
-    TEST_ASSERT_TRUE(backface_cull(SR_WINDING_ORDER_CW, v0, v1, v2));
+    TEST_ASSERT_FALSE(winding_order(SR_WINDING_ORDER_CCW, v0, v1, v2));
+    TEST_ASSERT_TRUE(winding_order(SR_WINDING_ORDER_CW, v0, v1, v2));
 }
 
 

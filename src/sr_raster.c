@@ -59,11 +59,11 @@ is_tl(float* v0, float* v1);
 void 
 draw_pt(struct raster_context* rast, float* pt)
 {
-    uint32_t color = 0; /* color dest */
-    rast->fs(rast->uniform, pt, &color);
+    uint32_t color = 0; /* color dst */
+    rast->fs(rast->uniform, pt, &color);  /* fragment shader */
     size_t fb_idx = floorf(pt[1]) * rast->fbuf->width + floorf(pt[0]);
     
-    if (pt[2] < rast->fbuf->depths[fb_idx]) {  /* deptth buffer */
+    if (pt[2] < rast->fbuf->depths[fb_idx]) {  /* depth buffer */
         rast->fbuf->colors[fb_idx] = color;
         rast->fbuf->depths[fb_idx] = pt[2];
     }
@@ -120,7 +120,7 @@ draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2)
                 float b1 = w1 / area;
                 float b2 = w2 / area;
 
-                /* interpolate attributes */
+                /* interpolate z and w */
 
                 float a = b0 * v0[3];
                 float b = b1 * v1[3];
@@ -131,7 +131,9 @@ draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2)
                 pt[2] = 1 / Z;
                 pt[3] = Z;
 
-                for (int i = 4; i < (int)rast->num_attr; i++) {
+                /* interpolate rest of points */
+
+                for (int i = 4; i < (int)rast->n_attr; i++) {
                     float P = (a * v0[i] + b * v1[i] + c * v2[i]);
                     pt[i] = P * pt[2]; /* to clip space */
                 }
