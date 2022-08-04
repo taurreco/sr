@@ -46,9 +46,9 @@ $(EXAMPLES): $(BIN_DIR)/%: $(EXAMPLES_DIR)/%.c $(BIN_DIR)/sr_matrix.o
 
 
 $(MATRIX_TESTS): $(BIN_DIR)/%: $(MATRIX_TESTS_DIR)/%.c \
-$(BIN_DIR)/sr_matrix.o $(BIN_DIR)/unity.o
+$(SRC_DIR)/sr_matrix.h $(BIN_DIR)/unity.o
 	mkdir -p $(@D)
-	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR) -lm
 
 $(RASTER_TESTS): $(BIN_DIR)/%: $(RASTER_TESTS_DIR)/%.c \
 $(BIN_DIR)/sr_raster.o $(BIN_DIR)/unity.o
@@ -64,11 +64,6 @@ $(CLIP_TESTS): $(BIN_DIR)/%: $(CLIP_TESTS_DIR)/%.c \
 $(BIN_DIR)/sr_clip.o $(BIN_DIR)/unity.o
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR)
-
-
-$(BIN_DIR)/sr_matrix.o: $(SRC_DIR)/sr_matrix.c $(SRC_DIR)/sr_matrix.h
-	mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
 
 # requires -lm flag for linux systems to direct gcc to where linux stores math.h
 $(BIN_DIR)/sr_raster.o: $(SRC_DIR)/sr_raster.c $(SRC_DIR)/sr_raster.h

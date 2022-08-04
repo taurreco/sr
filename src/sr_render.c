@@ -77,7 +77,7 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices,
         clip_test(pts_out + i * num_attr_out, clip_flags + i);
     }
 
-    for (size_t i = 0; i <= num_prims; i += prim_sz) {    /* per face */
+    for (size_t i = 0; i < num_prims * prim_sz; i += prim_sz) {    /* per face */
 
         /* primitive assembly */
 
@@ -87,7 +87,7 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices,
 
             /* fill buffer with primitive data */
             memcpy(tmp_p + j * num_attr_out, 
-                   pts_out + indices[i + j], 
+                   pts_out + indices[i + j] * num_attr_out, 
                    num_attr_out * sizeof(float));
 
             /* accumulate point clip flags */
@@ -111,22 +111,25 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices,
         /* traverse thru a fan of clipped points and draw primitives */
         switch (prim_sz) {
             case 1:    /* point list */
-                for (size_t j = 0; i < clip_pts; j++) {
-                    draw_pt(&rast, tmp_p + i * num_attr_out);
+                for (size_t j = 0; j < clip_pts; j++) {
+                    draw_pt(&rast, tmp_p + j * num_attr_out);
                 }
                 break;
-            case 2:    /* line strip */
-                for (size_t j = 1; i < clip_pts; j++) {
+            case 2:    /* line list */
+                for (size_t j = 1; j < clip_pts; j++) {
                    /* draw_ln(&rast, tmp_p, tmp_p + i * num_attr_out); */
                 }
                 break;
-            case 3:    /* triangle strip */
-                for (size_t j = 1; i < clip_pts; j += 2) {
+            case 3:    /* triangle fan */
+                {
                     float* v0 = tmp_p;
-                    float* v1 = tmp_p + i * num_attr_out;
-                    float* v2 = tmp_p + (i + 1) * num_attr_out;
-                    if (backface_cull(pipe->winding_order, v0, v1, v2))
-                        draw_tr(&rast, v0, v1, v2);
+                    float* v1 = tmp_p + 1 * num_attr_out;
+                    for (size_t j = 2; j < clip_pts; j ++) {
+                        float* v2 = tmp_p + j * num_attr_out;
+                        //if (backface_cull(pipe->winding_order, v0, v1, v2))
+                            draw_tr(&rast, v0, v1, v2);
+                        v1 = v2;
+                    }
                 }
                 break;
         }
@@ -195,8 +198,8 @@ screen_space(struct sr_framebuffer* fbuf, float* pt)
     pt[2] *= pt[3]; /* should equal 1 now */
 
     /* to screen space */
-    pt[0] = fbuf->width * (pt[0] + 1)/2;
-    pt[1] = fbuf->height * -(pt[0] + 1)/2;
+    pt[0] = (fbuf->width / 2) * (pt[0] + 1);
+    pt[1] = (fbuf->height / 2) * (1 - pt[1]);
     pt[2] = (pt[2] + 1) / 2;
 }
 

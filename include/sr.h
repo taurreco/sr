@@ -76,7 +76,6 @@ struct sr_camera {
 struct sr_pipeline_context {
     
     struct sr_framebuffer* fbuf;
-    struct sr_camera* cam;
 
     void* uniform;        
     vs_f vs;
@@ -87,7 +86,7 @@ struct sr_pipeline_context {
     size_t num_attr_in;
     size_t num_attr_out;
 
-    size_t winding_order;
+    int winding_order;
 };
 
 /*********************************************************************
