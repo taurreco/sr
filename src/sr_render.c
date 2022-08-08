@@ -42,8 +42,8 @@ screen_space(struct sr_framebuffer* fbuf, float* pt);
  * refines indexed vertex data to be sent to rasterizer
  */
 void
-sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices, 
-                size_t n_indices, size_t prim_type)
+sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* idxs, 
+                size_t n_idxs, size_t prim_type)
 {
     /* setup variables */
     
@@ -57,7 +57,7 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices,
 
     size_t prim_sz;
     split_prim(prim_type, &prim_sz);
-    size_t n_prims = n_indices / prim_sz;
+    size_t n_prims = n_idxs / prim_sz;
 
     /* vertex processing */
 
@@ -88,7 +88,7 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices,
         for (size_t j = 0; j < prim_sz; j++) {
             /* fill buffer with primitive data */
             memcpy(tmp + j * pipe->n_attr_out,
-                   pts_out + indices[i + j] * pipe->n_attr_out, 
+                   pts_out + idxs[i + j] * pipe->n_attr_out, 
                    pipe->n_attr_out * sizeof(float));
 
             /* accumulate point clip flags */

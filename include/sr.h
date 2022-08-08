@@ -90,6 +90,14 @@ struct sr_pipeline_context {
     int wind_dir;
 };
 
+struct sr_triangle_list {
+    float* pts;
+    int* indices;
+    int n_pts;
+    int n_attr;
+    int n_indices;
+};
+
 /*********************************************************************
  *                                                                   *
  *                       public declarations                         *

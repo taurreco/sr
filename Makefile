@@ -3,7 +3,7 @@
 CC = gcc
 
 # Flags
-CFLAGS +=-ggdb3 
+CFLAGS += -ggdb3 
 CFLAGS += -Wall 
 CFLAGS += -Wextra 
 CFLAGS += -Wshadow 
