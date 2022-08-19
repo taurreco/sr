@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "unity.h"
-#include "sr_clip.h"
+#include "sr_clip.c"
 
 /*********************************************************************
  *                                                                   *
@@ -48,7 +48,7 @@ tr_contained()
     };
 
     uint8_t clip_flags = 0;
-    size_t num_pts = 3;
+    int num_pts = 3;
 
     clip_poly(src, &num_pts, 4, clip_flags);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(ans, src, num_pts * 4);
@@ -76,7 +76,7 @@ tr_intersects_left()
     };
 
     uint8_t clip_flags = SR_CLIP_LEFT_PLANE;
-    size_t num_pts = 3;
+    int num_pts = 3;
 
     clip_poly(src, &num_pts, 4, clip_flags);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(ans, src, num_pts * 4);
@@ -106,7 +106,7 @@ tr_intersects_left_near()
 
     uint8_t clip_flags = SR_CLIP_LEFT_PLANE | 
                         SR_CLIP_NEAR_PLANE;
-    size_t num_pts = 3;
+    int num_pts = 3;
     
     clip_poly(src, &num_pts, 4, clip_flags);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(ans, src, num_pts * 4);
@@ -141,7 +141,7 @@ tr_intersects_top_left_bottom()
     uint8_t clip_flags = SR_CLIP_TOP_PLANE | 
                          SR_CLIP_LEFT_PLANE |
                          SR_CLIP_BOTTOM_PLANE;
-    size_t num_pts = 3;
+    int num_pts = 3;
     
     clip_poly(src, &num_pts, 4, clip_flags);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(ans, src, num_pts * 4);
@@ -167,7 +167,7 @@ ln_intersects_top()
     };
 
     uint8_t clip_flags = SR_CLIP_TOP_PLANE;
-    size_t num_pts = 2;
+    int num_pts = 2;
 
     clip_poly(src, &num_pts, 4, clip_flags);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(ans, src, num_pts * 4);
@@ -201,11 +201,11 @@ fucky()
     };
 
     uint8_t clip_flags = SR_CLIP_TOP_PLANE | SR_CLIP_BOTTOM_PLANE | SR_CLIP_LEFT_PLANE;
-    size_t num_pts = 3;
+    int num_pts = 3;
 
     clip_poly(src, &num_pts, 4, clip_flags);
 
-    for (size_t i = 0; i < num_pts * 4; i++) {
+    for (int i = 0; i < num_pts * 4; i++) {
         if (i % 4 == 0) {
             printf("\n");
         }

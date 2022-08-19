@@ -10,8 +10,6 @@
  *                                                                   *
  *********************************************************************/
 
-#if !(UNIT_TEST)
-
 /***************
  * struct edge *
  ***************/
@@ -32,18 +30,75 @@ struct bbox {
     float max_x, max_y;
 };
 
-/* constructors */
-u_static float 
-edge_init(struct edge* edge, float* v0, float* v1, float* pt);
+/*********************************************************************
+ *                                                                   *
+ *                      private utility helpers                      *
+ *                                                                   *
+ *********************************************************************/
 
-u_static void 
-bbox_init(struct bbox* bbox, float* v0, float* v1, float* v2);
+/*********
+ * is_tl *
+ *********/
 
-/* utility */
-u_static int 
-is_tl(float* v0, float* v1);
+/* determines whether an edge is top or left */
+static int 
+is_tl(float* v0, float* v1) 
+{
+    int is_top = (v0[1] == v1[1]) && (v0[0] > v1[0]); 
+    int is_left = v0[1] < v1[1];
+    return is_top | is_left;
+}
 
-#endif
+/*********************************************************************
+ *                                                                   *
+ *                       private constructors                        *
+ *                                                                   *
+ *********************************************************************/
+
+/*************
+ * edge_init *
+ *************/
+
+/* make an edge struct instance, return the initial determinant */
+static float 
+edge_init(struct edge* edge, float* v0, float* v1, float* pt)
+{
+    edge->is_tl = is_tl(v0, v1);
+
+    float A = v1[1] - v0[1];
+    float B = v0[0] - v1[0];
+    float C = v0[1] * v1[0] - v0[0] * v1[1];
+
+    /* step sizes */
+    edge->step_x = A;
+    edge->step_y = B;
+
+    /* edge function output at origin */
+    return A * pt[0] + B * pt[1] + C;
+}
+
+/*************
+ * bbox_init *
+ *************/
+
+/* define a pixel-aligned bounding box for triangle rasterization */
+static void
+bbox_init(struct bbox* bbox, float* v0, float* v1, float* v2)
+{    
+    /* naiive values */
+
+    bbox->min_x = fmin(v0[0], fmin(v1[0], v2[0]));
+    bbox->min_y = fmin(v0[1], fmin(v1[1], v2[1]));
+    bbox->max_x = fmax(v0[0], fmax(v1[0], v2[0]));
+    bbox->max_y = fmax(v0[1], fmax(v1[1], v2[1]));
+
+    /* align to pixel centers */
+
+    bbox->min_x = floorf(bbox->min_x) + 0.5;
+    bbox->min_y = floorf(bbox->min_y) + 0.5;
+    bbox->max_x = floorf(bbox->max_x) + 0.5;
+    bbox->max_y = floorf(bbox->max_y) + 0.5;
+}
 
 /*********************************************************************
  *                                                                   *
@@ -55,17 +110,17 @@ is_tl(float* v0, float* v1);
  * draw_pt *
  ***********/
 
-/* render ptoint to framebuffer */
-void 
+/* render point to framebuffer */
+extern void 
 draw_pt(struct raster_context* rast, float* pt)
 {
-    uint32_t color = 0; /* color dst */
+    uint32_t color = 0; /* color dest */
     rast->fs(rast->uniform, pt, &color);  /* fragment shader */
-    size_t fb_idx = floorf(pt[1]) * rast->fbuf->width + floorf(pt[0]);
+    size_t fbuf_idx = floorf(pt[1]) * rast->fbuf->width + floorf(pt[0]);
     
-    if (pt[2] < rast->fbuf->depths[fb_idx]) {  /* depth buffer */
-        rast->fbuf->colors[fb_idx] = color;
-        rast->fbuf->depths[fb_idx] = pt[2];
+    if (pt[2] < rast->fbuf->depths[fbuf_idx]) {  /* depth buffer */
+        rast->fbuf->colors[fbuf_idx] = color;
+        rast->fbuf->depths[fbuf_idx] = pt[2];
     }
 }
 
@@ -74,7 +129,7 @@ draw_pt(struct raster_context* rast, float* pt)
  ***********/
 
 /* rasterize a triangle to framebuffer */
-void 
+extern void 
 draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2)
 {   
     /* find bounding box */
@@ -150,74 +205,4 @@ draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2)
         w1_row += e20.step_y;
         w2_row += e01.step_y;
     }
-}
-
-/*********************************************************************
- *                                                                   *
- *                       private constructors                        *
- *                                                                   *
- *********************************************************************/
-
-/*************
- * edge_init *
- *************/
-
-/* make an edge struct instance, return the initial determinant */
-u_static float 
-edge_init(struct edge* edge, float* v0, float* v1, float* pt)
-{
-    edge->is_tl = is_tl(v0, v1);
-
-    float A = v1[1] - v0[1];
-    float B = v0[0] - v1[0];
-    float C = v0[1] * v1[0] - v0[0] * v1[1];
-
-    /* step sizes */
-    edge->step_x = A;
-    edge->step_y = B;
-
-    /* edge function output at origin */
-    return A * pt[0] + B * pt[1] + C;
-}
-
-/*************
- * bbox_init *
- *************/
-
-/* define a pixel-aligned bounding box for triangle rasterization */
-u_static void
-bbox_init(struct bbox* bbox, float* v0, float* v1, float* v2)
-{    
-    /* naiive values */
-
-    bbox->min_x = fmin(v0[0], fmin(v1[0], v2[0]));
-    bbox->min_y = fmin(v0[1], fmin(v1[1], v2[1]));
-    bbox->max_x = fmax(v0[0], fmax(v1[0], v2[0]));
-    bbox->max_y = fmax(v0[1], fmax(v1[1], v2[1]));
-
-    /* align to pixel centers */
-
-    bbox->min_x = floorf(bbox->min_x) + 0.5;
-    bbox->min_y = floorf(bbox->min_y) + 0.5;
-    bbox->max_x = floorf(bbox->max_x) + 0.5;
-    bbox->max_y = floorf(bbox->max_y) + 0.5;
-}
-
-/*********************************************************************
- *                                                                   *
- *                      private utility helpers                      *
- *                                                                   *
- *********************************************************************/
-
-/*********
- * is_tl *
- *********/
-
-/* determines whether an edge is top or left */
-u_static int 
-is_tl(float* v0, float* v1) 
-{
-    int is_top = (v0[1] == v1[1]) && (v0[0] > v1[0]); 
-    int is_left = v0[1] < v1[1];
-    return is_top | is_left;
 }

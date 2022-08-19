@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "unity.h"
-#include "sr_clip.h"
+#include "sr_clip.c"
 
 /*********************************************************************
  *                                                                   *
@@ -58,10 +58,8 @@ clip_no_pts()
     float* ans = (float*)src;
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
-    size_t num_pts = 3;
-    clip_routine(src, dest, &num_pts, 4, 0, -1);
-
-    printf("num_pts %ld", num_pts);
+    int num_pts = 3;
+    clip_routine(dest, src, &num_pts, 4, 0, -1);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 3);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 3);
@@ -97,8 +95,8 @@ cull_triangle()
 
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
-    size_t num_pts = 3;
-    clip_routine(src, dest, &num_pts, 4, 0, -1);
+    int num_pts = 3;
+    clip_routine(dest, src, &num_pts, 4, 0, -1);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 0);
 }
@@ -149,9 +147,9 @@ clip_one_pt()
 
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
-    size_t num_pts = 3;
+    int num_pts = 3;
 
-    clip_routine(src, dest, &num_pts, 4, 0, -1);
+    clip_routine(dest, src, &num_pts, 4, 0, -1);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 4);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 4);
@@ -193,8 +191,8 @@ clip_two_pts()
 
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
-    size_t num_pts = 3;
-    clip_routine(src, dest, &num_pts, 4, 0, -1);
+    int num_pts = 3;
+    clip_routine(dest, src, &num_pts, 4, 0, -1);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 3);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 3);
@@ -240,10 +238,10 @@ clip_three_pts()
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
     float tmp[16 * SR_MAX_ATTRIBUTE_COUNT];
 
-    size_t num_pts = 3;
-    clip_routine(src, dest, &num_pts, 4, 0, -1);  /* clip left */
-    clip_routine(dest, tmp, &num_pts, 4, 1, 1);       /* clip top */
-    clip_routine(tmp, dest, &num_pts, 4, 0, 1);       /* clip right */
+    int num_pts = 3;
+    clip_routine(dest, src, &num_pts, 4, 0, -1);  /* clip left */
+    clip_routine(tmp, dest, &num_pts, 4, 1, 1);       /* clip top */
+    clip_routine(dest, tmp, &num_pts, 4, 0, 1);       /* clip right */
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 6);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 6);
@@ -291,8 +289,8 @@ clip_attr()
 
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
-    size_t num_pts = 3;
-    clip_routine(src, dest, &num_pts, 8, 0, -1);
+    int num_pts = 3;
+    clip_routine(dest, src, &num_pts, 8, 0, -1);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 3);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 8 * 3);
@@ -342,8 +340,8 @@ miss_axes()
 
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
-    size_t num_pts = 3;
-    clip_routine(src, dest, &num_pts, 4, 2, 1);  /* clip left */
+    int num_pts = 3;
+    clip_routine(dest, src, &num_pts, 4, 2, 1);  /* clip left */
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 4);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 4);
@@ -396,9 +394,9 @@ clip_pt_on_edge()
 
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
-    size_t num_pts = 4;
+    int num_pts = 4;
 
-    clip_routine(src, dest, &num_pts, 4, 0, 1);
+    clip_routine(dest, src, &num_pts, 4, 0, 1);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 5);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 5);
@@ -444,8 +442,8 @@ clip_degenerate()
 
     float dest[16 * SR_MAX_ATTRIBUTE_COUNT];
 
-    size_t num_pts = 4;
-    clip_routine(src, dest, &num_pts, 4, 0, -1);
+    int num_pts = 4;
+    clip_routine(dest, src, &num_pts, 4, 0, -1);
 
     TEST_ASSERT_EQUAL_UINT(num_pts, 5);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4 * 5);

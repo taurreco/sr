@@ -1,9 +1,9 @@
 
-#include <stdint.h>
-#include <stddef.h>
-
 #ifndef SR_H
 #define SR_H
+
+#include <stdint.h>
+#include <stddef.h>
 
 #define SR_MAX_ATTRIBUTE_COUNT 32                   
 
@@ -49,7 +49,7 @@ struct sr_std_uniform;      /* hidden from end user bc it uses internal matrix d
 
 /* interface to whatever writes to the screen */
 struct sr_framebuffer {
-    size_t width, height;    /* width, height */
+    int width, height;    /* width, height */
     uint32_t* colors;        /* colors */
     float* depths;           /* depths */
 };
@@ -60,7 +60,7 @@ struct sr_framebuffer {
 
 /* holds camera model information */
 struct sr_camera {
-    float near, far, top, right, fov;
+    float n, f, t, r, fov;
     float x, y, z;
     float roll, pitch, yaw;
 };
@@ -83,13 +83,18 @@ struct sr_pipeline_context {
     fs_f fs;
 
     float* pts_in;
-    size_t n_pts;
-    size_t n_attr_in;
-    size_t n_attr_out;
+    int n_pts;
+    int n_attr_in;
+    int n_attr_out;
 
-    int wind_dir;
+    int winding;
 };
 
+/***************************
+ * struct sr_triangle_list *
+ ***************************/
+
+/* indexed triangle list structure */
 struct sr_triangle_list {
     float* pts;
     int* indices;
@@ -105,7 +110,8 @@ struct sr_triangle_list {
  *********************************************************************/
 
 /* render interface */
-void sr_draw_indexed(struct sr_pipeline_context* pipe, size_t* indices, 
-                     size_t n_indices, size_t prim_type);
+extern void
+sr_draw_indexed(struct sr_pipeline_context* pipe, int* indices, 
+                int n_indices, uint8_t prim_type);
 
 #endif /* SR_H */

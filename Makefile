@@ -3,13 +3,16 @@
 CC = gcc
 
 # Flags
-CFLAGS += -ggdb3 
+CFLAGS += -ggdb3
+CFLAGS += -g
 CFLAGS += -Wall 
 CFLAGS += -Wextra 
 CFLAGS += -Wshadow 
 CFLAGS += -std=gnu11 
-CFLAGS += -Wno-unused-parameter 
+CFLAGS += -Wno-unused-parameter
+CFLAGS += -O3
 CFLAGS += -Iinclude
+#CFLAGS += -fsanitize=address
 
 SDL2_FLAGS += -I/usr/local/include/SDL2 
 SDL2_FLAGS += -I/usr/local/lib 
@@ -46,8 +49,6 @@ TESTS += $(RENDER_TESTS)
 TESTS += $(CLIP_TESTS) 
 TESTS += $(OBJ_TESTS)
 
-all: $(TESTS)
-
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c $(SRC_DIR)/%.h
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -65,18 +66,20 @@ $(EXAMPLES): %: %.c $(BIN_DIR)/sr_matrix.o
 $(MATRIX_TESTS): %: %.c $(SRC_DIR)/sr_matrix.h $(BIN_DIR)/unity.o
 	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR) -lm
 
-$(RASTER_TESTS): %: %.c $(BIN_DIR)/sr_raster.o $(BIN_DIR)/unity.o
+$(RASTER_TESTS): %: %.c $(BIN_DIR)/unity.o
 	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR) -lm
 
-$(RENDER_TESTS): %: %.c $(BIN_DIR)/sr_render.o $(BIN_DIR)/sr_raster.o \
+$(RENDER_TESTS): %: %.c $(BIN_DIR)/sr_raster.o \
 $(BIN_DIR)/sr_clip.o $(BIN_DIR)/unity.o
 	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR) -lm
 
-$(CLIP_TESTS): %: %.c $(BIN_DIR)/sr_clip.o $(BIN_DIR)/unity.o
+$(CLIP_TESTS): %: %.c $(BIN_DIR)/unity.o
 	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR)
 
 $(OBJ_TESTS): %: %.c $(BIN_DIR)/unity.o
 	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR) -lm
+
+tests: $(TESTS)
 
 check-raster: $(RASTER_TESTS)
 	for t in $(RASTER_TESTS); do $$t; done
@@ -93,7 +96,7 @@ check-render: $(RENDER_TESTS)
 check-matrix: $(MATRIX_TESTS)
 	for t in $(MATRIX_TESTS); do $$t; done
 
-check-all: check-raster check-clip check-obj check-matrix
+check-all: check-raster check-clip check-obj check-matrix check-render
 	
 clean:
 	rm -r $(BIN_DIR)

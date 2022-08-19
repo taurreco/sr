@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "unity.h"
-#include "sr_raster.h"
+#include "sr_raster.c"
 
 /*********************************************************************
  *                                                                   *

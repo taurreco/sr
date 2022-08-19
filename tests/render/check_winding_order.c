@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "unity.h"
-#include "sr_render.h"
+#include "sr_render.c"
 
 /*********************************************************************
  *                                                                   *

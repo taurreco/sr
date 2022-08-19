@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "unity.h"
-#include "sr_clip.h"
+#include "sr_clip.c"
 
 /*********************************************************************
  *                                                                   *

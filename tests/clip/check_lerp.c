@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "unity.h"
-#include "sr_clip.h"
+#include "sr_clip.c"
 
 /*********************************************************************
  *                                                                   *
@@ -52,7 +52,7 @@ same_val()
     float dest[4];
     float a = 1;
 
-    lerp(v0, v1, dest, a, 4);
+    lerp(dest, v0, v1, a, 4);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 1);
 }
 
@@ -88,7 +88,7 @@ one_attr()
     float dest[4];
     float a = 0.5;
 
-    lerp(v0, v1, dest, a, 4);
+    lerp(dest, v0, v1, a, 4);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 1);
 }
 
@@ -116,7 +116,7 @@ two_attr()
     float dest[4];
     float a = 0.5;
 
-    lerp(v0, v1, dest, a, 4);
+    lerp(dest, v0, v1, a, 4);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4);
 }
 
@@ -144,7 +144,7 @@ five_attr()
     float dest[5];
     float a = 0.5;
 
-    lerp(v0, v1, dest, a, 5);
+    lerp(dest, v0, v1, a, 5);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 5);
 }
 
@@ -178,7 +178,7 @@ three_fourths()
     float dest[4];
     float a = 0.75;
 
-    lerp(v0, v1, dest, a, 4);
+    lerp(dest, v0, v1, a, 4);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4);
 }
 
@@ -206,7 +206,7 @@ one_sixteenth()
     float dest[4];
     float a = 0.0625;
 
-    lerp(v0, v1, dest, a, 4);
+    lerp(dest, v0, v1, a, 4);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4);
 }
 
@@ -242,7 +242,7 @@ negative_interpolants()
     float dest[4];
     float a = 0.75;
 
-    lerp(v0, v1, dest, a, 4);
+    lerp(dest, v0, v1, a, 4);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4);
 }
 
@@ -270,7 +270,7 @@ floating_point_interpolants()
     float dest[4];
     float a = 0.32;
 
-    lerp(v0, v1, dest, a, 4);
+    lerp(dest, v0, v1, a, 4);
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(dest, ans, 4);
 }
 
