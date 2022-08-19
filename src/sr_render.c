@@ -36,32 +36,34 @@ static void
 draw_prim(struct raster_context* rast, float* pts, 
           int n_pts, uint8_t prim_type)
 {
-        switch (prim_type) {
-            case SR_PRIMITIVE_TYPE_POINT_LIST:    /* point list */
-                for (int i = 0; i < n_pts; i++) {
-                    draw_pt(rast, pts + i * rast->n_attr);
-                }
-                break;
-            case SR_PRIMITIVE_TYPE_LINE_LIST:
-            case SR_PRIMITIVE_TYPE_LINE_STRIP:    /* line list */
-                for (int i = 1; i < n_pts; i++) {
-                   /* draw_ln(rast, tmp_p, tmp_p + i * n_attr_out); */
-                }
-                break;
-            case SR_PRIMITIVE_TYPE_TRIANGLE_LIST:
-            case SR_PRIMITIVE_TYPE_TRIANGLE_STRIP:    /* triangle fan */
-                {
-                    float* v0 = pts;
-                    float* v1 = pts + 1 * rast->n_attr;
-                    for (int i = 2; i < n_pts; i++) {
-                        float* v2 = pts + i * rast->n_attr;
-                        if (winding_order(rast->winding, v0, v1, v2))
-                            draw_tr(rast, v0, v1, v2);
-                        v1 = v2;
-                    }
-                }
-                break;
+    switch (prim_type) {
+    case SR_PRIMITIVE_TYPE_POINT_LIST:    /* point list */
+        for (int i = 0; i < n_pts; i++) {
+            draw_pt(rast, pts + i * rast->n_attr);
         }
+        break;
+
+    case SR_PRIMITIVE_TYPE_LINE_LIST:
+    case SR_PRIMITIVE_TYPE_LINE_STRIP:    /* line list */
+        for (int i = 1; i < n_pts; i++) {
+            /* draw_ln(rast, tmp_p, tmp_p + i * n_attr_out); */
+        }
+        break;
+        
+    case SR_PRIMITIVE_TYPE_TRIANGLE_LIST:
+    case SR_PRIMITIVE_TYPE_TRIANGLE_STRIP:    /* triangle fan */
+        {
+            float* v0 = pts;
+            float* v1 = pts + 1 * rast->n_attr;
+            for (int i = 2; i < n_pts; i++) {
+                float* v2 = pts + i * rast->n_attr;
+                if (winding_order(rast->winding, v0, v1, v2))
+                    draw_tr(rast, v0, v1, v2);
+                v1 = v2;
+            }
+        }
+        break;
+    }
 }
 
 /**************

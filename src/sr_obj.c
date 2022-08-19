@@ -12,7 +12,7 @@
 
 #define MAX_LINE_SIZE 1000
 
-const uint SIZES[23] = {
+const int SIZES[23] = {
     53, 107, 223, 449, 907, 1823, 3659, 
     7321, 14653, 29311, 58631, 117269, 
     234539, 469099, 938207, 1876417, 
@@ -283,16 +283,16 @@ grow(struct hash_table* ht)
 
 /**
  * takes a stream of whitespace seperated strings, converts 
- * them to floats, and copies it to the dst buffer
+ * them to floats, and copies it to the dest buffer
  */
 static void
-push_stream(float* dst, char* stream, int n_str) 
+push_stream(float* dest, char* stream, int n_str) 
 {
     char* start = stream;
     char* end;
     for (int i = 0; i < n_str; i++) {
         float val = strtof(start, &end);
-        dst[i] = val;
+        dest[i] = val;
         char* tmp = start;
         start = end;
         end = tmp;
