@@ -3,9 +3,16 @@
 #include <string.h>
 
 #include "sr.h"
-#include "sr_raster.h"
+#include "sr_rast.h"
 #include "sr_clip.h"
 
+/**
+ * sr_pipe.c
+ * --------
+ * implementation of the internal graphics pipeline,
+ * resembling a bit how its done in hardware
+ * 
+ */
 
 /*********************************************************************
  *                                                                   *
@@ -119,17 +126,17 @@ screen_space(struct sr_framebuffer* fbuf, float* pt)
  *                                                                   *
  *********************************************************************/
 
-/*******************
- * sr_draw_indexed *
- *******************/
+/*************
+ * sr_render *
+ *************/
 
 /**
  * entry point of the sr pipeline, 
  * refines indexed vertex data to be sent to rasterizer
  */
 extern void
-sr_draw_indexed(struct sr_pipeline* pipe, int* indices, 
-                int n_indices, uint8_t prim_type)
+sr_render(struct sr_pipeline* pipe, int* indices, 
+          int n_indices, uint8_t prim_type)
 {
     /* setup variables */
     

@@ -2,7 +2,14 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include "sr_raster.h"
+#include "sr_rast.h"
+
+/**
+ * sr_rast.c
+ * --------
+ * rasterizes triangles, lines, and points
+ * 
+ */
 
 /*********************************************************************
  *                                                                   *

@@ -7,6 +7,13 @@
 
 #include "sr.h"
 
+/**
+ * sr_obj.c
+ * --------
+ * simple .obj file loader
+ * 
+ */
+
 #define VT 1 << 0
 #define VN 1 << 1
 

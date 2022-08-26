@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "unity.h"
 #include "sr.h"
-#include "sr_load_obj.c"
+#include "sr_obj.c"
 #include <time.h>
 
 /*********************************************************************

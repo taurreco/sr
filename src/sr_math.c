@@ -2,9 +2,17 @@
 #include <math.h>
 #include "sr_math.h"
 
+/**
+ * sr_math.c
+ * --------
+ * provides an internal matrix representation (mat4)
+ * and associated operations for the sr lib
+ * 
+ */
+
 /*********************************************************************
  *                                                                   *
- *                       private defcitions                         *
+ *                       private definitions                         *
  *                                                                   *
  *********************************************************************/
 

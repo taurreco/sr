@@ -117,11 +117,11 @@ extern void
 sr_viewport(int width, int height); */
 
 extern void
-sr_fixed_draw(int* indices, int n_indices, uint8_t prim_type);
+sr_renderl(int* indices, int n_indices, uint8_t prim_type);
 
 extern void
-sr_draw_indexed(struct sr_pipeline* pipe, int* indices, 
-                int n_indices, uint8_t prim_type);
+sr_render(struct sr_pipeline* pipe, int* indices, 
+          int n_indices, uint8_t prim_type);
 
 /*********************************************************************
  *                                                                   *

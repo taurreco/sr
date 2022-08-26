@@ -1,4 +1,5 @@
 
+
 #include <string.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -6,6 +7,13 @@
 #include "sr.h"
 #include "sr_clip.h"
 
+/**
+ * sr_clip.c
+ * --------
+ * defines functions to clip a polygon of vectors (x, y, z, w) in
+ * homogeneous space
+ * 
+ */
 
 /*********************************************************************
  *                                                                   *

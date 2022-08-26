@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     sr_scale(1, 1, 1);
 
 
-    sr_fixed_draw(indices, n_indices, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_renderl(indices, n_indices, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
 
     
         
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
          
         // sr_rotate_x(0.01);
 
-         sr_fixed_draw(indices, n_indices, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+         sr_renderl(indices, n_indices, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
     
            
         uint32_t endTicks = SDL_GetTicks();

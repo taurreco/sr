@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "unity.h"
-#include "sr_render.c"
+#include "sr_pipe.c"
 #include "sr_math.h"
 
 /*********************************************************************
