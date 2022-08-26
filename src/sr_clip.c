@@ -48,7 +48,7 @@ lerp(float* dest, float* from, float* to, float a, int n_attr)
  * as determined by an axis and a sign to indicate direction
  */
 static void
-clip_routine( float* dest, float* src, 
+clip_routine(float* dest, float* src, 
              int* n_pts, int n_attr, 
              int axis, int sign)
 {

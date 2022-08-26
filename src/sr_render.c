@@ -6,6 +6,7 @@
 #include "sr_raster.h"
 #include "sr_clip.h"
 
+
 /*********************************************************************
  *                                                                   *
  *                       private definitions                         *
@@ -49,7 +50,7 @@ draw_prim(struct raster_context* rast, float* pts,
             /* draw_ln(rast, tmp_p, tmp_p + i * n_attr_out); */
         }
         break;
-        
+
     case SR_PRIMITIVE_TYPE_TRIANGLE_LIST:
     case SR_PRIMITIVE_TYPE_TRIANGLE_STRIP:    /* triangle fan */
         {
@@ -127,7 +128,7 @@ screen_space(struct sr_framebuffer* fbuf, float* pt)
  * refines indexed vertex data to be sent to rasterizer
  */
 extern void
-sr_draw_indexed(struct sr_pipeline_context* pipe, int* indices, 
+sr_draw_indexed(struct sr_pipeline* pipe, int* indices, 
                 int n_indices, uint8_t prim_type)
 {
     /* setup variables */
@@ -176,14 +177,14 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, int* indices,
                    pipe->n_attr_out * sizeof(float));
 
             /* accumulate point clip flags */
-            clip_and &= clip_flags[i + j];
-            clip_or |= clip_flags[i + j];
+            clip_and &= clip_flags[indices[i + j]];
+            clip_or |= clip_flags[indices[i + j]];
         }
 
         /* clipping */
 
         if (clip_and != 0)  /* outside frustum */
-            break;
+            continue;
 
         int clipped_prim_sz = prim_sz;
         if (clip_or != 0)     /* if intersect frustum */
@@ -198,6 +199,3 @@ sr_draw_indexed(struct sr_pipeline_context* pipe, int* indices,
     free(pts_out);
     free(clip_flags);
 }
-
-
-

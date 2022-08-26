@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "unity.h"
 #include "sr.h"
-#include "sr_obj.c"
+#include "sr_load_obj.c"
 #include <time.h>
 
 /*********************************************************************
@@ -40,38 +40,35 @@ load()
     double cpu_time_used;
      
     start = clock();
+
+    float* pts;
+    int* indices;
+    int n_pts, n_attr, n_indices;
     
-    struct sr_triangle_list* tr_list = sr_load_model("ogre.obj");
+    sr_load_obj(&pts, &indices, &n_pts, &n_attr, &n_indices, "cube.obj");
 
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     printf("took %f seconds\n", cpu_time_used);
-
-
-    if (tr_list) {
-
         
-        for (int i = 0; i < tr_list->n_pts * 8; i++) {
+        for (int i = 0; i <  n_pts * 8; i++) {
             if (i % 8 == 0) {
                 printf("\n");
             }
-           printf("%f ", tr_list->pts[i]);
+           printf("%f ", pts[i]);
         }
-        /*
-        for (int i = 0; i < tr_list->n_indices; i++) {
+        
+        for (int i = 0; i < n_indices; i++) {
             if (i % 3 == 0) {
               printf("\n");
             }
-            printf("%d ", tr_list->indices[i]);
+            printf("%d ", indices[i]);
         }
-*/
-        free(tr_list->indices);
-        free(tr_list->pts);
-        free(tr_list);
+
+        free(indices);
+        free(pts);
     }
 
-
-}
 
 
 /*********************************************************************

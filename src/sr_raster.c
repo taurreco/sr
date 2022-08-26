@@ -40,7 +40,10 @@ struct bbox {
  * is_tl *
  *********/
 
-/* determines whether an edge is top or left */
+/* 
+ * determines whether an edge is top or left 
+ * where the edge is directed, starting at v0 pointing to v1
+ */
 static int 
 is_tl(float* v0, float* v1) 
 {
@@ -118,7 +121,7 @@ draw_pt(struct raster_context* rast, float* pt)
     rast->fs(rast->uniform, pt, &color);  /* fragment shader */
     size_t fbuf_idx = floorf(pt[1]) * rast->fbuf->width + floorf(pt[0]);
     
-    if (pt[2] < rast->fbuf->depths[fbuf_idx]) {  /* depth buffer */
+    if (pt[2] > rast->fbuf->depths[fbuf_idx]) {  /* depth buffer */
         rast->fbuf->colors[fbuf_idx] = color;
         rast->fbuf->depths[fbuf_idx] = pt[2];
     }

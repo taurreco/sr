@@ -10,94 +10,69 @@ CFLAGS += -Wextra
 CFLAGS += -Wshadow 
 CFLAGS += -std=gnu11 
 CFLAGS += -Wno-unused-parameter
-CFLAGS += -O3
 CFLAGS += -Iinclude
+CFLAGS += -O3
 #CFLAGS += -fsanitize=address
 
-SDL2_FLAGS += -I/usr/local/include/SDL2 
-SDL2_FLAGS += -I/usr/local/lib 
 SDL2_FLAGS += -lSDL2
 
-# Directories
-BIN_DIR = bin
-INCLUDE_DIR = include
-SRC_DIR = src
-TESTS_DIR = tests
-EXAMPLES_DIR = examples
-TEST_FRAMEWORK_DIR = unity
+SR_SRC += src/sr_lib.c
+SR_SRC += src/sr_render.c
+SR_SRC += src/sr_load_obj.c
+SR_SRC += src/sr_clip.c
+SR_SRC += src/sr_raster.c
+SR_SRC += src/sr_math.c
 
-# Test directories
-MATRIX_TESTS_DIR = $(TESTS_DIR)/matrix
-RENDER_TESTS_DIR = $(TESTS_DIR)/render
-RASTER_TESTS_DIR = $(TESTS_DIR)/raster
-CLIP_TESTS_DIR = $(TESTS_DIR)/clip
-OBJ_TESTS_DIR = $(TESTS_DIR)/obj
+# Example Targets
+EXAMPLES += examples/cube
 
-# Targets
-EXAMPLES = $(patsubst $(EXAMPLES_DIR)/%, $(BIN_DIR)/%, \
-$(patsubst %.c, %, $(wildcard $(EXAMPLES_DIR)/*.c)))
+# Tests Targets
+RENDER_TESTS += tests/check_draw_indexed
+RENDER_TESTS += tests/check_winding_order
+RENDER_DEPS += src/sr_clip.c 
+RENDER_DEPS += src/sr_raster.c 
+RENDER_DEPS += src/sr_math.c
 
-MATRIX_TESTS = $(patsubst %.c, %, $(wildcard $(MATRIX_TESTS_DIR)/*.c))
-RASTER_TESTS  = $(patsubst %.c, %, $(wildcard $(RASTER_TESTS_DIR)/*.c))
-RENDER_TESTS  = $(patsubst %.c, %, $(wildcard $(RENDER_TESTS_DIR)/*.c))
-CLIP_TESTS  = $(patsubst %.c, %, $(wildcard $(CLIP_TESTS_DIR)/*.c))
-OBJ_TESTS = $(patsubst %.c, %, $(wildcard $(OBJ_TESTS_DIR)/*.c))
+RASTER_TESTS += tests/check_draw_tr
+RASTER_TESTS += tests/check_draw_pt
+RASTER_TESTS += tests/check_edge_init
+RASTER_TESTS += tests/check_is_tl
 
-TESTS += $(MATRIX_TESTS) 
-TESTS += $(RASTER_TESTS) 
-TESTS += $(RENDER_TESTS) 
-TESTS += $(CLIP_TESTS) 
-TESTS += $(OBJ_TESTS)
+OBJ_TESTS += tests/check_hash_table
+OBJ_TESTS += tests/check_load_obj
 
-$(BIN_DIR)/%.o: $(SRC_DIR)/%.c $(SRC_DIR)/%.h
-	mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
+CLIP_TESTS += tests/check_clip_poly
+CLIP_TESTS += tests/check_clip_routine
+CLIP_TESTS += tests/check_clip_test
+CLIP_TESTS += tests/check_lerp
 
-# test framework
-$(BIN_DIR)/unity.o: $(TEST_FRAMEWORK_DIR)/unity.c \
-$(TEST_FRAMEWORK_DIR)/unity.h $(TEST_FRAMEWORK_DIR)/unity_internals.h
-	mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
+MATH_TESTS += tests/check_matmul
 
-# grab the pattern for the file
-$(EXAMPLES): %: %.c $(BIN_DIR)/sr_matrix.o
-	$(CC) $(CFLAGS) $^ -o $@ $(SDL2_FLAGS)
+ALL_TESTS += $(RASTER_TESTS) 
+ALL_TESTS += $(OBJ_TESTS) 
+ALL_TESTS += $(CLIP_TESTS) 
+ALL_TESTS += $(MATH_TESTS)
 
-$(MATRIX_TESTS): %: %.c $(SRC_DIR)/sr_matrix.h $(BIN_DIR)/unity.o
-	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR) -lm
+# Example Rules
+$(EXAMPLES): %: %.c
+	$(CC) $(CFLAGS) $< $(SR_SRC) -o $@ $(SDL2_FLAGS) -lm
 
-$(RASTER_TESTS): %: %.c $(BIN_DIR)/unity.o
-	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR) -lm
+# Test Rules
+$(RENDER_TESTS): %: %.c
+	$(CC) $(CFLAGS) -Isrc -Iunity $< $(RENDER_DEPS) unity/unity.c -o $@ -lm
 
-$(RENDER_TESTS): %: %.c $(BIN_DIR)/sr_raster.o \
-$(BIN_DIR)/sr_clip.o $(BIN_DIR)/unity.o
-	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR) -lm
+$(ALL_TESTS): %: %.c
+	$(CC) $(CFLAGS) -Isrc -Iunity $< unity/unity.c -o $@ -lm
 
-$(CLIP_TESTS): %: %.c $(BIN_DIR)/unity.o
-	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR)
+examples: $(EXAMPLES)
+tests: $(RENDER_TESTS) $(ALL_TESTS)
 
-$(OBJ_TESTS): %: %.c $(BIN_DIR)/unity.o
-	$(CC) $(CFLAGS) $^ -o $@ -I$(TEST_FRAMEWORK_DIR) -I$(SRC_DIR) -lm
+# Clean Up
+clean-tests:
+	for t in $(RENDER_TESTS); do rm $$t; done
+	for t in $(ALL_TESTS); do rm $$t; done
 
-tests: $(TESTS)
+clean-examples:
+	for t in $(EXAMPLES); do rm $$t; done
 
-check-raster: $(RASTER_TESTS)
-	for t in $(RASTER_TESTS); do $$t; done
-
-check-clip: $(CLIP_TESTS)
-	for t in $(CLIP_TESTS); do $$t; done
-
-check-obj: $(OBJ_TESTS)
-	for t in $(OBJ_TESTS); do $$t; done
-
-check-render: $(RENDER_TESTS)
-	for t in $(RENDER_TESTS); do $$t; done
-
-check-matrix: $(MATRIX_TESTS)
-	for t in $(MATRIX_TESTS); do $$t; done
-
-check-all: check-raster check-clip check-obj check-matrix check-render
-	
-clean:
-	rm -r $(BIN_DIR)
-	for t in $(TESTS); do rm $$t; done
+clean-all: clean-examples clean-tests

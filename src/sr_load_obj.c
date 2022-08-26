@@ -379,10 +379,13 @@ obj_init(FILE* fp, struct obj* obj)
  * structured appropriately
  */
 static void
-obj_fill(FILE* fp, struct obj* obj, 
-        struct sr_triangle_list* tr_list, 
-        float* v, float* vt, float* vn) 
+obj_fill(FILE* fp, struct obj* obj, float* pts, int* indices, int* n_pts_p) 
 {
+
+    float* v = malloc(obj->n_v * 3 * sizeof(float));
+    float* vt = malloc(obj->n_vt * 2 * sizeof(float));
+    float* vn = malloc(obj->n_vn * 3 * sizeof(float));
+
     int v_idx = 0;
     int vt_idx = 0;
     int vn_idx = 0;
@@ -430,29 +433,29 @@ obj_fill(FILE* fp, struct obj* obj,
             tokens[1] = strtok(NULL, " ");
             tokens[2] = strtok(NULL, " ");
 
-            int indices[3];   /* stores indexes into v, vt, vn */
+            int token_indices[3];   /* stores indexes into v, vt, vn */
             char tmp[255];
 
             while (tokens[2] != NULL) {
 
                 for (int i = 0; i < 3; i++) {
-                    float* cur = tr_list->pts + n_pts * 8;  /* current point */
+                    float* cur = pts + n_pts * 8;  /* current point */
 
                     if (search(ht, tokens[i]) == -1) {    /* haven't seen this point */
 
                         strcpy(tmp, tokens[i]);
-                        split_indices(indices, tmp, flags);  /* convert to indices */
+                        split_indices(token_indices, tmp, flags);  /* convert to indices */
 
                         /* fill pts buffer with the vertex attributes */
                         
-                        memcpy(cur, v + indices[0] * 3, 
+                        memcpy(cur, v + token_indices[0] * 3, 
                                3 * sizeof(float));
                         if (flags & VT) {
-                            memcpy(cur + 3, vt + indices[1] * 2, 
+                            memcpy(cur + 3, vt + token_indices[1] * 2, 
                                    2 * sizeof(float));
                         }
                         if (flags & VN) {
-                            memcpy(cur + 5, vn + indices[2] * 3, 
+                            memcpy(cur + 5, vn + token_indices[2] * 3, 
                                    3 * sizeof(float));
                         }
 
@@ -462,7 +465,7 @@ obj_fill(FILE* fp, struct obj* obj,
                 }
 
                 for (int i = 0; i < 3; i++)
-                    tr_list->indices[tr_idx * 3 + i] = search(ht, tokens[i]);
+                    indices[tr_idx * 3 + i] = search(ht, tokens[i]);
 
                 tokens[1] = tokens[2];
                 tokens[2] = strtok(NULL, " ");
@@ -470,8 +473,11 @@ obj_fill(FILE* fp, struct obj* obj,
             }
         }
     }
-    tr_list->n_pts = n_pts;
+    *n_pts_p = n_pts;
     hash_table_free(ht);
+    free(v);
+    free(vt);
+    free(vn);
 }
 
 /*********************************************************************
@@ -480,18 +486,15 @@ obj_fill(FILE* fp, struct obj* obj,
  *                                                                   *
  *********************************************************************/
 
-/*****************
- * sr_load_model *
- *****************/
+/*************************
+ * sr_load_triangle_list *
+ *************************/
 
 /* reads obj file data from path into an indexed triangle list */
-extern struct sr_triangle_list*
-sr_load_model(char* file)
+extern void
+sr_load_obj(float** pts_p, int** indices_p, int* n_pts_p, 
+            int* n_attr_p, int* n_indices_p, char* file)
 {
-    /* the return address */
-
-    struct sr_triangle_list* tr_list;
-    tr_list = malloc(sizeof(struct sr_triangle_list));
 
     /* open file and pre allocate buffers in obj context */
 
@@ -510,31 +513,27 @@ sr_load_model(char* file)
 
     obj_init(fp, &obj);
 
-    float* v = malloc(obj.n_v * 3 * sizeof(float));
-    float* vt = malloc(obj.n_vt * 2 * sizeof(float));
-    float* vn = malloc(obj.n_vn * 3 * sizeof(float));
-
-    tr_list->n_attr = 8;
-    tr_list->n_pts = obj.n_pts;
-    tr_list->n_indices = obj.n_tr * 3;
+    int n_pts = obj.n_pts;
+    int n_indices = obj.n_tr * 3;
     
-    size_t pts_sz = tr_list->n_pts * tr_list->n_attr;
-    tr_list->pts = malloc(pts_sz * sizeof(float));
-    tr_list->indices = malloc(tr_list->n_indices * sizeof(int));
+    float* pts = malloc(n_pts * 8 * sizeof(float));
+    int* indices = malloc(n_indices * sizeof(int));
 
     /* fill triangle list buffers */
 
-    obj_fill(fp, &obj, tr_list, v, vt, vn);
+    obj_fill(fp, &obj, pts, indices, &n_pts);
 
-    size_t pts_sz_new = tr_list->n_pts * tr_list->n_attr;
     float* tmp;
-    if ((tmp = realloc(tr_list->pts, pts_sz_new * sizeof(float))))
-        tr_list->pts = tmp;
+    if ((tmp = realloc(pts, n_pts * 8 * sizeof(float))))
+        pts = tmp;
 
-    free(v);
-    free(vn);
-    free(vt);
+    /* fill return pointers */
+
+    *pts_p = pts;
+    *indices_p = indices;
+    *n_pts_p = n_pts;
+    *n_attr_p = 8;
+    *n_indices_p = n_indices;
+
     fclose(fp);
-
-    return tr_list;
 }

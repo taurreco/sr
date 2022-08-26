@@ -5,7 +5,7 @@
 
 #include "unity.h"
 #include "sr_render.c"
-#include "sr_matrix.h"
+#include "sr_math.h"
 
 /*********************************************************************
  *                                                                   *
@@ -36,7 +36,7 @@ struct sr_framebuffer g_fbuf = {
     .depths = g_depths
 };
 
-struct sr_pipeline_context g_pipe = {
+struct sr_pipeline g_pipe = {
     .fbuf = &g_fbuf,
     .uniform = &g_uniform,
     .vs = vs_basic,
@@ -78,7 +78,7 @@ vs_basic(void* uniform, float* in, float* out)
 static void
 vs_transform(void* uniform, float* in, float* out)
 {
-    matmul_v(out, (float*)uniform, in);
+    matmul_v(out, (struct mat4*)uniform, in);
     out[4] = in[4];
 }
 
@@ -476,14 +476,14 @@ projection_matrix()
     float f = 100;        /* far plane */
     float ta = tan( fov / 2 );
 
-    float projection_matrix[4 * 4] = {
+    struct mat4 proj = {
         1/(ta*a),  0,         0,            0,
         0,         1/ta,      0,            0,
         0,         0,         -(f+n)/(f-n), 2*f*n/(f-n),
         0,         0,        -1,            0
     };
 
-    g_pipe.uniform = projection_matrix;
+    g_pipe.uniform = (void*)(&proj);
     g_pipe.vs = vs_transform;
 
     float pts_in[5 * 3] = {
@@ -546,14 +546,14 @@ another_projection_test()
     float f = 100;        /* far plane */
     float ta = tan( fov / 2 );
 
-    float projection_matrix[4 * 4] = {
+    struct mat4 proj = {
         1/(ta*a),  0,         0,            0,
         0,         1/ta,      0,            0,
         0,         0,         -(f+n)/(f-n), 2*f*n/(f-n),
         0,         0,        -1,            0
     };
 
-    g_pipe.uniform = projection_matrix;
+    g_pipe.uniform = (void*)(&proj);
     g_pipe.vs = vs_transform;
 
     float pts_in[5 * 3] = {

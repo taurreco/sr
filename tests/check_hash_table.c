@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include "unity.h"
-#include "sr_obj.c"
+#include "sr_load_obj.c"
 
 /*********************************************************************
  *                                                                   *

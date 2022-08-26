@@ -26,6 +26,21 @@
 #define SR_WINDING_ORDER_CCW 1
 #define SR_WINDING_ORDER_CW -1
 
+enum sr_primitive {
+    SR_POINT_LIST,
+    SR_LINE_LIST,
+    SR_LINE_STRIP,
+    SR_TRIANGLE_LIST,
+    SR_TRIANGLE_STRIP
+};
+
+enum sr_matrix_mode {
+    SR_MODEL_MATRIX,
+    SR_VIEW_MATRIX,
+    SR_PROJECTION_MATRIX,
+    SR_MVP_MATRIX
+};
+
 /*********************************************************************
  *                                                                   *
  *                     shader function pointers                      *
@@ -41,7 +56,6 @@ typedef void (*fs_f)(void* uniform, float* in, uint32_t* out);
  *                                                                   *
  *********************************************************************/
 
-struct sr_std_uniform;      /* hidden from end user bc it uses internal matrix data */
 
 /*************************
  * struct sr_framebuffer *
@@ -54,17 +68,6 @@ struct sr_framebuffer {
     float* depths;           /* depths */
 };
 
-/********************
- * struct sr_camera *
- ********************/
-
-/* holds camera model information */
-struct sr_camera {
-    float n, f, t, r, fov;
-    float x, y, z;
-    float roll, pitch, yaw;
-};
-
 /******************************
  * struct sr_pipeline_context *
  ******************************/
@@ -74,7 +77,7 @@ struct sr_camera {
  * memory required to render an indexed list of
  * arbitrary length
  */
-struct sr_pipeline_context {
+struct sr_pipeline {
     
     struct sr_framebuffer* fbuf;
 
@@ -90,28 +93,97 @@ struct sr_pipeline_context {
     int winding;
 };
 
-/***************************
- * struct sr_triangle_list *
- ***************************/
-
-/* indexed triangle list structure */
-struct sr_triangle_list {
-    float* pts;
-    int* indices;
-    int n_pts;
-    int n_attr;
-    int n_indices;
-};
-
 /*********************************************************************
  *                                                                   *
- *                       public declarations                         *
+ *                           render pipeline                         *
  *                                                                   *
  *********************************************************************/
 
 /* render interface */
+
 extern void
-sr_draw_indexed(struct sr_pipeline_context* pipe, int* indices, 
+sr_bind_pts(float* pts, int n_pts, int n_attr);
+
+extern void
+sr_bind_framebuffer(int width, int height, uint32_t* colors, float* depths);
+
+extern void
+sr_bind_vs(vs_f vs, int n_attr_out);
+
+extern void
+sr_bind_fs(fs_f fs);
+/*
+extern void
+sr_viewport(int width, int height); */
+
+extern void
+sr_fixed_draw(int* indices, int n_indices, uint8_t prim_type);
+
+extern void
+sr_draw_indexed(struct sr_pipeline* pipe, int* indices, 
                 int n_indices, uint8_t prim_type);
+
+/*********************************************************************
+ *                                                                   *
+ *                             obj loading                           *
+ *                                                                   *
+ *********************************************************************/
+
+extern void
+sr_load_obj(float** pts_p, int** indices_p, int* n_pts_p, 
+            int* n_attr_p, int* n_indices_p, char* file);
+
+/*********************************************************************
+ *                                                                   *
+ *                      matrix stack interface                       *
+ *                                                                   *
+ *********************************************************************/
+
+extern void
+sr_matrix_mode(enum sr_matrix_mode mode);
+
+extern void
+sr_dump_matrix(float* dest);
+
+extern void
+sr_load_identity();
+
+extern void
+sr_perspective(float fovy, float aspect, float near, float far);
+
+extern void
+sr_frustum(float left, float right, float bottom, 
+           float top, float near, float far);
+
+extern void
+sr_translate(float x, float y, float z);
+
+extern void
+sr_rotate_x(float r);
+
+extern void
+sr_rotate_y(float p);
+
+extern void
+sr_rotate_z(float y);
+
+extern void
+sr_scale(float sx, float sy, float sz);
+
+extern void
+sr_look_at(float ex, float ey, float ez, 
+           float cx, float cy, float cz, 
+           float ux, float uy, float uz);
+
+/*********************************************************************
+ *                                                                   *
+ *                              shaders                              *
+ *                                                                   *
+ *********************************************************************/
+extern void 
+sr_bind_vs_test();
+
+extern void
+sr_bind_fs_test();
 
 #endif /* SR_H */
