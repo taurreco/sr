@@ -21,6 +21,7 @@ SR_SRC += src/sr_pipe.c
 SR_SRC += src/sr_obj.c
 SR_SRC += src/sr_clip.c
 SR_SRC += src/sr_rast.c
+SR_SRC += src/sr_shaders.c
 SR_SRC += src/sr_math.c
 
 # Example Targets

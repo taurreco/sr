@@ -47,8 +47,8 @@ enum sr_matrix_mode {
  *                                                                   *
  *********************************************************************/
 
-typedef void (*vs_f)(void* uniform, float* in, float* out);
-typedef void (*fs_f)(void* uniform, float* in, uint32_t* out);
+typedef void (*vs_f)(float* out, float* in, void* uniform);
+typedef void (*fs_f)(uint32_t* out, float* in, void* uniform);
 
 /*********************************************************************
  *                                                                   *
@@ -181,9 +181,9 @@ sr_look_at(float ex, float ey, float ez,
  *                                                                   *
  *********************************************************************/
 extern void 
-sr_bind_vs_test();
+sr_bind_color_vs();
 
 extern void
-sr_bind_fs_test();
+sr_bind_color_fs();
 
 #endif /* SR_H */

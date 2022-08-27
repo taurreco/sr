@@ -125,7 +125,7 @@ extern void
 draw_pt(struct raster_context* rast, float* pt)
 {
     uint32_t color = 0; /* color dest */
-    rast->fs(rast->uniform, pt, &color);  /* fragment shader */
+    rast->fs(&color, pt, rast->uniform);  /* fragment shader */
     size_t fbuf_idx = floorf(pt[1]) * rast->fbuf->width + floorf(pt[0]);
     
     if (pt[2] > rast->fbuf->depths[fbuf_idx]) {  /* depth buffer */

@@ -2,6 +2,7 @@
 
 #include "sr.h"
 #include "sr_math.h"
+#include "sr_lib.h"
 
 /**
  * sr_lib.c
@@ -13,16 +14,6 @@
  * and matrix stack-like operations to build it
  * 
  */
-
-/*********************************************************************
- *                                                                   *
- *                          uniform struct                           *
- *                                                                   *
- *********************************************************************/
-
-struct sr_uniform {
-    struct mat4* mvp;
-};
 
 /*********************************************************************
  *                                                                   *
@@ -97,49 +88,6 @@ struct sr_pipeline pipe = {
     .n_attr_out = 0,
     .winding = SR_WINDING_ORDER_CCW
 };
-
-static void 
-test_vs(void* uniform, float* in, float* out)
-{
-    struct mat4* mvp = ((struct sr_uniform*)uniform)->mvp;
-    float hin[4] = {
-        in[0], in[1], in[2], 1
-    };
-    matmul_v(out, mvp, hin);
-    memcpy(out + 4, in + 3, 5 * sizeof(float));
-}
-static void
-test_fs(void* uniform, float* in, uint32_t* out)
-{
-    *out = (0 << 24) | (158 << 16) | (85 << 8) | (194 << 0); 
-    
-    if ((int)in[6] == 0 && (int)in[7] == 1 && (int)in[8] == 0)
-        *out = (0 << 24) | (151 << 16) | (151 << 8) | (151 << 0); /* grey */
-    if ((int)in[6] == 0 && (int)in[7] == 0 && (int)in[8] == 1)
-        *out = (0 << 24) | (86 << 16) | (194 << 8) | (138 << 0); 
-    if ((int)in[6] == -1 && (int)in[7] == 0 && (int)in[8] == 0)
-        *out = (0 << 24) | (162 << 16) | (134 << 8) | (38 << 0); 
-    if ((int)in[6] == 0 && (int)in[7] == -1 && (int)in[8] == 0)
-        *out = (0 << 24) | (20 << 16) | (121 << 8) | (176 << 0); 
-    if ((int)in[6] == 1 && (int)in[7] == 0 && (int)in[8] == 0)
-        *out = (0 << 24) | (43 << 16) | (29 << 8) | (164 << 0); 
-    if ((int)in[6] == 0 && (int)in[7] == 0 && (int)in[8] == -1)
-        *out = (0 << 24) | (198 << 16) | (7 << 8) | (163 << 0); 
-
-   
-}
-
-extern void
-sr_bind_vs_test()
-{
-    sr_bind_vs(test_vs, 9);
-}
-
-extern void
-sr_bind_fs_test()
-{
-    sr_bind_fs(test_fs);
-}
 
 /*********************************************************************
  *                                                                   *

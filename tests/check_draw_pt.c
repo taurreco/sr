@@ -10,7 +10,7 @@
  *                                                                   *
  *********************************************************************/
 
-static void fs(void* uniform, float* pt, uint32_t* color_p);
+static void fs(uint32_t* color_p, float* pt void* uniform,);
 
 /*********************************************************************
  *                                                                   *
@@ -43,7 +43,7 @@ struct raster_context g_rast = {
 
 /* sets color to 1 */
 static void 
-fs(void* uniform, float* pt, uint32_t* color_p)
+fs(uint32_t* color_p, float* pt, void* uniform)
 {
     (*color_p) = 1;
 }

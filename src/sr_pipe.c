@@ -161,9 +161,9 @@ sr_render(struct sr_pipeline* pipe, int* indices,
     for (int i = 0; i < pipe->n_pts; i++) {    /* per point */
 
         /* vertex shader pass */
-        pipe->vs(pipe->uniform, 
+        pipe->vs(pts_out + i * pipe->n_attr_out,
                  pipe->pts_in + i * pipe->n_attr_in, 
-                 pts_out + i * pipe->n_attr_out);
+                 pipe->uniform);
 
         /* grab clip flags while vertex is still hot */
         clip_test(pts_out + i * pipe->n_attr_out, clip_flags + i);

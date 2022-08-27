@@ -11,8 +11,8 @@
  *                                                                   *
  *********************************************************************/
 
-static void fs_attr(void* uniform, float* pt, uint32_t* color_p);
-static void fs_color(void* uniform, float* pt, uint32_t* color_p);
+static void fs_attr(uint32_t* color_p, float* pt, void* uniform);
+static void fs_color( uint32_t* color_p, float* pt, void* uniform);
 
 /*********************************************************************
  *                                                                   *
@@ -47,7 +47,7 @@ struct raster_context g_rast = {
 /* whatever is in the fourth attribute slot is the 'color' */
 
 static void
-fs_attr(void* uniform, float* pt, uint32_t* color_p) 
+fs_attr(uint32_t* color_p, float* pt, void* uniform) 
 {
     (*color_p) = pt[4];
 }
@@ -55,7 +55,7 @@ fs_attr(void* uniform, float* pt, uint32_t* color_p)
 /* the uniform data becomes the 'color' */
 
 static void 
-fs_color(void* uniform, float* pt, uint32_t* color_p)
+fs_color(uint32_t* color_p, float* pt, void* uniform, )
 {
     (*color_p) = *((uint32_t*)(uniform));
 }

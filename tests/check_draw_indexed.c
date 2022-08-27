@@ -14,10 +14,10 @@
  *********************************************************************/
 
 static void
-vs_basic(void* uniform, float* in, float* out);
+vs_basic(float* out, float* in, void* uniform);
 
 static void
-fs_basic(void* uniform, float* in, uint32_t* out);
+fs_basic(uint32_t* out, float* in, void* uniform);
 
 /*********************************************************************
  *                                                                   *
