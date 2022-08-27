@@ -5,6 +5,7 @@
 #include <math.h>
 
 #include "sr.h"
+#include "sr_math.h"
 
 int WIDTH = 1024;
 int HEIGHT = 1024;
@@ -100,13 +101,8 @@ int main(int argc, char *argv[]) {
     sr_renderl(cube_indices, 12 * 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
 
 
-
-    int mx, my;
-    int lmx = WIDTH / 2;
-    int lmy = HEIGHT / 2;
     float pitch = 0;
     float yaw = -90;
-    float roll = 45;
 
     float f[3] = {
         0, 0, -1
@@ -125,12 +121,12 @@ int main(int argc, char *argv[]) {
     };
 
     float dt = 0;
-    struct timespec start, end;
     clock_t t;
+    int cur_time = 0;
+    int prev_time = 0;
 
     for (int frame = 0; ; ++frame) {
-          t = clock();
-        clock_gettime(CLOCK_REALTIME, &start);
+        t = clock();
         SDL_Event event;
         
         if (SDL_PollEvent(&event) != 0) {
@@ -175,13 +171,10 @@ int main(int argc, char *argv[]) {
                        pitch += 1;
                     }
 
-                                if (event.key.keysym.scancode == SDL_SCANCODE_DOWN) {
+                    if (event.key.keysym.scancode == SDL_SCANCODE_DOWN) {
                        pitch -= 1;
-                       
                     }
-
-            
-                      
+                     
                     break;
 
                 /* SDL_QUIT event (window close) */
@@ -193,18 +186,14 @@ int main(int argc, char *argv[]) {
             }
         }
 
-         f[0] = cos(radians(yaw)) * cos(radians(pitch));
+        f[0] = cos(radians(yaw)) * cos(radians(pitch));
         f[1] = sin(radians(pitch));
         f[2] = sin(radians(yaw)) * cos(radians(pitch));
         normalize(f);
-
-
         cross(l, f, u);   /* orthonormal to f and up */
         normalize(l);
         cross(u, l, f);  /* orthonormal up */
-
         normalize(u);
-
 
         for (int i = 0; i < WIDTH * HEIGHT; i++) {
             depths[i] = -1000;
@@ -220,9 +209,9 @@ int main(int argc, char *argv[]) {
         sr_rotate_y(1 * dt);
         sr_renderl(cube_indices, 12 * 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
 
-        int pitch;
+        int p;
         uint32_t *pixels;
-        SDL_LockTexture(texture, &screenRect, (void**)&pixels, &pitch);
+        SDL_LockTexture(texture, &screenRect, (void**)&pixels, &p);
         uint32_t startTicks = SDL_GetTicks();
         for (int y = 0; y < screenRect.h; y++) {
             for (int x = 0; x < screenRect.w; x++) {
@@ -231,12 +220,17 @@ int main(int argc, char *argv[]) {
             }
         }
         
-       
            
         uint32_t endTicks = SDL_GetTicks();
         dt = (float)(clock() - t) / CLOCKS_PER_SEC;
-        clock_gettime(CLOCK_REALTIME, &end);
         SDL_UnlockTexture(texture);
+
+         cur_time = SDL_GetTicks();
+        if (cur_time > prev_time + 1000) {
+            printf("FPS: %d\n", frame);
+            frame = 0;
+            prev_time = cur_time;
+        }
 
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(renderer);

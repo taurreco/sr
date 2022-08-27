@@ -175,7 +175,7 @@ sr_render(struct sr_pipeline* pipe, int* indices,
 
         /* primitive assembly */
 
-        uint8_t clip_and, clip_or = 0;
+        uint8_t clip_and = 0, clip_or = 0;
 
         for (int j = 0; j < prim_sz; j++) {
             /* fill buffer with primitive data */

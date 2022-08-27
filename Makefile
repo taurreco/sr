@@ -56,7 +56,7 @@ ALL_TESTS += $(MATH_TESTS)
 
 # Example Rules
 $(EXAMPLES): %: %.c
-	$(CC) $(CFLAGS) $< $(SR_SRC) -o $@ $(SDL2_FLAGS) -lm
+	$(CC) $(CFLAGS) $< $(SR_SRC) -o $@ $(SDL2_FLAGS) -Isrc -lm
 
 # Test Rules
 $(PIPE_TESTS): %: %.c

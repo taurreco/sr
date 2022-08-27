@@ -507,7 +507,7 @@ sr_load_obj(float** pts_p, int** indices_p, int* n_pts_p,
 
     FILE* fp = fopen(file, "r");
     if (fp == NULL) {
-        return NULL;
+        return;
     }
 
     struct obj obj = {
