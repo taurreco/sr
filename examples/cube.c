@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
 
     uint32_t* cube_texture;
     int t_width, t_height;
-    sr_load_tga(&cube_texture, &t_width, &t_height, "./assets/minecraft_dirt.tga");
+    sr_load_tga(&cube_texture, &t_width, &t_height, "./assets/cube_tex.tga");
     sr_bind_texture(cube_texture, t_width, t_height);
     sr_bind_pts(cube_pts, 24, 5);
     sr_bind_framebuffer(WIDTH, HEIGHT, colors, depths);

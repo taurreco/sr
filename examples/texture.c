@@ -39,11 +39,15 @@ int HEIGHT = 350;
 
 
 
-int WIDTH = 228;
-int HEIGHT = 221;
-
 
 int main(int argc, char *argv[]) {
+
+     uint32_t* tex;
+    int height, width;
+    sr_load_tga(&tex, &width, &height, "./assets/cube_tex.tga");
+
+    int WIDTH = width;
+    int HEIGHT = height;
 
     SDL_Init(SDL_INIT_VIDEO);
     
@@ -58,9 +62,7 @@ int main(int argc, char *argv[]) {
     SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, 
                            SDL_TEXTUREACCESS_STREAMING, screenRect.w, screenRect.h);
 
-    uint32_t* tex;
-    int height, width;
-    sr_load_tga(&tex, &width, &height, "./assets/amongus.tga");
+   
 
     float dt = 0;
     clock_t t;
