@@ -497,8 +497,11 @@ obj_fill(FILE* fp, struct obj* obj, float* pts, int* indices, int* n_pts_p)
  * sr_load_triangle_list *
  *************************/
 
-/* reads obj file data from path into an indexed triangle list */
-extern void
+/* 
+ * reads obj file data from path into an indexed triangle list
+ * 1 on success, 0 on failure 
+ */
+extern int
 sr_load_obj(float** pts_p, int** indices_p, int* n_pts_p, 
             int* n_attr_p, int* n_indices_p, char* file)
 {
@@ -507,7 +510,7 @@ sr_load_obj(float** pts_p, int** indices_p, int* n_pts_p,
 
     FILE* fp = fopen(file, "r");
     if (fp == NULL) {
-        return;
+        return 0;
     }
 
     struct obj obj = {
@@ -543,4 +546,5 @@ sr_load_obj(float** pts_p, int** indices_p, int* n_pts_p,
     *n_indices_p = n_indices;
 
     fclose(fp);
+    return 1;
 }

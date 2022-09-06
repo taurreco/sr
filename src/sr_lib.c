@@ -73,7 +73,10 @@ struct sr_framebuffer fbuf = {
 
 /* uniform */
 struct sr_uniform uniform = {
-    .mvp = &mvp
+    .mvp = &mvp,
+    .texture = 0,
+    .t_width = 0,
+    .t_height = 0
 };
 
 /* pipeline state */
@@ -101,8 +104,9 @@ struct sr_pipeline pipe = {
 
 /* builds the mvp and renders the global state */
 extern void
-sr_renderl(int* indices, int n_indices, uint8_t prim_type)
+sr_renderl(int* indices, int n_indices, enum sr_primitive prim_type)
 {
+
     mvp = identity;
     matmul(&mvp, &proj);
     matmul(&mvp, &view);
@@ -158,6 +162,19 @@ extern void
 sr_bind_fs(fs_f fs)
 {
     pipe.fs = fs;
+}
+
+/*******************
+ * sr_bind_texture *
+ *******************/
+
+/* binds a texture to pipeline */
+extern void
+sr_bind_texture(uint32_t* texture, int width, int height)
+{
+    uniform.texture = texture;
+    uniform.t_width = width;
+    uniform.t_height = height;
 }
 
 /******************
@@ -432,7 +449,7 @@ sr_frustum(float left, float right, float bottom,
         e00, 0,   e02,  0,
         0,   e11, e12,  0,
         0,   0,   e22,  e23,
-        0,   0,   1,    0
+        0,   0,   -1,    0
     };
 
     matmul(cur_mat, &p);

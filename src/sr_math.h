@@ -45,4 +45,7 @@ cross(float* a, float* b, float* c);
 extern void
 normalize(float* a);
 
+extern float
+radians(float deg);
+
 #endif   /* SR_MATH_H */

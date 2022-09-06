@@ -10,22 +10,24 @@
 int WIDTH = 1024;
 int HEIGHT = 1024;
 
+/*
+
 float cube_pts[24 * 7] = {
 
-    1, 1, -1, 0, 151, 151, 151,  
+    1, 1, -1, 0, 83, 58, 1,  
     -1, 1, -1, 0, 151, 151, 151,
-    -1, 1, 1, 0, 151, 151, 151,
-    1, 1, 1, 0,151, 151, 151,  
+    -1, 1, 1, 0, 85, 100, 111,
+    1, 1, 1, 0, 99, 10, 10,  
 
     1, -1, 1, 0, 86, 194, 138,
-    1, 1, 1, 0, 86, 194, 138,
-    -1, 1, 1, 0, 86, 194, 138,
-    -1, -1, 1, 0, 86, 194, 138,
+    1, 1, 1, 0, 73, 102, 18,
+    -1, 1, 1, 0, 3, 102, 173,
+    -1, -1, 1, 0, 18, 38, 200,
 
-    -1, -1, 1, 0, 162, 134, 38,
+    -1, -1, 1, 0, 200, 21, 91,
     -1, 1, 1, 0, 162, 134, 38,
-    -1, 1, -1, 0, 162, 134, 38,
-    -1, -1, -1, 0, 162, 134, 38,
+    -1, 1, -1, 0, 18, 28, 3,
+    -1, -1, -1, 0, 178, 17, 33,
 
     -1, -1, -1, 0, 20, 121, 176,
     1, -1, -1, 0, 20, 121, 176,
@@ -43,6 +45,42 @@ float cube_pts[24 * 7] = {
     1, -1, -1, 0, 198, 7, 163
 };
 
+*/
+
+
+float cube_pts[24 * 5] = {
+
+    1, 1, -1, 0.5, 0.668,  
+    -1, 1, -1, 0.5, 0.332,
+    -1, 1, 1, 0.25, 0.332,
+    1, 1, 1, 0.25, 0.668,
+
+    1, -1, 1, 0, 0.668,
+    1, 1, 1, 0.25, 0.668,
+    -1, 1, 1, 0.25, 0.332,
+    -1, -1, 1, 0, 0.332, 
+
+    -1, -1, 1, 0.25, 0, 
+    -1, 1, 1, 0.25, 0.332,
+    -1, 1, -1, 0.5, 0.332, 
+    -1, -1, -1, 0.5, 0, 
+
+    -1, -1, -1, 1, 0.332,
+    1, -1, -1, 0.75, 0.332, 
+    1, -1, 1, 0.75, 0.668, 
+    -1, -1, 1, 1, 0.668,  
+
+    1, -1, -1, 0.5, 1,
+    1, 1, -1, 0.5, 0.668,
+    1, 1, 1, 0.25, 0.668,
+    1, -1, 1, 0.25, 1,
+
+    -1, -1, -1, 0.75, 0.332,  
+    -1, 1, -1, 0.5, 0.332,
+    1, 1, -1, 0.5, 0.668, 
+    1, -1, -1, 0.75, 0.668, 
+};
+
 int cube_indices[12 * 3] = {
     0, 1, 2,
     0, 2, 3,
@@ -57,12 +95,6 @@ int cube_indices[12 * 3] = {
     20, 21, 22,
     20, 22, 23
 };
-
-float 
-radians(float deg) 
-{
-    return deg * (M_PI / 180);
-}
 
 int main(int argc, char *argv[]) {
 
@@ -80,8 +112,6 @@ int main(int argc, char *argv[]) {
                            SDL_TEXTUREACCESS_STREAMING, screenRect.w, screenRect.h);
 
 
-    sr_bind_pts(cube_pts, 24, 7);
-
     float* depths = calloc(WIDTH * HEIGHT, sizeof(float));
     for (int i = 0; i < WIDTH * HEIGHT; i++)
     {
@@ -89,16 +119,20 @@ int main(int argc, char *argv[]) {
     }
     uint32_t* colors = calloc(WIDTH * HEIGHT, sizeof(uint32_t));
 
+    uint32_t* cube_texture;
+    int t_width, t_height;
+    sr_load_tga(&cube_texture, &t_width, &t_height, "./assets/minecraft_dirt.tga");
+    sr_bind_texture(cube_texture, t_width, t_height);
+    sr_bind_pts(cube_pts, 24, 5);
     sr_bind_framebuffer(WIDTH, HEIGHT, colors, depths);
-    sr_bind_color_vs();
-    sr_bind_color_fs();
+    sr_bind_texture_vs();
+    sr_bind_texture_fs();
     sr_matrix_mode(SR_PROJECTION_MATRIX);
-    sr_perspective(1, 1, 10, 1000);
+    sr_perspective(1, 1, 2, 1000);
     sr_matrix_mode(SR_VIEW_MATRIX);
     sr_look_at(0, 0, 10, 0, 0, 0, 0, 1, 0);
     sr_matrix_mode(SR_MODEL_MATRIX);
-    sr_scale(3, 3, 3);
-    sr_renderl(cube_indices, 12 * 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_renderl(cube_indices, 12 * 3, SR_TRIANGLE_LIST);
 
 
     float pitch = 0;
@@ -128,63 +162,66 @@ int main(int argc, char *argv[]) {
     for (int frame = 0; ; ++frame) {
         t = clock();
         SDL_Event event;
-        
-        if (SDL_PollEvent(&event) != 0) {
-            switch( event.type ){
-                /* Pass the event data onto PrintKeyInfo() */
-                case SDL_KEYUP:
-                case SDL_KEYDOWN:
-                    if (event.key.keysym.scancode == SDL_SCANCODE_Q)
-                        return 0;
-                    if (event.key.keysym.scancode == SDL_SCANCODE_W) {
-                        pos[0] += f[0] * 100 * dt;
-                        pos[1] += f[1] * 100 * dt;
-                        pos[2] += f[2] * 100 * dt;
-                    }
 
-                     if (event.key.keysym.scancode == SDL_SCANCODE_S) {
-                        pos[0] -= f[0] * 100 * dt;
-                        pos[1] -= f[1] * 100 * dt;
-                        pos[2] -= f[2] * 100 * dt;
-                     }
-                     if (event.key.keysym.scancode == SDL_SCANCODE_A) {
-                        pos[0] -= l[0] * 100 * dt;
-                        pos[1] -= l[1] * 100 * dt;
-                        pos[2] -= l[2] * 100 * dt;
-                     }
-  
-                    if (event.key.keysym.scancode == SDL_SCANCODE_D) {
-                        pos[0] += l[0] * 100 * dt;
-                        pos[1] += l[1] * 100 * dt;
-                        pos[2] += l[2] * 100 * dt;
-                    }
-
-                    if (event.key.keysym.scancode == SDL_SCANCODE_RIGHT) {
-                       yaw +=1;
-                    }
-
-                    if (event.key.keysym.scancode == SDL_SCANCODE_LEFT) {
-                       yaw -=1;
-                    }
-
-                     if (event.key.keysym.scancode == SDL_SCANCODE_UP) {
-                       pitch += 1;
-                    }
-
-                    if (event.key.keysym.scancode == SDL_SCANCODE_DOWN) {
-                       pitch -= 1;
-                    }
-                     
-                    break;
-
-                /* SDL_QUIT event (window close) */
-                case SDL_QUIT:
-                    return 0;
-
-                default:
-                    break;
+        while ((SDL_PollEvent(&event)) != 0) {
+            /*! request quit */
+            if (event.type == SDL_QUIT) { 
+                return 0;
             }
         }
+
+        const uint8_t* keystate = SDL_GetKeyboardState(NULL);
+
+        if (keystate[SDL_SCANCODE_W]) {
+            pos[0] += f[0] * 10 * dt;
+            pos[1] += f[1] * 10 * dt;
+            pos[2] += f[2] * 10 * dt;
+        }
+
+        if (keystate[SDL_SCANCODE_S]) {
+            pos[0] -= f[0] * 10 * dt;
+            pos[1] -= f[1] * 10 * dt;
+            pos[2] -= f[2] * 10 * dt;
+        }
+
+        if (keystate[SDL_SCANCODE_W]) {
+            pos[0] += f[0] * 10 * dt;
+            pos[1] += f[1] * 10 * dt;
+            pos[2] += f[2] * 10 * dt;
+        }
+
+        if (keystate[SDL_SCANCODE_A]) {
+            pos[0] -= l[0] * 10 * dt;
+            pos[1] -= l[1] * 10 * dt;
+            pos[2] -= l[2] * 10 * dt;
+        }
+
+        if (keystate[SDL_SCANCODE_D]) {
+            pos[0] += l[0] * 10 * dt;
+            pos[1] += l[1] * 10 * dt;
+            pos[2] += l[2] * 10 * dt;
+        }
+
+        if (keystate[SDL_SCANCODE_RIGHT])
+            yaw += 0.5;
+        
+        if (keystate[SDL_SCANCODE_LEFT])
+            yaw -= 0.5;
+        
+        if (keystate[SDL_SCANCODE_UP])
+            pitch += 0.5;
+        
+        if (keystate[SDL_SCANCODE_DOWN])
+            pitch -= 0.5;
+        
+        if (keystate[SDL_SCANCODE_Q])
+            return 0;
+
+        if (pitch >= 80)
+            pitch = 80;
+
+        if (pitch <= -80)
+            pitch = -80;     
 
         f[0] = cos(radians(yaw)) * cos(radians(pitch));
         f[1] = sin(radians(pitch));
@@ -199,13 +236,14 @@ int main(int argc, char *argv[]) {
             depths[i] = -1000;
             colors[i] = 0;
         } 
+
         sr_matrix_mode(SR_VIEW_MATRIX);
         sr_load_identity();
-       sr_look_at(pos[0], pos[1], pos[2], 
-                  pos[0] + f[0], pos[1] + f[1], pos[2] + f[2], 
-                  u[0], u[1], u[2]); 
+        sr_look_at(pos[0], pos[1], pos[2], 
+                   pos[0] + f[0], pos[1] + f[1], pos[2] + f[2], 
+                   u[0], u[1], u[2]); 
         sr_matrix_mode(SR_MODEL_MATRIX);
-        sr_rotate_x(1* dt);
+        sr_rotate_x(1 * dt);
         sr_rotate_y(1 * dt);
         sr_renderl(cube_indices, 12 * 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
 
@@ -213,14 +251,9 @@ int main(int argc, char *argv[]) {
         uint32_t *pixels;
         SDL_LockTexture(texture, &screenRect, (void**)&pixels, &p);
         uint32_t startTicks = SDL_GetTicks();
-        for (int y = 0; y < screenRect.h; y++) {
-            for (int x = 0; x < screenRect.w; x++) {
-                
-                pixels[y*screenRect.w + x] = colors[y*screenRect.w + x];
-            }
-        }
-        
-           
+
+        memcpy(pixels, colors, screenRect.h * screenRect.w * sizeof(uint32_t));
+
         uint32_t endTicks = SDL_GetTicks();
         dt = (float)(clock() - t) / CLOCKS_PER_SEC;
         SDL_UnlockTexture(texture);

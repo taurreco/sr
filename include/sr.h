@@ -41,6 +41,12 @@ enum sr_matrix_mode {
     SR_MVP_MATRIX
 };
 
+enum sr_color_type {
+    SR_RGBA32,
+    SR_RGBA16,
+    SR_RBA5
+};
+
 /*********************************************************************
  *                                                                   *
  *                     shader function pointers                      *
@@ -112,26 +118,30 @@ sr_bind_vs(vs_f vs, int n_attr_out);
 
 extern void
 sr_bind_fs(fs_f fs);
-/*
-extern void
-sr_viewport(int width, int height); */
 
 extern void
-sr_renderl(int* indices, int n_indices, uint8_t prim_type);
+sr_bind_texture(uint32_t* texture, int width, int height);
+
+extern void
+sr_renderl(int* indices, int n_indices, enum sr_primitive prim_type);
 
 extern void
 sr_render(struct sr_pipeline* pipe, int* indices, 
-          int n_indices, uint8_t prim_type);
+          int n_indices, enum sr_primitive prim_type);
 
 /*********************************************************************
  *                                                                   *
- *                             obj loading                           *
+ *                             file input                            *
  *                                                                   *
  *********************************************************************/
 
-extern void
+extern int
 sr_load_obj(float** pts_p, int** indices_p, int* n_pts_p, 
             int* n_attr_p, int* n_indices_p, char* file);
+
+extern int
+sr_load_tga(uint32_t** texture_p, int* width_p, 
+            int* height_p, char* file);
 
 /*********************************************************************
  *                                                                   *
@@ -144,6 +154,9 @@ sr_matrix_mode(enum sr_matrix_mode mode);
 
 extern void
 sr_dump_matrix(float* dest);
+
+extern void
+sr_load_matrix(float* src);
 
 extern void
 sr_load_identity();
@@ -185,5 +198,11 @@ sr_bind_color_vs();
 
 extern void
 sr_bind_color_fs();
+
+extern void
+sr_bind_texture_vs();
+
+extern void
+sr_bind_texture_fs();
 
 #endif /* SR_H */

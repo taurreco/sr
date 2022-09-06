@@ -11,7 +11,7 @@ CFLAGS += -Wshadow
 CFLAGS += -std=gnu11 
 CFLAGS += -Wno-unused-parameter
 CFLAGS += -Iinclude
-CFLAGS += -O3
+#CFLAGS += -O3
 #CFLAGS += -fsanitize=address
 
 SDL2_FLAGS += -lSDL2
@@ -19,6 +19,7 @@ SDL2_FLAGS += -lSDL2
 SR_SRC += src/sr_lib.c
 SR_SRC += src/sr_pipe.c
 SR_SRC += src/sr_obj.c
+SR_SRC += src/sr_tga.c
 SR_SRC += src/sr_clip.c
 SR_SRC += src/sr_rast.c
 SR_SRC += src/sr_shaders.c
@@ -26,6 +27,7 @@ SR_SRC += src/sr_math.c
 
 # Example Targets
 EXAMPLES += examples/cube
+EXAMPLES += examples/texture
 
 # Tests Targets
 PIPE_TESTS += tests/check_draw_indexed
@@ -42,6 +44,8 @@ RAST_TESTS += tests/check_is_tl
 OBJ_TESTS += tests/check_hash_table
 OBJ_TESTS += tests/check_load_obj
 
+TGA_TESTS += tests/check_load_tga
+
 CLIP_TESTS += tests/check_clip_poly
 CLIP_TESTS += tests/check_clip_routine
 CLIP_TESTS += tests/check_clip_test
@@ -51,6 +55,7 @@ MATH_TESTS += tests/check_matmul
 
 ALL_TESTS += $(RASTER_TESTS) 
 ALL_TESTS += $(OBJ_TESTS) 
+ALL_TESTS += $(TGA_TESTS) 
 ALL_TESTS += $(CLIP_TESTS) 
 ALL_TESTS += $(MATH_TESTS)
 

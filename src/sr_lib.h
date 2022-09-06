@@ -24,6 +24,9 @@
 
 struct sr_uniform {
     struct mat4* mvp;
+    uint32_t* texture;
+    int t_width;
+    int t_height;
 };
 
 #endif  /* SR_LIB_H */

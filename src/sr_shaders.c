@@ -51,11 +51,11 @@ uint32_t argb(uint8_t a, uint8_t r, uint8_t g, uint8_t b) {
 /**
  * in (7):
  *    float x, y, z;
- *    int a, r, g, b
+ *    int a, r, g, b;
  * 
  * out (8):
  *    float x, y, z, w;
- *    int a, r, g, b
+ *    int a, r, g, b;
  */
 
 /************
@@ -88,6 +88,52 @@ color_fs(uint32_t* out, float* in, void* uniform)
 
 /*********************************************************************
  *                                                                   *
+ *                              texture                              *
+ *                                                                   *
+ *********************************************************************/
+
+/**
+ * in (5):
+ *    float x, y, z;
+ *    float u, v;
+ * 
+ * out (6):
+ *    float x, y, z, w;
+ *    float u, v;
+ */
+
+/**************
+ * texture_vs *
+ **************/
+
+/* copies argb coords over from 'in' to 'out' */
+static void 
+texture_vs(float* out, float* in, void* uniform)
+{
+    clip_space(out, in, uniform);
+    memcpy(out + 4, in + 3, 2 * sizeof(float));
+}
+
+/**************
+ * texture_fs *
+ **************/
+
+/* uses argb coords to fit color representation */
+static void
+texture_fs(uint32_t* out, float* in, void* uniform)
+{   
+    struct sr_uniform* uf = (struct sr_uniform*)uniform;
+    float u = in[4];
+    float v = in[5];
+    int width = floorf(u * uf->t_width);
+    int height = floorf(v * uf->t_height);
+    int idx = height * uf->t_width + width;
+
+    *out = uf->texture[idx];
+}
+
+/*********************************************************************
+ *                                                                   *
  *                             bindings                              *
  *                                                                   *
  *********************************************************************/
@@ -106,5 +152,21 @@ extern void
 sr_bind_color_fs()
 {
     sr_bind_fs(color_fs);
+}
+
+/***********
+ * texture *
+ ***********/
+
+extern void
+sr_bind_texture_vs()
+{
+    sr_bind_vs(texture_vs, 6);
+}
+
+extern void
+sr_bind_texture_fs()
+{
+    sr_bind_fs(texture_fs);
 }
 

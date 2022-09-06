@@ -84,3 +84,14 @@ normalize(float* a)
     a[1] = a[1] / m;
     a[2] = a[2] / m;
 }
+
+/***********
+ * radians *
+ ***********/
+
+/* converts degrees to radians */
+extern float 
+radians(float deg) 
+{
+    return deg * (M_PI / 180);
+}

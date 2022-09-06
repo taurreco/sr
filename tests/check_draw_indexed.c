@@ -66,7 +66,7 @@ tearDown()
 }
 
 static void
-vs_basic(void* uniform, float* in, float* out)
+vs_basic(float* out, float* in, void* uniform)
 {
     out[0] = in[0];
     out[1] = in[1];
@@ -76,7 +76,7 @@ vs_basic(void* uniform, float* in, float* out)
 }
 
 static void
-vs_transform(void* uniform, float* in, float* out)
+vs_transform(float* out, float* in, void* uniform)
 {
     matmul_v(out, (struct mat4*)uniform, in);
     out[4] = in[4];
@@ -84,7 +84,7 @@ vs_transform(void* uniform, float* in, float* out)
 
 
 static void
-fs_basic(void* uniform, float* in, uint32_t* out)
+fs_basic(uint32_t* out, float* in, void* uniform)
 {
     *out = ceil(in[4]);
 }
@@ -107,7 +107,7 @@ one_point()
     g_pipe.pts_in = pts_in;
     g_pipe.n_pts = 1;
     int indices[1] = {0};
-    sr_draw_indexed(&g_pipe, indices, 1, SR_PRIMITIVE_TYPE_POINT_LIST);
+    sr_render(&g_pipe, indices, 1, SR_PRIMITIVE_TYPE_POINT_LIST);
 
     uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -144,7 +144,7 @@ three_points()
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_POINT_LIST);
+    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_POINT_LIST);
 
     uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -190,7 +190,7 @@ one_triangle()
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
 
      uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -242,7 +242,7 @@ three_triangles()
     g_pipe.n_pts = 9;
 
     int indices[9] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-    sr_draw_indexed(&g_pipe, indices, 9, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 9, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
     
     uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -291,7 +291,7 @@ triangle_fan()
     g_pipe.n_pts = 5;
 
     int indices[9] = {0, 1, 2, 0, 2, 3, 0, 3, 4};
-    sr_draw_indexed(&g_pipe, indices, 9, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 9, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
 
     uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -341,7 +341,7 @@ flat_depth()
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
 
      uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -386,7 +386,7 @@ near_depth()
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
 
     uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -430,7 +430,7 @@ far_depth()
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
     
     uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -505,7 +505,7 @@ projection_matrix()
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
 
     uint32_t target_colors[10 * 10] = {
         1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -566,7 +566,7 @@ another_projection_test()
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_draw_indexed(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
 
     uint32_t target_colors[10 * 10] = {
         1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -668,7 +668,7 @@ clip_three_triangles()
     g_pipe.n_pts = 9;
 
     int indices[9] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-    sr_draw_indexed(&g_pipe, indices, 9, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 9, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
 
     uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
