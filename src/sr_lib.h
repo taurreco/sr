@@ -18,15 +18,32 @@
 
 /*********************************************************************
  *                                                                   *
- *                          uniform struct                           *
+ *                              structs                              *
  *                                                                   *
  *********************************************************************/
 
+struct texture {
+    uint32_t* colors;
+    int width;
+    int height;
+};
+
+struct sr_point_light {
+    float* pos;
+    float* color;
+    float diffuse;
+    float ambient;
+    float const_attn;
+    float lin_attn;
+    float quad_attn;
+};
+
 struct sr_uniform {
+    struct mat4* model;
     struct mat4* mvp;
-    uint32_t* texture;
-    int t_width;
-    int t_height;
+    struct texture* texture;
+    struct sr_point_light* light;
+    float* base_color;
 };
 
 #endif  /* SR_LIB_H */

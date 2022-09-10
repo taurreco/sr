@@ -79,6 +79,7 @@ edge_init(struct edge* edge, float* v0, float* v1, float* pt)
     float B = v0[0] - v1[0];
     float C = v0[1] * v1[0] - v0[0] * v1[1];
 
+
     /* step sizes */
     edge->step_x = A;
     edge->step_y = B;
@@ -128,7 +129,7 @@ draw_pt(struct raster_context* rast, float* pt)
     rast->fs(&color, pt, rast->uniform);  /* fragment shader */
     size_t fbuf_idx = floorf(pt[1]) * rast->fbuf->width + floorf(pt[0]);
     
-    if (pt[2] > rast->fbuf->depths[fbuf_idx]) {  /* depth buffer */
+    if (pt[2] < rast->fbuf->depths[fbuf_idx]) {  /* depth buffer */
         rast->fbuf->colors[fbuf_idx] = color;
         rast->fbuf->depths[fbuf_idx] = pt[2];
     }

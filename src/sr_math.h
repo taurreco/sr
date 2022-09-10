@@ -39,8 +39,17 @@ matmul(struct mat4* a, struct mat4* b);
 extern void
 matmul_v(float* a, struct mat4* b, float* c);
 
+extern float
+dot(float* a, float* b);
+
 extern void
 cross(float* a, float* b, float* c);
+
+extern void
+sub_v(float* a, float* b, float* c);
+
+extern float
+magnitude(float* a);
 
 extern void
 normalize(float* a);

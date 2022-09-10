@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 
      uint32_t* tex;
     int height, width;
-    sr_load_tga(&tex, &width, &height, "./assets/cube_tex.tga");
+    sr_load_tga(&tex, &width, &height, "./assets/happy_mask.tga");
 
     int WIDTH = width;
     int HEIGHT = height;

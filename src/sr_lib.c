@@ -63,6 +63,20 @@ struct mat4 mvp = {
 
 struct mat4* cur_mat;  /* points to whichever matrix stack is being used */
 
+struct texture texture = {
+    .colors = 0,
+    .width = 0,
+    .height = 0
+};
+
+struct sr_point_light light = {
+    .pos = 0,
+    .color = 0,
+    .const_attn = 2,
+    .lin_attn = 3,
+    .quad_attn = 2
+};
+
 /* framebuffer */
 struct sr_framebuffer fbuf = {
     .width = 0,
@@ -73,10 +87,11 @@ struct sr_framebuffer fbuf = {
 
 /* uniform */
 struct sr_uniform uniform = {
+    .model = &model,
     .mvp = &mvp,
-    .texture = 0,
-    .t_width = 0,
-    .t_height = 0
+    .texture = &texture,
+    .light = &light,
+    .base_color = 0
 };
 
 /* pipeline state */
@@ -170,11 +185,34 @@ sr_bind_fs(fs_f fs)
 
 /* binds a texture to pipeline */
 extern void
-sr_bind_texture(uint32_t* texture, int width, int height)
+sr_bind_texture(uint32_t* colors, int width, int height)
 {
-    uniform.texture = texture;
-    uniform.t_width = width;
-    uniform.t_height = height;
+    texture.colors = colors;
+    texture.width = width;
+    texture.height = height;
+}
+
+/***********************
+ * sr_bind_point_light *
+ ***********************/
+
+/* binds a texture to pipeline */
+extern void
+sr_bind_point_light(float* pos, float* color)
+{
+    light.pos = pos;
+    light.color = color;
+}
+
+/*****************
+ * sr_bind_color *
+ *****************/
+
+/* binds a base color to uniform */
+extern void
+sr_bind_base_color(float* color)
+{
+    uniform.base_color = color;
 }
 
 /******************

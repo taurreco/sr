@@ -7,12 +7,6 @@
 
 #define SR_MAX_ATTRIBUTE_COUNT 32                   
 
-#define SR_PRIMITIVE_TYPE_POINT_LIST 1
-#define SR_PRIMITIVE_TYPE_LINE_LIST 2
-#define SR_PRIMITIVE_TYPE_LINE_STRIP 3
-#define SR_PRIMITIVE_TYPE_TRIANGLE_LIST 4
-#define SR_PRIMITIVE_TYPE_TRIANGLE_STRIP 5
-
 #define SR_PRIMITIVE_SIZE_POINT 1
 #define SR_PRIMITIVE_SIZE_LINE 2
 #define SR_PRIMITIVE_SIZE_TRIANGLE 3
@@ -123,6 +117,12 @@ extern void
 sr_bind_texture(uint32_t* texture, int width, int height);
 
 extern void
+sr_bind_point_light(float* pos, float* color);
+
+extern void
+sr_bind_base_color(float* color);
+
+extern void
 sr_renderl(int* indices, int n_indices, enum sr_primitive prim_type);
 
 extern void
@@ -204,5 +204,11 @@ sr_bind_texture_vs();
 
 extern void
 sr_bind_texture_fs();
+
+extern void
+sr_bind_phong_vs();
+
+extern void
+sr_bind_phong_fs();
 
 #endif /* SR_H */

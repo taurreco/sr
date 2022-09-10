@@ -58,6 +58,17 @@ matmul_v(float* a, struct mat4* b, float* c)
     a[3] = c[0] * b->e30 + c[1] * b->e31 + c[2] * b->e32 + c[3] * b->e33;
 }
 
+/*******
+ * dot *
+ *******/
+
+/* dot product of two vector3s */
+extern float
+dot(float* a, float* b)
+{
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
 /*********
  * cross *
  *********/
@@ -71,6 +82,31 @@ cross(float* a, float* b, float* c)
     a[2] = (b[0] * c[1]) - (b[1] * c[0]);
 }
 
+/*********
+ * sub_v *
+ *********/
+
+/* subtracts vec3 c from b and stores result in a */
+extern void
+sub_v(float* a, float* b, float* c)
+{
+    a[0] = b[0] - c[0];
+    a[1] = b[1] - c[1];
+    a[2] = b[2] - c[2];
+}
+
+
+/*************
+ * magnitude *
+ *************/
+
+/* returns the magnitude of a vector3 */
+extern float
+magnitude(float* a)
+{
+    return sqrt(pow(a[0], 2) + pow(a[1], 2) + pow(a[2], 2));
+}
+
 /*************
  * normalize *
  *************/
@@ -79,7 +115,7 @@ cross(float* a, float* b, float* c)
 extern void
 normalize(float* a)
 {
-    float m = sqrt(pow(a[0], 2) + pow(a[1], 2) + pow(a[2], 2));
+    float m = magnitude(a);
     a[0] = a[0] / m;
     a[1] = a[1] / m;
     a[2] = a[2] / m;

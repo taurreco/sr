@@ -48,37 +48,37 @@ float cube_pts[24 * 7] = {
 */
 
 
-float cube_pts[24 * 5] = {
+float cube_pts[24 * 8] = {
 
-    1, 1, -1, 0.5, 0.668,  
-    -1, 1, -1, 0.5, 0.332,
-    -1, 1, 1, 0.25, 0.332,
-    1, 1, 1, 0.25, 0.668,
+    1, 1, -1, 0.5, 0.668, 0, 1, 0,
+    -1, 1, -1, 0.5, 0.332, 0, 1, 0,
+    -1, 1, 1, 0.25, 0.332, 0, 1, 0,
+    1, 1, 1, 0.25, 0.668, 0, 1, 0,
 
-    1, -1, 1, 0, 0.668,
-    1, 1, 1, 0.25, 0.668,
-    -1, 1, 1, 0.25, 0.332,
-    -1, -1, 1, 0, 0.332, 
+    1, -1, 1, 0, 0.668, 0, 0, 1,
+    1, 1, 1, 0.25, 0.668, 0, 0, 1,
+    -1, 1, 1, 0.25, 0.332, 0, 0, 1,
+    -1, -1, 1, 0, 0.332, 0, 0, 1,
 
-    -1, -1, 1, 0.25, 0, 
-    -1, 1, 1, 0.25, 0.332,
-    -1, 1, -1, 0.5, 0.332, 
-    -1, -1, -1, 0.5, 0, 
+    -1, -1, 1, 0.25, 0, -1, 0, 0,
+    -1, 1, 1, 0.25, 0.332, -1, 0, 0,
+    -1, 1, -1, 0.5, 0.332, -1, 0, 0,
+    -1, -1, -1, 0.5, 0, -1, 0, 0,
 
-    -1, -1, -1, 1, 0.332,
-    1, -1, -1, 0.75, 0.332, 
-    1, -1, 1, 0.75, 0.668, 
-    -1, -1, 1, 1, 0.668,  
+    -1, -1, -1, 1, 0.332, 0, -1, 0,
+    1, -1, -1, 0.75, 0.332, 0, -1, 0,
+    1, -1, 1, 0.75, 0.668, 0, -1, 0,
+    -1, -1, 1, 1, 0.668, 0, -1, 0,
 
-    1, -1, -1, 0.5, 1,
-    1, 1, -1, 0.5, 0.668,
-    1, 1, 1, 0.25, 0.668,
-    1, -1, 1, 0.25, 1,
+    1, -1, -1, 0.5, 1, 1, 0, 0,
+    1, 1, -1, 0.5, 0.668, 1, 0, 0,
+    1, 1, 1, 0.25, 0.668, 1, 0, 0,
+    1, -1, 1, 0.25, 1, 1, 0, 0,
 
-    -1, -1, -1, 0.75, 0.332,  
-    -1, 1, -1, 0.5, 0.332,
-    1, 1, -1, 0.5, 0.668, 
-    1, -1, -1, 0.75, 0.668, 
+    -1, -1, -1, 0.75, 0.332, 0, 0, -1,
+    -1, 1, -1, 0.5, 0.332, 0, 0, -1,
+    1, 1, -1, 0.5, 0.668, 0, 0, -1,
+    1, -1, -1, 0.75, 0.668, 0, 0, -1
 };
 
 int cube_indices[12 * 3] = {
@@ -115,18 +115,25 @@ int main(int argc, char *argv[]) {
     float* depths = calloc(WIDTH * HEIGHT, sizeof(float));
     for (int i = 0; i < WIDTH * HEIGHT; i++)
     {
-        depths[i] = -1000;
+        depths[i] = 1000;
     }
     uint32_t* colors = calloc(WIDTH * HEIGHT, sizeof(uint32_t));
 
     uint32_t* cube_texture;
     int t_width, t_height;
+    float light_pos[3] = {
+        3, 3, 3
+    };
+    float light_color[3] = {
+        1, 1, 1
+    };
     sr_load_tga(&cube_texture, &t_width, &t_height, "./assets/cube_tex.tga");
     sr_bind_texture(cube_texture, t_width, t_height);
-    sr_bind_pts(cube_pts, 24, 5);
+    sr_bind_point_light(light_pos, light_color);
+    sr_bind_pts(cube_pts, 24, 8);
     sr_bind_framebuffer(WIDTH, HEIGHT, colors, depths);
-    sr_bind_texture_vs();
-    sr_bind_texture_fs();
+    sr_bind_phong_vs();
+    sr_bind_phong_fs();
     sr_matrix_mode(SR_PROJECTION_MATRIX);
     sr_perspective(1, 1, 2, 1000);
     sr_matrix_mode(SR_VIEW_MATRIX);
@@ -233,7 +240,7 @@ int main(int argc, char *argv[]) {
         normalize(u);
 
         for (int i = 0; i < WIDTH * HEIGHT; i++) {
-            depths[i] = -1000;
+            depths[i] = 1000;
             colors[i] = 0;
         } 
 
@@ -245,7 +252,7 @@ int main(int argc, char *argv[]) {
         sr_matrix_mode(SR_MODEL_MATRIX);
         sr_rotate_x(1 * dt);
         sr_rotate_y(1 * dt);
-        sr_renderl(cube_indices, 12 * 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+        sr_renderl(cube_indices, 12 * 3, SR_TRIANGLE_LIST);
 
         int p;
         uint32_t *pixels;

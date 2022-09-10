@@ -12,6 +12,61 @@
 
 /*********************************************************************
  *                                                                   *
+ *                          color & blending                         *
+ *                                                                   *
+ *********************************************************************/
+
+/********
+ * argb *
+ ********/
+
+static uint32_t
+rgb_int(float* color)
+{
+    uint8_t a = 255;
+    uint8_t r = floorf(color[0] * 255);
+    uint8_t g = floorf(color[1] * 255);
+    uint8_t b = floorf(color[2] * 255);
+
+    return a << 24 | r << 16 | g << 8 | b << 0; 
+}
+
+static void
+rgb_float(float* a, uint32_t b)
+{
+    a[0] = ((b & 0x00FF0000) >> 16) / (float)255;
+    a[1] = ((b & 0x0000FF00) >> 8) / (float)255;
+    a[2] = (b & 0x000000FF) / (float)255;
+}
+
+static void 
+blend_multiply(float* a, float* b)
+{
+    a[0] = fmin(a[0] * b[0], 1);
+    a[1] = fmin(a[1] * b[1], 1);
+    a[2] = fmin(a[2] * b[2], 1);
+}
+
+static void
+blend_scale(float* a, float b)
+{
+    a[0] = fmin(a[0] * b, 1);
+    a[1] = fmin(a[1] * b, 1);
+    a[2] = fmin(a[2] * b, 1);
+}
+
+
+static void
+blend_add(float* a, float* b)
+{
+    a[0] = fmin(a[0] + b[0], 1);
+    a[1] = fmin(a[1] + b[1], 1);
+    a[2] = fmin(a[2] + b[2], 1);
+}
+
+
+/*********************************************************************
+ *                                                                   *
  *                              helpers                              *
  *                                                                   *
  *********************************************************************/
@@ -33,13 +88,70 @@ clip_space(float* out, float* in, struct sr_uniform* uniform)
     matmul_v(out, uniform->mvp, in_h);
 }
 
-/********
- * argb *
- ********/
+/******************
+ * sample_texture *
+ ******************/
 
-/* arbg color representation */
-uint32_t argb(uint8_t a, uint8_t r, uint8_t g, uint8_t b) { 
-    return (a<<24) | (r << 16) | (g << 8) | (b << 0); 
+static uint32_t
+sample_texture(struct texture* texture, float u, float v)
+{
+    int x = floorf(u * texture->width);
+    int y = texture->height - floorf(v * texture->height);
+
+    return texture->colors[y * texture->width + x];
+}
+
+/*********
+ * phong *
+ *********/
+
+static uint32_t 
+phong(struct sr_uniform* uniform, 
+      struct sr_point_light* light, 
+      float* pos, float* norm, float* base_color)
+{
+
+    float ambient[3];
+    float diffuse[3];
+    float specular[3];
+    float final_color[3];
+    float light_dir[3];
+
+    memcpy(ambient, light->color, 3 * sizeof(float));
+    memcpy(diffuse, light->color, 3 * sizeof(float));
+    memset(specular, 0, 3 * sizeof(float));
+    memset(final_color, 0, 3 * sizeof(float));
+
+    /* ambient */
+    blend_scale(ambient, 0.3);
+
+    /* diffuse */
+    sub_v(light_dir, light->pos, pos);
+
+    float dist = magnitude(light_dir);   /* only used for attenuation */
+
+    normalize(light_dir);
+    normalize(norm);
+
+    float diff = fmax(dot(norm, light_dir), 0);
+    
+    blend_scale(diffuse, diff);
+
+    /* attenuation */
+
+    float attenuation = 1 / (light->const_attn +
+                             light->lin_attn * dist + 
+                             light->quad_attn * dist * dist);
+
+    blend_scale(ambient, attenuation * 30);
+    blend_scale(diffuse, attenuation * 30);
+
+    blend_add(final_color, ambient);
+    blend_add(final_color, diffuse);
+    blend_add(final_color, specular);
+    blend_multiply(final_color, base_color);
+    
+    return rgb_int(final_color);
 }
 
 /*********************************************************************
@@ -49,13 +161,13 @@ uint32_t argb(uint8_t a, uint8_t r, uint8_t g, uint8_t b) {
  *********************************************************************/
 
 /**
- * in (7):
+ * in (3):
  *    float x, y, z;
- *    int a, r, g, b;
  * 
- * out (8):
+ * out (10):
  *    float x, y, z, w;
- *    int a, r, g, b;
+ *    float wx, wy, wz;
+ *    float nx, ny, nz;
  */
 
 /************
@@ -66,8 +178,11 @@ uint32_t argb(uint8_t a, uint8_t r, uint8_t g, uint8_t b) {
 static void 
 color_vs(float* out, float* in, void* uniform)
 {
+    struct sr_uniform* sr_uniform = (struct sr_uniform*)uniform;
     clip_space(out, in, uniform);
-    memcpy(out + 4, in + 3, 4 * sizeof(float));
+    matmul_v(out + 4, sr_uniform->model, in);
+    matmul_v(out + 7, sr_uniform->model, in);
+    normalize(out + 7);
 }
 
 /************
@@ -78,12 +193,12 @@ color_vs(float* out, float* in, void* uniform)
 static void
 color_fs(uint32_t* out, float* in, void* uniform)
 {   
-    int a = (int)in[3];
-    int r = (int)in[4];
-    int g = (int)in[5];
-    int b = (int)in[6];
+    struct sr_uniform* sr_uniform = (struct sr_uniform*)uniform;
+    struct sr_point_light* light = sr_uniform->light;
 
-    *out = (a << 24) | (r << 16) | (g << 8) | (b << 0); 
+    float* pos = in + 4;
+    float* norm = in + 7;
+    *out = phong(sr_uniform, light, pos, norm, sr_uniform->base_color);
 }
 
 /*********************************************************************
@@ -122,15 +237,77 @@ texture_vs(float* out, float* in, void* uniform)
 static void
 texture_fs(uint32_t* out, float* in, void* uniform)
 {   
-    struct sr_uniform* uf = (struct sr_uniform*)uniform;
-    float u = in[4];
-    float v = in[5];
-    int width = floorf(u * uf->t_width);
-    int height = floorf(v * uf->t_height);
-    int idx = height * uf->t_width + width;
+    struct sr_uniform* u = (struct sr_uniform*)uniform;
+    struct texture* texture = u->texture;
 
-    *out = uf->texture[idx];
+    *out = sample_texture(texture, in[4], in[5]);
 }
+
+
+/*********************************************************************
+ *                                                                   *
+ *                               phong                               *
+ *                                                                   *
+ *********************************************************************/
+
+/**
+ * in (8):
+ *    float x, y, z;
+ *    float u, v;
+ *    float nx, ny, nz;
+ * 
+ * out (12):
+ *    float x, y, z, w;
+ *    float wx, wy, wz;
+ *    float u, v;
+ *    float nx, ny, nz;
+ */
+
+/************
+ * phong_vs *
+ ************/
+
+/* copies argb coords over from 'in' to 'out' */
+static void 
+phong_vs(float* out, float* in, void* uniform)
+{
+    struct sr_uniform* sr_uniform = (struct sr_uniform*)uniform;
+
+    /* calculate x, y, z, w */
+    clip_space(out, in, uniform);
+
+    /* calculate wx, wy, wz */
+    matmul_v(out + 4, sr_uniform->model, in);
+
+    /* copy over texture cordinates */
+    memcpy(out + 7, in + 3, 2 * sizeof(float));
+
+    /* send normals to world space */    
+    matmul_v(out + 9, sr_uniform->model, in + 5);
+
+    /* normalize them */
+    normalize(out + 9);
+}
+
+
+/************
+ * phong_fs *
+ ************/
+
+/* uses argb coords to fit color representation */
+static void
+phong_fs(uint32_t* out, float* in, void* uniform)
+{   
+    struct sr_uniform* sr_uniform = (struct sr_uniform*)uniform;
+
+    float* pos = in + 4;
+    float* norm = in + 9;
+    float base_color[3];
+    
+    rgb_float(base_color, sample_texture(sr_uniform->texture, in[7], in[8]));
+    *out = phong(sr_uniform, sr_uniform->light, pos, norm, base_color);
+}
+
 
 /*********************************************************************
  *                                                                   *
@@ -145,7 +322,7 @@ texture_fs(uint32_t* out, float* in, void* uniform)
 extern void
 sr_bind_color_vs()
 {
-    sr_bind_vs(color_vs, 9);
+    sr_bind_vs(color_vs, 10);
 }
 
 extern void
@@ -169,4 +346,21 @@ sr_bind_texture_fs()
 {
     sr_bind_fs(texture_fs);
 }
+
+/*********
+ * phong *
+ *********/
+
+extern void
+sr_bind_phong_vs()
+{
+    sr_bind_vs(phong_vs, 12);
+}
+
+extern void
+sr_bind_phong_fs()
+{
+    sr_bind_fs(phong_fs);
+}
+
 

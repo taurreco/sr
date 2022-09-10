@@ -11,7 +11,7 @@ CFLAGS += -Wshadow
 CFLAGS += -std=gnu11 
 CFLAGS += -Wno-unused-parameter
 CFLAGS += -Iinclude
-#CFLAGS += -O3
+CFLAGS += -O3
 #CFLAGS += -fsanitize=address
 
 SDL2_FLAGS += -lSDL2
@@ -27,6 +27,8 @@ SR_SRC += src/sr_math.c
 
 # Example Targets
 EXAMPLES += examples/cube
+EXAMPLES += examples/phong
+EXAMPLES += examples/obj
 EXAMPLES += examples/texture
 
 # Tests Targets
