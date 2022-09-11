@@ -30,6 +30,7 @@ EXAMPLES += examples/cube
 EXAMPLES += examples/phong
 EXAMPLES += examples/obj
 EXAMPLES += examples/texture
+EXAMPLES += examples/dragon
 
 # Tests Targets
 PIPE_TESTS += tests/check_draw_indexed

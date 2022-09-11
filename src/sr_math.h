@@ -27,6 +27,10 @@ struct mat4 {
     float e30, e31, e32, e33;
 };
 
+struct vec3 {
+    float x, y, z;
+};
+
 /*********************************************************************
  *                                                                   *
  *                        public declarations                        *
@@ -47,6 +51,9 @@ cross(float* a, float* b, float* c);
 
 extern void
 sub_v(float* a, float* b, float* c);
+
+extern void
+scale_v(float* a, float* b, float c);
 
 extern float
 magnitude(float* a);

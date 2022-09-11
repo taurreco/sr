@@ -95,6 +95,18 @@ sub_v(float* a, float* b, float* c)
     a[2] = b[2] - c[2];
 }
 
+/***********
+ * scale_v *
+ ***********/
+
+/* multiplies vec3 b by scalar c and stores result in a */
+extern void
+scale_v(float* a, float* b, float c)
+{
+    a[0] = b[0] * c;
+    a[1] = b[1] * c;
+    a[2] = b[2] * c;
+}
 
 /*************
  * magnitude *

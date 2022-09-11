@@ -77,6 +77,10 @@ struct sr_point_light light = {
     .quad_attn = 2
 };
 
+float cam_pos[3] = {
+    0, 0, 0
+};
+
 /* framebuffer */
 struct sr_framebuffer fbuf = {
     .width = 0,
@@ -91,7 +95,8 @@ struct sr_uniform uniform = {
     .mvp = &mvp,
     .texture = &texture,
     .light = &light,
-    .base_color = 0
+    .base_color = 0,
+    .cam_pos = cam_pos
 };
 
 /* pipeline state */
@@ -344,6 +349,9 @@ sr_rotate_x(float t)
 /***************
  * sr_rotate_y *
  ***************/
+float camera_pos[3] = {
+    0, 0, 0
+};
 
 /* pushes a matrix rotating about the y axis by t radians */
 extern void
@@ -442,6 +450,9 @@ sr_look_at(float ex, float ey, float ez,
 
     matmul(cur_mat, &m);
     sr_translate(-ex, -ey, -ez);
+    cam_pos[0] = ex;
+    cam_pos[1] = ey;
+    cam_pos[2] = ez;
 }
 
 /******************

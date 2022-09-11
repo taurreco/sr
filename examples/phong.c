@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 
     uint32_t* colors = calloc(WIDTH * HEIGHT, sizeof(uint32_t));
     float base_color[3] = {
-        0.7, 0.2, 0.4
+        0.4, 0.8, 0.2
     };
 
     float light_color[3] = {
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
     };
 
     float light_pos[3] = {
-        3, 3, 3
+        0, 0, 4
     };
 
 

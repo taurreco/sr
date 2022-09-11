@@ -44,6 +44,7 @@ struct sr_uniform {
     struct texture* texture;
     struct sr_point_light* light;
     float* base_color;
+    float* cam_pos;
 };
 
 #endif  /* SR_LIB_H */

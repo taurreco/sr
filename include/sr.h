@@ -211,4 +211,7 @@ sr_bind_phong_vs();
 extern void
 sr_bind_phong_fs();
 
+extern void
+sr_bind_phong_color_fs();
+
 #endif /* SR_H */

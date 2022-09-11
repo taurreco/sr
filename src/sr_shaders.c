@@ -64,6 +64,13 @@ blend_add(float* a, float* b)
     a[2] = fmin(a[2] + b[2], 1);
 }
 
+static void
+reflect(float* out, float* norm, float* incident)
+{
+    scale_v(out, norm, 2 * dot(incident, norm));
+    sub_v(out, out, incident);
+}
+
 
 /*********************************************************************
  *                                                                   *
@@ -116,10 +123,14 @@ phong(struct sr_uniform* uniform,
     float specular[3];
     float final_color[3];
     float light_dir[3];
+    float incident_dir[3];
+    float reflection_dir[3];
+
+    normalize(uniform->cam_pos);
 
     memcpy(ambient, light->color, 3 * sizeof(float));
     memcpy(diffuse, light->color, 3 * sizeof(float));
-    memset(specular, 0, 3 * sizeof(float));
+    memcpy(specular, light->color, 3 * sizeof(float));
     memset(final_color, 0, 3 * sizeof(float));
 
     /* ambient */
@@ -136,6 +147,16 @@ phong(struct sr_uniform* uniform,
     float diff = fmax(dot(norm, light_dir), 0);
     
     blend_scale(diffuse, diff);
+
+    /* specular */
+    float damp = 10;
+    reflect(reflection_dir, norm, light_dir);
+    normalize(reflection_dir);
+
+    float shine = fmax(dot(reflection_dir, uniform->cam_pos), 0);
+    shine = powf(shine, damp);
+
+    blend_scale(specular, shine * 1);
 
     /* attenuation */
 
@@ -237,10 +258,9 @@ texture_vs(float* out, float* in, void* uniform)
 static void
 texture_fs(uint32_t* out, float* in, void* uniform)
 {   
-    struct sr_uniform* u = (struct sr_uniform*)uniform;
-    struct texture* texture = u->texture;
+    struct sr_uniform* sr_uniform = (struct sr_uniform*)uniform;
 
-    *out = sample_texture(texture, in[4], in[5]);
+    *out = sample_texture(sr_uniform->texture, in[4], in[5]);
 }
 
 
@@ -274,7 +294,7 @@ phong_vs(float* out, float* in, void* uniform)
     struct sr_uniform* sr_uniform = (struct sr_uniform*)uniform;
 
     /* calculate x, y, z, w */
-    clip_space(out, in, uniform);
+    clip_space(out, in, sr_uniform);
 
     /* calculate wx, wy, wz */
     matmul_v(out + 4, sr_uniform->model, in);
@@ -306,6 +326,22 @@ phong_fs(uint32_t* out, float* in, void* uniform)
     
     rgb_float(base_color, sample_texture(sr_uniform->texture, in[7], in[8]));
     *out = phong(sr_uniform, sr_uniform->light, pos, norm, base_color);
+}
+
+
+/* uses argb coords to fit color representation */
+static void
+phong_color_fs(uint32_t* out, float* in, void* uniform)
+{   
+    struct sr_uniform* sr_uniform = (struct sr_uniform*)uniform;
+
+    float* pos = in + 4;
+    float* norm = in + 9;
+    float base_color[3];
+
+ //   printf("%f %f %f\n", sr_uniform->cam_pos[0], sr_uniform->cam_pos[1], sr_uniform->cam_pos[2]);
+
+    *out = phong(sr_uniform, sr_uniform->light, pos, norm, sr_uniform->base_color);
 }
 
 
@@ -362,5 +398,13 @@ sr_bind_phong_fs()
 {
     sr_bind_fs(phong_fs);
 }
+
+extern void
+sr_bind_phong_color_fs()
+{
+    sr_bind_fs(phong_color_fs);
+}
+
+
 
 
