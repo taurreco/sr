@@ -20,7 +20,7 @@ SR is a lightweight software rendering library written in C.  It provides a core
 * obj loading
 * tga image loading!
 <p align="right">
-  <img src="https://user-images.githubusercontent.com/8971799/189619522-cc23a50b-4dfd-4391-95c2-3a930e215c3d.png" />
+  <img align="right" src="https://user-images.githubusercontent.com/8971799/189619522-cc23a50b-4dfd-4391-95c2-3a930e215c3d.png" />
 </p>
 
 ### Design Overview!
