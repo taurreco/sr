@@ -5,9 +5,20 @@
 </p>
 
 ### about
-SR is a software rendering library written in C which uses no dependencies.  It provides a core programmable pipeline in `sr_pipe.c`, and then builds on top of that a much easier to use rendering api that resembles fixed function OpenGL implementations.
+SR is a lightweight software rendering library written in C.  It provides a core programmable pipeline in `sr_pipe.c`, and then builds on top of that a much easier to use rendering api in `sr_lib.c`.  This project is entirely educational, and is free for anyone to use / adapt.
 
 ### features
+* perspective-correct interpolation
+* texture mapping
+* matrix stack
+* phong lighting
+* clipping
+* depth buffer
+* color blending
+* custom shaders
+* custom vertex attributes
+* obj loading
+* tga image loading
 
 ### design overview
 
