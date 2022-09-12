@@ -5,7 +5,7 @@
 </p>
 
 ### About
-SR is a lightweight software rendering library written in C.  It exposes the main algorithms, data structures, and math behind the standard real-time rendering model used in popular graphics api's like OpenGL and DirectX3D.  This project is entirely educational, and is free for anyone to use / adapt.
+SR is a lightweight software rendering library written in C.  It exposes the main algorithms, data structures, and math behind the standard real-time rendering model used in popular graphics api's like OpenGL and DirectX3D.  This project is entirely educational, and is free for anyone to use / adapt.  SR is tested with the [Unity Framework](http://www.throwtheswitch.org/unity) and the examples use SDL2 in order to display its output buffer.
 
 ### Features
 <p align="right">
@@ -80,7 +80,36 @@ To give control over the model view projection transform, the user can switch be
 The library also supplies custom lighting for up to eight lights.  Within the uniform is an array of lights whose fields can be set by the `sr_light` function.
 
 ### Build
+For linux:
 
+to make the examples go into the repository and type 
+```
+make examples
+```
+then enter the examples directory
+```
+cd examples
+```
+and then run the example you desire.
+
+To make the tests go into the repository and type
+```
+make tests
+```
+then enter the tests directory
+```
+cd tests
+```
+and then run the test you deire.
+
+To clean tests executables run
+```
+make clean-tests
+```
+And likewise to clean the example executables run 
+```
+make clean-examples
+```
 
 Happy Mask Salesman model does not belong to me
 
