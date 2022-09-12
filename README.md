@@ -30,7 +30,7 @@ SR is a lightweight software rendering library written in C.  It exposes the mai
 ### Design Overview
 The core of the library is written in `sr_pipe.c`, where the rendering pipeline is implemented.  Its functionality depends on data organized into a struct called `sr_pipeline`:
 ```c
-/* in sr.h */
+/* sr.h */
 
 struct sr_pipeline {
     
@@ -73,7 +73,11 @@ The only assumptions SR will make about the user defined vertex shader is that t
   <img src="https://user-images.githubusercontent.com/8971799/189635641-df877cd6-5575-4f24-8a3d-e2ae5e21b405.png" />
 </p>
 
+On top of this core, there exists a fixed function pipeline with a more accessable api supplied in `sr_lib.c`.  The library keeps a global pipeline context and custom uniform type `sr_uniform`.  Functions in the library allow for interaction with these global state variables easily.  
 
+To give control over the model view projection transform, the user can switch between matrix 'modes' using `sr_matrix_mode`.  The modes correspond to either the model, view, or projection matrix.  Then the user can make transformations using `sr_translate`, `sr_scale`, etc.  Or make a view matrix with `sr_look_at`.  This approach is drawn from early implementations of OpenGL.
+
+The library also supplies custom lighting for up to eight lights.  Within the uniform is an array of lights whose fields can be set by the `sr_light` function.
 
 ### Build
 
