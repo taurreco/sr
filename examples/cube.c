@@ -160,6 +160,9 @@ int main(int argc, char *argv[]) {
         while ((SDL_PollEvent(&event)) != 0) {
             /*! request quit */
             if (event.type == SDL_QUIT) { 
+                sr_texture_free(cube_texture);
+                free(depths);
+                free(colors);
                 return 0;
             }
         }
@@ -209,7 +212,7 @@ int main(int argc, char *argv[]) {
             pitch -= 0.5;
         
         if (keystate[SDL_SCANCODE_Q]) {
-            sr_texture_free(texture);
+            sr_texture_free(cube_texture);
             free(depths);
             free(colors);
             return 0;
