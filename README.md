@@ -83,32 +83,32 @@ The library also supplies custom lighting for up to eight lights.  Within the un
 For linux:
 
 to make the examples go into the repository and type 
-```
-make examples
+```shell
+$make examples
 ```
 then enter the examples directory
-```
-cd examples
+```shell
+$cd examples
 ```
 and then run the example you desire.
 
 To make the tests go into the repository and type
-```
-make tests
+```shell
+$make tests
 ```
 then enter the tests directory
-```
-cd tests
+```shell
+$cd tests
 ```
 and then run the test you deire.
 
 To clean tests executables run
 ```
-make clean-tests
+$make clean-tests
 ```
 And likewise to clean the example executables run 
 ```
-make clean-examples
+$make clean-examples
 ```
 
 Happy Mask Salesman model does not belong to me
