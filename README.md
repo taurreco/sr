@@ -1,7 +1,7 @@
 # Software Renderer
 
 <p align="center">
-  <img src="./screenshots/dragon.png" />
+  <img src="https://user-images.githubusercontent.com/8971799/189614240-9449b3fe-372d-4796-8f32-3b13309ca629.png" />
 </p>
 
 ### about
