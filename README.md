@@ -12,9 +12,8 @@ SR is a lightweight software rendering library written in C.  It exposes the mai
   <img align="right" src="https://user-images.githubusercontent.com/8971799/189619522-cc23a50b-4dfd-4391-95c2-3a930e215c3d.png" />
 </p>
 <p align="right">
-  <img align="right" src="https://user-images.githubusercontent.com/8971799/189633576-7c8ad77d-f99e-4508-8d10-8ee36c508734.png" />
+  <img align="right" src="https://user-images.githubusercontent.com/8971799/189634084-8e53e2fb-c8b1-4952-aafd-655cbea47ca7.png" />
 </p>
-
 
 * perspective-correct interpolation
 * texture mapping
