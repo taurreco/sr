@@ -1,7 +1,9 @@
 # software renderer
 
+<p align="center">
+  <img src="./screenshots/dragon.png" />
+</p>
 
-![Alt text](./screenshots/dragon.png?raw=true "Title")
 
 
 ### about
