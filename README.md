@@ -66,8 +66,15 @@ This buffer has two points, each with six attributes.  As such, `n_pts = 2` and 
 
 Finally, `winding` specefies a winding order of the input vertices: 1 for counter-clock-wise and -1 for clock-wise.
 
-
-
 The only assumptions SR will make about the user defined vertex shader is that the clip space coordinates of the vertex (x, y, z, w) appear at the front of the buffer.
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/8971799/189635638-c78c674f-316b-4337-b5c3-75948d0e468e.png" />
+</p>
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/8971799/189635641-df877cd6-5575-4f24-8a3d-e2ae5e21b405.png" />
+</p>
+
+
 
 ### Build
