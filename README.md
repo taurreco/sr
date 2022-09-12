@@ -18,7 +18,9 @@ SR is a lightweight software rendering library written in C.  It provides a core
 * custom shaders
 * custom vertex attributes
 * obj loading
-* tga image loading
+* tga image loading!
+[mask](https://user-images.githubusercontent.com/8971799/189617971-6535ce19-c94c-4f26-b167-8a5a85c49557.png)
+
 
 ### Design Overview
 
