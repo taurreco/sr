@@ -10,7 +10,7 @@
  * sr_pipe.c
  * --------
  * implementation of the internal graphics pipeline,
- * resembling very loosley how its done in hardware
+ * resembling loosley how its done in hardware
  * 
  */
 
