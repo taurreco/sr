@@ -12,7 +12,7 @@
 
 /*********************************************************************
  *                                                                   *
- *                       private definitions                         *
+ *                             matrices                              *
  *                                                                   *
  *********************************************************************/
 
@@ -20,7 +20,7 @@
  * matmul *
  **********/
 
-/* multiplies two 4x4 matrices, a and b, stores the result in a */
+/* multiplies two 4x4 matrices, 'a' and 'b', stores the result in 'a' */
 extern void 
 matmul(struct mat4* a, struct mat4* b)
 {
@@ -48,7 +48,7 @@ matmul(struct mat4* a, struct mat4* b)
  * matmul_v *
  ************/
 
-/* applys the matrix b to vector c, stores result in vector a */ 
+/* applys the matrix 'b' to vector 'c', stores result in vector 'a' */ 
 extern void
 matmul_v(float* a, struct mat4* b, float* c)
 {
@@ -58,35 +58,17 @@ matmul_v(float* a, struct mat4* b, float* c)
     a[3] = c[0] * b->e30 + c[1] * b->e31 + c[2] * b->e32 + c[3] * b->e33;
 }
 
-/*******
- * dot *
- *******/
-
-/* dot product of two vector3s */
-extern float
-dot(float* a, float* b)
-{
-    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-}
-
-/*********
- * cross *
- *********/
-
-/* applys the cross product b x c, stores result in a */
-extern void
-cross(float* a, float* b, float* c)
-{
-    a[0] = (b[1] * c[2]) - (b[2] * c[1]);
-    a[1] = (b[2] * c[0]) - (b[0] * c[2]);
-    a[2] = (b[0] * c[1]) - (b[1] * c[0]);
-}
+/*********************************************************************
+ *                                                                   *
+ *                              vectors                              *
+ *                                                                   *
+ *********************************************************************/
 
 /*********
  * sub_v *
  *********/
 
-/* subtracts vec3 c from b and stores result in a */
+/* subtracts vec3 'c' from 'b' and stores result in 'a' */
 extern void
 sub_v(float* a, float* b, float* c)
 {
@@ -99,7 +81,7 @@ sub_v(float* a, float* b, float* c)
  * scale_v *
  ***********/
 
-/* multiplies vec3 b by scalar c and stores result in a */
+/* multiplies vec3 'b' by scalar 'c' and stores result in 'a' */
 extern void
 scale_v(float* a, float* b, float c)
 {
@@ -109,10 +91,47 @@ scale_v(float* a, float* b, float c)
 }
 
 /*************
+ * reflect_v *
+ *************/
+
+/* reflects a vec3 'v' across a normal 'n', result in 'r' */
+extern void
+reflect_v(float* r, float* n, float* v)
+{
+    float w[3];
+    scale_v(w, n, 2 * dot(v, n));
+    sub_v(r, w, v);
+}
+
+/*******
+ * dot *
+ *******/
+
+/* dot product of two vec3s */
+extern float
+dot(float* a, float* b)
+{
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+/*********
+ * cross *
+ *********/
+
+/* applys the cross product 'b' x 'c', stores result in 'a' */
+extern void
+cross(float* a, float* b, float* c)
+{
+    a[0] = (b[1] * c[2]) - (b[2] * c[1]);
+    a[1] = (b[2] * c[0]) - (b[0] * c[2]);
+    a[2] = (b[0] * c[1]) - (b[1] * c[0]);
+}
+
+/*************
  * magnitude *
  *************/
 
-/* returns the magnitude of a vector3 */
+/* returns the magnitude of a vec3 */
 extern float
 magnitude(float* a)
 {
@@ -123,7 +142,7 @@ magnitude(float* a)
  * normalize *
  *************/
 
-/* normalizes vector3 in place */
+/* normalizes vec3 in place */
 extern void
 normalize(float* a)
 {
@@ -132,6 +151,12 @@ normalize(float* a)
     a[1] = a[1] / m;
     a[2] = a[2] / m;
 }
+
+/*********************************************************************
+ *                                                                   *
+ *                                misc                               *
+ *                                                                   *
+ *********************************************************************/
 
 /***********
  * radians *

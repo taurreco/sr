@@ -10,75 +10,37 @@
 int WIDTH = 1024;
 int HEIGHT = 1024;
 
-/*
-
-float cube_pts[24 * 7] = {
-
-    1, 1, -1, 0, 83, 58, 1,  
-    -1, 1, -1, 0, 151, 151, 151,
-    -1, 1, 1, 0, 85, 100, 111,
-    1, 1, 1, 0, 99, 10, 10,  
-
-    1, -1, 1, 0, 86, 194, 138,
-    1, 1, 1, 0, 73, 102, 18,
-    -1, 1, 1, 0, 3, 102, 173,
-    -1, -1, 1, 0, 18, 38, 200,
-
-    -1, -1, 1, 0, 200, 21, 91,
-    -1, 1, 1, 0, 162, 134, 38,
-    -1, 1, -1, 0, 18, 28, 3,
-    -1, -1, -1, 0, 178, 17, 33,
-
-    -1, -1, -1, 0, 20, 121, 176,
-    1, -1, -1, 0, 20, 121, 176,
-    1, -1, 1, 0, 20, 121, 176,
-    -1, -1, 1, 0, 20, 121, 176,
-
-    1, -1, -1, 0, 43, 29, 164,
-    1, 1, -1, 0, 43, 29, 164,
-    1, 1, 1, 0, 43, 29, 164,
-    1, -1, 1, 0, 43, 29, 164,
-
-    -1, -1, -1, 0, 198, 7, 163,
-    -1, 1, -1, 0, 198, 7, 163,
-    1, 1, -1, 0, 198, 7, 163,
-    1, -1, -1, 0, 198, 7, 163
-};
-
-*/
-
-
 float cube_pts[24 * 8] = {
 
-    1, 1, -1, 0.5, 0.668, 0, 1, 0,
-    -1, 1, -1, 0.5, 0.332, 0, 1, 0,
-    -1, 1, 1, 0.25, 0.332, 0, 1, 0,
-    1, 1, 1, 0.25, 0.668, 0, 1, 0,
+    1, 1, -1, 0.5, 0.332, 0, 1, 0,
+    -1, 1, -1, 0.5, 0.668, 0, 1, 0,
+    -1, 1, 1, 0.25, 0.668, 0, 1, 0,
+    1, 1, 1, 0.25, 0.332, 0, 1, 0,
 
-    1, -1, 1, 0, 0.668, 0, 0, 1,
-    1, 1, 1, 0.25, 0.668, 0, 0, 1,
-    -1, 1, 1, 0.25, 0.332, 0, 0, 1,
-    -1, -1, 1, 0, 0.332, 0, 0, 1,
+    1, -1, 1, 0, 0.332, 0, 0, 1,
+    1, 1, 1, 0.25, 0.332, 0, 0, 1,
+    -1, 1, 1, 0.25, 0.668, 0, 0, 1,
+    -1, -1, 1, 0, 0.668, 0, 0, 1,
 
-    -1, -1, 1, 0.25, 0, -1, 0, 0,
-    -1, 1, 1, 0.25, 0.332, -1, 0, 0,
-    -1, 1, -1, 0.5, 0.332, -1, 0, 0,
-    -1, -1, -1, 0.5, 0, -1, 0, 0,
+    -1, -1, 1, 0.25, 1, -1, 0, 0,
+    -1, 1, 1, 0.25, 0.668, -1, 0, 0,
+    -1, 1, -1, 0.5, 0.668, -1, 0, 0,
+    -1, -1, -1, 0.5, 1, -1, 0, 0,
 
-    -1, -1, -1, 1, 0.332, 0, -1, 0,
-    1, -1, -1, 0.75, 0.332, 0, -1, 0,
-    1, -1, 1, 0.75, 0.668, 0, -1, 0,
-    -1, -1, 1, 1, 0.668, 0, -1, 0,
+    -1, -1, -1, 1, 0.668, 0, -1, 0,
+    1, -1, -1, 0.75, 0.668, 0, -1, 0,
+    1, -1, 1, 0.75, 0.332, 0, -1, 0,
+    -1, -1, 1, 1, 0.332, 0, -1, 0,
 
-    1, -1, -1, 0.5, 1, 1, 0, 0,
-    1, 1, -1, 0.5, 0.668, 1, 0, 0,
-    1, 1, 1, 0.25, 0.668, 1, 0, 0,
-    1, -1, 1, 0.25, 1, 1, 0, 0,
+    1, -1, -1, 0.5, 0, 1, 0, 0,
+    1, 1, -1, 0.5, 0.332, 1, 0, 0,
+    1, 1, 1, 0.25, 0.332, 1, 0, 0,
+    1, -1, 1, 0.25, 0, 1, 0, 0,
 
-    -1, -1, -1, 0.75, 0.332, 0, 0, -1,
-    -1, 1, -1, 0.5, 0.332, 0, 0, -1,
-    1, 1, -1, 0.5, 0.668, 0, 0, -1,
-    1, -1, -1, 0.75, 0.668, 0, 0, -1
+    -1, -1, -1, 0.75, 0.668, 0, 0, -1,
+    -1, 1, -1, 0.5, 0.668, 0, 0, -1,
+    1, 1, -1, 0.5, 0.332, 0, 0, -1,
+    1, -1, -1, 0.75, 0.332, 0, 0, -1
 };
 
 int cube_indices[12 * 3] = {
@@ -102,14 +64,19 @@ int main(int argc, char *argv[]) {
     
     SDL_Rect screenRect = {0, 0, WIDTH, HEIGHT};
 
-    SDL_Window* window = SDL_CreateWindow("SDL", SDL_WINDOWPOS_UNDEFINED, 
-                         SDL_WINDOWPOS_UNDEFINED, screenRect.w, screenRect.h, 
+    SDL_Window* window = SDL_CreateWindow("SDL", 
+                         SDL_WINDOWPOS_UNDEFINED, 
+                         SDL_WINDOWPOS_UNDEFINED, 
+                         screenRect.w, screenRect.h, 
                          SDL_WINDOW_SHOWN);
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 
+                             SDL_RENDERER_ACCELERATED);
 
-    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, 
-                           SDL_TEXTUREACCESS_STREAMING, screenRect.w, screenRect.h);
+    SDL_Texture* texture = SDL_CreateTexture(renderer, 
+                           SDL_PIXELFORMAT_ARGB8888, 
+                           SDL_TEXTUREACCESS_STREAMING, 
+                           screenRect.w, screenRect.h);
 
 
     float* depths = calloc(WIDTH * HEIGHT, sizeof(float));
@@ -119,28 +86,48 @@ int main(int argc, char *argv[]) {
     }
     uint32_t* colors = calloc(WIDTH * HEIGHT, sizeof(uint32_t));
 
-    uint32_t* cube_texture;
-    int t_width, t_height;
     float light_pos[3] = {
-        3, 3, 3
+        2, 2, 2
     };
     float light_color[3] = {
         1, 1, 1
     };
-    sr_load_tga(&cube_texture, &t_width, &t_height, "./assets/cube_tex.tga");
-    sr_bind_texture(cube_texture, t_width, t_height);
-    sr_bind_point_light(light_pos, light_color);
+
+    float light_attn_const = 3;
+    float light_attn_lin = 3;
+    float light_attn_quad = 3;
+    
+    float light_ambient = 3;
+    float light_diffuse = 3;
+    float light_specular = 0.5;
+
+    sr_light(SR_LIGHT_1, SR_POSITION, light_pos);
+    sr_light(SR_LIGHT_1, SR_COLOR, light_color);
+
+    sr_light(SR_LIGHT_1, SR_AMBIENT, &light_ambient);
+    sr_light(SR_LIGHT_1, SR_DIFFUSE, &light_diffuse);
+    sr_light(SR_LIGHT_1, SR_SPECULAR, &light_specular);
+
+    sr_light(SR_LIGHT_1, SR_CONSTANT_ATTENUATION, &light_attn_const);
+    sr_light(SR_LIGHT_1, SR_LINEAR_ATTENUATION, &light_attn_lin);
+    sr_light(SR_LIGHT_1, SR_QUADRATIC_ATTENUATION, &light_attn_quad);
+
+    struct sr_texture* cube_texture = sr_load_tga("./assets/cube_tex.tga");
+    
+    sr_bind_texture(cube_texture->colors, 
+                    cube_texture->width, 
+                    cube_texture->height);
+    
     sr_bind_pts(cube_pts, 24, 8);
     sr_bind_framebuffer(WIDTH, HEIGHT, colors, depths);
     sr_bind_phong_vs();
-    sr_bind_phong_fs();
+    sr_bind_phong_texture_fs();
     sr_matrix_mode(SR_PROJECTION_MATRIX);
     sr_perspective(1, 1, 2, 1000);
     sr_matrix_mode(SR_VIEW_MATRIX);
     sr_look_at(0, 0, 10, 0, 0, 0, 0, 1, 0);
     sr_matrix_mode(SR_MODEL_MATRIX);
     sr_renderl(cube_indices, 12 * 3, SR_TRIANGLE_LIST);
-
 
     float pitch = 0;
     float yaw = -90;
@@ -221,8 +208,12 @@ int main(int argc, char *argv[]) {
         if (keystate[SDL_SCANCODE_DOWN])
             pitch -= 0.5;
         
-        if (keystate[SDL_SCANCODE_Q])
+        if (keystate[SDL_SCANCODE_Q]) {
+            sr_texture_free(texture);
+            free(depths);
+            free(colors);
             return 0;
+        }
 
         if (pitch >= 80)
             pitch = 80;

@@ -23,8 +23,9 @@
 
 /* holds the steps sizes / data for barycentric weight for an edge */
 struct edge {
-    float step_x, step_y;    /* steps to increment to get the det at new pt */
-    int is_tl;               /* tracks if the edge is top left */
+    float step_x;    /* steps to increment to get the det at new pt */
+    float step_y;    
+    int is_tl;       /* tracks if the edge is top left */
 };
 
 /***************
@@ -33,8 +34,10 @@ struct edge {
 
 /* holds the upper and lower bounds of the triangle */
 struct bbox {
-    float min_x, min_y;
-    float max_x, max_y;
+    float min_x; 
+    float min_y;
+    float max_x;
+    float max_y;
 };
 
 /*********************************************************************
@@ -47,7 +50,7 @@ struct bbox {
  * is_tl *
  *********/
 
-/* 
+/**
  * determines whether an edge is top or left 
  * where the edge is directed, starting at v0 pointing to v1
  */
@@ -71,7 +74,8 @@ is_tl(float* v0, float* v1)
 
 /* make an edge struct instance, return the initial determinant */
 static float 
-edge_init(struct edge* edge, float* v0, float* v1, float* pt)
+edge_init(struct edge* edge, int winding, 
+          float* v0, float* v1, float* pt)
 {
     edge->is_tl = is_tl(v0, v1);
 
@@ -79,6 +83,9 @@ edge_init(struct edge* edge, float* v0, float* v1, float* pt)
     float B = v0[0] - v1[0];
     float C = v0[1] * v1[0] - v0[0] * v1[1];
 
+    A *= winding;
+    B *= winding;
+    C *= winding;
 
     /* step sizes */
     edge->step_x = A;
@@ -158,9 +165,9 @@ draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2)
 
     struct edge e12, e20, e01;
 
-    float w0_row = edge_init(&e12, v1, v2, pt);
-    float w1_row = edge_init(&e20, v2, v0, pt);
-    float w2_row = edge_init(&e01, v0, v1, pt);
+    float w0_row = edge_init(&e12, rast->winding, v1, v2, pt);
+    float w1_row = edge_init(&e20, rast->winding, v2, v0, pt);
+    float w2_row = edge_init(&e01, rast->winding, v0, v1, pt);
 
     /* rasterize */
 

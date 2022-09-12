@@ -19,29 +19,58 @@ int main(int argc, char *argv[]) {
         depths[i] = 1000;
 
     uint32_t* colors = calloc(WIDTH * HEIGHT, sizeof(uint32_t));
-    float base_color[3] = {
-        0.4, 0.8, 0.2
-    };
 
-    float light_color[3] = {
+    float light_color_1[3] = {
         1, 1, 1
     };
 
-    float light_pos[3] = {
+    float light_color_2[3] = {
+        0.9, 0, 0.3
+    };
+
+    float light_pos_1[3] = {
         0, 0, -4
     };
 
+    float light_pos_2[3] = {
+        0, 4, 0
+    };
 
-    float* pts;
-    int* indices;
-    int n_pts, n_attr, n_indices;
+    float light_attn_const = 1;
+    float light_attn_lin = 2.5;
+    float light_attn_quad = 0.4;
 
-    sr_load_obj(&pts, &indices, &n_pts, &n_attr, &n_indices, "./assets/stanford-dragon.obj");
+    float light_ambient = 3;
+    float light_diffuse = 3;
+    float light_specular = 0.5;
 
-    sr_bind_point_light(light_pos, light_color);
-    sr_bind_pts(pts, n_pts, n_attr);
+    sr_light(SR_LIGHT_1, SR_POSITION, light_pos_1);
+    sr_light(SR_LIGHT_1, SR_COLOR, light_color_1);
+
+    sr_light(SR_LIGHT_1, SR_AMBIENT, &light_ambient);
+    sr_light(SR_LIGHT_1, SR_DIFFUSE, &light_diffuse);
+    sr_light(SR_LIGHT_1, SR_SPECULAR, &light_specular);
+
+    sr_light(SR_LIGHT_1, SR_CONSTANT_ATTENUATION, &light_attn_const);
+    sr_light(SR_LIGHT_1, SR_LINEAR_ATTENUATION, &light_attn_lin);
+    sr_light(SR_LIGHT_1, SR_QUADRATIC_ATTENUATION, &light_attn_quad);
+
+    sr_light(SR_LIGHT_2, SR_POSITION, light_pos_2);
+    sr_light(SR_LIGHT_2, SR_COLOR, light_color_2);
+
+    sr_light(SR_LIGHT_2, SR_AMBIENT, &light_ambient);
+    sr_light(SR_LIGHT_2, SR_DIFFUSE, &light_diffuse);
+    sr_light(SR_LIGHT_2, SR_SPECULAR, &light_specular);
+
+    sr_light(SR_LIGHT_2, SR_CONSTANT_ATTENUATION, &light_attn_const);
+    sr_light(SR_LIGHT_2, SR_LINEAR_ATTENUATION, &light_attn_lin);
+    sr_light(SR_LIGHT_2, SR_QUADRATIC_ATTENUATION, &light_attn_quad);
+
+    struct sr_obj* obj = sr_load_obj("./assets/stanford-dragon.obj");
+
+    sr_bind_pts(obj->pts, obj->n_pts, obj->n_attr);
     sr_bind_framebuffer(WIDTH, HEIGHT, colors, depths);
-    sr_bind_base_color(base_color);
+    sr_bind_base_color(0.4, 0.8, 0.2);
     sr_bind_phong_vs();
     sr_bind_phong_color_fs();
     sr_matrix_mode(SR_PROJECTION_MATRIX);
@@ -50,7 +79,7 @@ int main(int argc, char *argv[]) {
     sr_look_at(0, 0, 4, 0, 0, 0, 0, 1, 0);
     sr_matrix_mode(SR_MODEL_MATRIX);
     sr_scale(0.1, 0.1, 0.1);
-    sr_renderl(indices, n_indices, SR_TRIANGLE_LIST);
+    sr_renderl(obj->indices, obj->n_indices, SR_TRIANGLE_LIST);
 
     SDL_Init(SDL_INIT_VIDEO);
     
@@ -70,7 +99,6 @@ int main(int argc, char *argv[]) {
                            SDL_TEXTUREACCESS_STREAMING, 
                            rect.w, rect.h);
     
-    float dt = 0;
     clock_t t;
     int cur_time = 0;
     int prev_time = 0;
@@ -88,6 +116,9 @@ int main(int argc, char *argv[]) {
 
         while ((SDL_PollEvent(&event)) != 0) {
             if (event.type == SDL_QUIT) { 
+                sr_obj_free(obj);
+                free(depths);
+                free(colors);
                 return 0;
             }
         }
@@ -106,21 +137,26 @@ int main(int argc, char *argv[]) {
         if (keystate[SDL_SCANCODE_DOWN])
             phi -= 0.05;
         
-        if (keystate[SDL_SCANCODE_Q])
+        if (keystate[SDL_SCANCODE_Q]) {
+            sr_obj_free(obj);
+            free(depths);
+            free(colors);
             return 0;
-
+        }
 
         for (int i = 0; i < WIDTH * HEIGHT; i++) {
             depths[i] = 1000;
             colors[i] = 0;
         }
 
-        light_pos[0] = sin(phi) * cos(theta) * 5;
-        light_pos[1] = cos(phi) * 5;
-        light_pos[2] = sin(phi) * sin(theta) * 5;
-        sr_matrix_mode(SR_MODEL_MATRIX);
-        sr_renderl(indices, n_indices, SR_TRIANGLE_LIST);
+        light_pos_1[0] = sin(phi) * cos(theta) * 5;
+        light_pos_1[1] = cos(phi) * 5;
+        light_pos_1[2] = sin(phi) * sin(theta) * 5;
 
+        sr_light(SR_LIGHT_1, SR_POSITION, light_pos_1);
+        
+        sr_matrix_mode(SR_MODEL_MATRIX);
+        sr_renderl(obj->indices, obj->n_indices, SR_TRIANGLE_LIST);
 
         int p;
         uint32_t *pixels;
@@ -130,7 +166,7 @@ int main(int argc, char *argv[]) {
 
         SDL_UnlockTexture(texture);
 
-         cur_time = SDL_GetTicks();
+        cur_time = SDL_GetTicks();
         if (cur_time > prev_time + 1000) {
             printf("FPS: %d\n", frame);
             frame = 0;

@@ -1,5 +1,18 @@
 # software renderer
 
+
+
+
+
+### about
+
+### design overview
+
+### documentation
+
+### build
+
+
 Perspective correct interpolation.
 
 1/z can be linearly interpolated in screen space.  So we calculate that first for our interpolated vertex, store it into Z:

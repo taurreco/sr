@@ -10,7 +10,7 @@
  * sr_pipe.c
  * --------
  * implementation of the internal graphics pipeline,
- * resembling a bit how its done in hardware
+ * resembling very loosley how its done in hardware
  * 
  */
 
@@ -26,13 +26,13 @@
 
 /* false for triangles against the winding order */
 static int
-winding_order(int dir, float* v0, float* v1, float* v2)
+winding_order(int winding, float* v0, float* v1, float* v2)
 {
     float e01 = (v1[0] - v0[0]) * (v1[1] + v0[1]);
     float e12 = (v2[0] - v1[0]) * (v2[1] + v1[1]);
     float e20 = (v0[0] - v2[0]) * (v0[1] + v2[1]);
 
-    return (e01 + e12 + e20) * dir > 0;  /* same sign */
+    return (e01 + e12 + e20) * winding > 0;  /* same sign */
 }
 
 /*************
@@ -45,32 +45,32 @@ draw_prim(struct raster_context* rast, float* pts,
           int n_pts, enum sr_primitive prim_type)
 {
     switch (prim_type) {
-    case SR_POINT_LIST:    /* point list */
-        for (int i = 0; i < n_pts; i++) {
-            draw_pt(rast, pts + i * rast->n_attr);
-        }
-        break;
-
-    case SR_LINE_LIST:
-    case SR_LINE_STRIP:    /* line list */
-        for (int i = 1; i < n_pts; i++) {
-            /* draw_ln(rast, tmp_p, tmp_p + i * n_attr_out); */
-        }
-        break;
-
-    case SR_TRIANGLE_LIST:
-    case SR_TRIANGLE_STRIP:    /* triangle fan */
-        {
-            float* v0 = pts;
-            float* v1 = pts + 1 * rast->n_attr;
-            for (int i = 2; i < n_pts; i++) {
-                float* v2 = pts + i * rast->n_attr;
-                if (winding_order(rast->winding, v0, v1, v2))
-                    draw_tr(rast, v0, v1, v2);
-                v1 = v2;
+        case SR_POINT_LIST:    /* point list */
+            for (int i = 0; i < n_pts; i++) {
+                draw_pt(rast, pts + i * rast->n_attr);
             }
-        }
-        break;
+            break;
+
+        case SR_LINE_LIST:
+        case SR_LINE_STRIP:    /* line list */
+            for (int i = 1; i < n_pts; i++) {
+                /* draw_ln(rast, tmp_p, tmp_p + i * n_attr_out); */
+            }
+            break;
+
+        case SR_TRIANGLE_LIST:
+        case SR_TRIANGLE_STRIP:    /* triangle fan */
+            {
+                float* v0 = pts;
+                float* v1 = pts + 1 * rast->n_attr;
+                for (int i = 2; i < n_pts; i++) {
+                    float* v2 = pts + i * rast->n_attr;
+                    if (winding_order(rast->winding, v0, v1, v2))
+                        draw_tr(rast, v0, v1, v2);
+                    v1 = v2;
+                }
+            }
+            break;
     }
 }
 
@@ -83,19 +83,19 @@ static void
 split_prim(enum sr_primitive prim_type, int* prim_size)
 {
     switch (prim_type) {
-    case SR_POINT_LIST:
-        *prim_size = 1;
-        break;
+        case SR_POINT_LIST:
+            *prim_size = 1;
+            break;
 
-    case SR_LINE_LIST:
-    case SR_LINE_STRIP:
-        *prim_size = 2;
-        break;
-        
-    case SR_TRIANGLE_LIST:
-    case SR_TRIANGLE_STRIP:
-        *prim_size = 3;
-        break;
+        case SR_LINE_LIST:
+        case SR_LINE_STRIP:
+            *prim_size = 2;
+            break;
+            
+        case SR_TRIANGLE_LIST:
+        case SR_TRIANGLE_STRIP:
+            *prim_size = 3;
+            break;
     }
 }
 

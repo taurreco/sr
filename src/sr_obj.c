@@ -42,13 +42,16 @@ struct kv_pair {
 
 struct hash_table {
     struct kv_pair** pairs;         /* list of obj indices */
-    uint n_pairs;               /* running count of keys */
+    int n_pairs;                    /* running count of keys */
     int size;                       /* number of buckets in ht */
 };
 
-struct obj {                  
-    uint n_v, n_vt, n_vn;
-    uint n_pts, n_tr;
+struct obj_desc {                  
+    int n_v; 
+    int n_vt; 
+    int n_vn;
+    int n_pts;
+    int n_tr;
 };
 
 static void 
@@ -138,7 +141,7 @@ hash_table_free(struct hash_table* ht)
 static int
 hash_1(char* key)
 {
-    uint64_t hash = 5381;
+    int64_t hash = 5381;
     int c;
 
     while ((c = *key++))
@@ -312,7 +315,7 @@ push_stream(float* dest, char* stream, int n_str)
 
 /* converts raw obj point indices into readable indices */
 static void
-split_indices(int* indices, char* raw, uint8_t flags)
+split_indices(int* indices, char* raw, int8_t flags)
 {
     char* save;
     
@@ -330,16 +333,13 @@ split_indices(int* indices, char* raw, uint8_t flags)
  *                                                                   *
  *********************************************************************/
 
-/************
- * obj_init *
- ************/
+/**************
+ * first_pass *
+ **************/
 
-/** 
- * reads obj file and allocates as much space as is needed 
- * for obj context fields 
- */
+/* reads over the file to find buffer sizes */
 static void
-obj_init(FILE* fp, struct obj* obj)
+first_pass(struct obj_desc* obj_desc, FILE* fp)
 {
     char line[MAX_LINE_SIZE];
     char* token;
@@ -355,43 +355,43 @@ obj_init(FILE* fp, struct obj* obj)
             continue;
         token = strtok(line, " ");
         if (strcmp(token, "v") == 0) {
-            obj->n_v++;
+            obj_desc->n_v++;
         }
         if (strcmp(token, "vt") == 0) {
-            obj->n_vt++;
+            obj_desc->n_vt++;
         }
         if (strcmp(token, "vn") == 0) {
-            obj->n_vn++;
+            obj_desc->n_vn++;
         }
         if (strcmp(token, "f") == 0) {
             int i = 0;
             token = strtok(NULL, " ");
             while (token != NULL) {
-                obj->n_pts++;
+                obj_desc->n_pts++;
                 i++;
                 token = strtok(NULL, " ");
             }
-            obj->n_tr += 1 + (i - 3);
+            obj_desc->n_tr += 1 + (i - 3);
         }
     }
     fseek(fp, 0, SEEK_SET);
 }
 
-/********************
- * obj_context_fill *
- ********************/
+/***************
+ * second_pass *
+ ***************/
 
-/**
- * reads obj file and moves data into obj context fields, 
- * structured appropriately
+/** 
+ * moves data from file into its respective buffers, 
+ * returns precise length of vertex buffer 'pts' 
  */
-static void
-obj_fill(FILE* fp, struct obj* obj, float* pts, int* indices, int* n_pts_p) 
+static int
+second_pass(struct obj_desc* obj_desc, float* pts, int* indices, FILE* fp) 
 {
 
-    float* v = malloc(obj->n_v * 3 * sizeof(float));
-    float* vt = malloc(obj->n_vt * 2 * sizeof(float));
-    float* vn = malloc(obj->n_vn * 3 * sizeof(float));
+    float* v = malloc(obj_desc->n_v * 3 * sizeof(float));
+    float* vt = malloc(obj_desc->n_vt * 2 * sizeof(float));
+    float* vn = malloc(obj_desc->n_vn * 3 * sizeof(float));
 
     int v_idx = 0;
     int vt_idx = 0;
@@ -402,7 +402,7 @@ obj_fill(FILE* fp, struct obj* obj, float* pts, int* indices, int* n_pts_p)
     char line[MAX_LINE_SIZE];
     char* token;
 
-    uint8_t flags = 0;
+    int8_t flags = 0;
 
     struct hash_table* ht = hash_table_alloc();
 
@@ -480,11 +480,12 @@ obj_fill(FILE* fp, struct obj* obj, float* pts, int* indices, int* n_pts_p)
             }
         }
     }
-    *n_pts_p = n_pts;
+
     hash_table_free(ht);
     free(v);
     free(vt);
     free(vn);
+    return n_pts;
 }
 
 /*********************************************************************
@@ -493,58 +494,49 @@ obj_fill(FILE* fp, struct obj* obj, float* pts, int* indices, int* n_pts_p)
  *                                                                   *
  *********************************************************************/
 
-/*************************
- * sr_load_triangle_list *
- *************************/
+/***************
+ * sr_load_obj *
+ ***************/
 
-/* 
- * reads obj file data from path into an indexed triangle list
- * 1 on success, 0 on failure 
- */
-extern int
-sr_load_obj(float** pts_p, int** indices_p, int* n_pts_p, 
-            int* n_attr_p, int* n_indices_p, char* file)
+/* reads obj file data from path into an indexed triangle list */
+extern struct sr_obj*
+sr_load_obj(char* file)
 {
+    struct sr_obj* obj = malloc(sizeof(struct sr_obj));
 
     /* open file and pre allocate buffers in obj context */
-
     FILE* fp = fopen(file, "r");
     if (fp == NULL) {
         return 0;
     }
 
-    struct obj obj = {
-        .n_v = 0,
-        .n_vt = 0, 
-        .n_vn = 0,
-        .n_pts = 0,
-        .n_tr = 0
-    };
+    struct obj_desc obj_desc;
+    memset(&obj_desc, 0, sizeof(struct obj_desc));
 
-    obj_init(fp, &obj);
+    first_pass(&obj_desc, fp);
 
-    int n_pts = obj.n_pts;
-    int n_indices = obj.n_tr * 3;
+    int n_pts = obj_desc.n_pts;
+    int n_indices = obj_desc.n_tr * 3;
     
     float* pts = malloc(n_pts * 8 * sizeof(float));
     int* indices = malloc(n_indices * sizeof(int));
 
     /* fill triangle list buffers */
-
-    obj_fill(fp, &obj, pts, indices, &n_pts);
+    n_pts = second_pass(&obj_desc, pts, indices, fp);
+    fclose(fp);
 
     float* tmp;
     if ((tmp = realloc(pts, n_pts * 8 * sizeof(float))))
         pts = tmp;
 
-    /* fill return pointers */
+    /* fill return obj */
 
-    *pts_p = pts;
-    *indices_p = indices;
-    *n_pts_p = n_pts;
-    *n_attr_p = 8;
-    *n_indices_p = n_indices;
+    obj->pts = pts;
+    obj->indices = indices;
+    obj->n_pts = n_pts;
+    obj->n_attr = 8;
+    obj->n_indices = n_indices;
 
-    fclose(fp);
-    return 1;
+    return obj;
 }
+

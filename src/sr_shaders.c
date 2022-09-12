@@ -1,4 +1,6 @@
 
+#include <stdlib.h>
+
 #include "sr.h"
 #include "sr_lib.h"
 #include "sr_math.h"
@@ -16,10 +18,11 @@
  *                                                                   *
  *********************************************************************/
 
-/********
- * argb *
- ********/
+/***********
+ * rgb_int *
+ ***********/
 
+/* converts a float representation of a color into an int */
 static uint32_t
 rgb_int(float* color)
 {
@@ -31,6 +34,11 @@ rgb_int(float* color)
     return a << 24 | r << 16 | g << 8 | b << 0; 
 }
 
+/*************
+ * rgb_float *
+ *************/
+
+/* converts one int into a float representation of a color */
 static void
 rgb_float(float* a, uint32_t b)
 {
@@ -39,6 +47,14 @@ rgb_float(float* a, uint32_t b)
     a[2] = (b & 0x000000FF) / (float)255;
 }
 
+/******************
+ * blend_multiply *
+ ******************/
+
+/** 
+ * multiplies a bottom layer, 'a', and top layer, 'b', 
+ * and stores result in 'a' 
+ */
 static void 
 blend_multiply(float* a, float* b)
 {
@@ -47,6 +63,11 @@ blend_multiply(float* a, float* b)
     a[2] = fmin(a[2] * b[2], 1);
 }
 
+/***************
+ * blend_scale *
+ ***************/
+
+/* scales the color 'a' by some intensity 'b' */
 static void
 blend_scale(float* a, float b)
 {
@@ -55,7 +76,11 @@ blend_scale(float* a, float b)
     a[2] = fmin(a[2] * b, 1);
 }
 
+/*************
+ * blend_add *
+ *************/
 
+/* combines two colors, stores the sum in 'a' */
 static void
 blend_add(float* a, float* b)
 {
@@ -64,17 +89,9 @@ blend_add(float* a, float* b)
     a[2] = fmin(a[2] + b[2], 1);
 }
 
-static void
-reflect(float* out, float* norm, float* incident)
-{
-    scale_v(out, norm, 2 * dot(incident, norm));
-    sub_v(out, out, incident);
-}
-
-
 /*********************************************************************
  *                                                                   *
- *                              helpers                              *
+ *                          shader helpers                           *
  *                                                                   *
  *********************************************************************/
 
@@ -87,20 +104,21 @@ reflect(float* out, float* norm, float* incident)
  * sets the first four indices of 'out' to these coordinates
  */
 static void
-clip_space(float* out, float* in, struct sr_uniform* uniform)
+clip_space(float* out, float* in, struct sr_uniform* sr_uniform)
 {
-    float in_h[4] = {
+    float tmp[4] = {    /* homogenize in vector */
         in[0], in[1], in[2], 1
     };
-    matmul_v(out, uniform->mvp, in_h);
+    matmul_v(out, sr_uniform->mvp, tmp);
 }
 
 /******************
  * sample_texture *
  ******************/
 
+/* returns the color of the texture at coordinates 'u' and 'v' */
 static uint32_t
-sample_texture(struct texture* texture, float u, float v)
+sample_texture(struct sr_texture* texture, float u, float v)
 {
     int x = floorf(u * texture->width);
     int y = texture->height - floorf(v * texture->height);
@@ -112,67 +130,74 @@ sample_texture(struct texture* texture, float u, float v)
  * phong *
  *********/
 
-static uint32_t 
-phong(struct sr_uniform* uniform, 
-      struct sr_point_light* light, 
-      float* pos, float* norm, float* base_color)
+/**
+ * given a world position, normal, and light, calculates 
+ * an ambient, diffuse, and specular intensites to blend 
+ * with the base color 
+ */
+static void
+phong(float* final_color, struct sr_uniform* sr_uniform, 
+      struct light* light, float* 
+      pos, float* norm, float* base_color)
 {
 
+    /* colors */
     float ambient[3];
     float diffuse[3];
     float specular[3];
-    float final_color[3];
+
+    /* vectors */
     float light_dir[3];
-    float incident_dir[3];
     float reflection_dir[3];
+    float view_dir[3];
 
-    normalize(uniform->cam_pos);
+    normalize(sr_uniform->cam_pos);
 
+    /* initialize color values */
     memcpy(ambient, light->color, 3 * sizeof(float));
     memcpy(diffuse, light->color, 3 * sizeof(float));
     memcpy(specular, light->color, 3 * sizeof(float));
     memset(final_color, 0, 3 * sizeof(float));
 
+    /* initialize vectors */
+    memcpy(view_dir, sr_uniform->cam_pos, 3 * sizeof(float));
+
     /* ambient */
-    blend_scale(ambient, 0.3);
+    blend_scale(ambient, light->ambient);
 
     /* diffuse */
-    sub_v(light_dir, light->pos, pos);
-
+    sub_v(light_dir, light->pos, pos);   /* calculate light_dir */
     float dist = magnitude(light_dir);   /* only used for attenuation */
 
     normalize(light_dir);
     normalize(norm);
-
-    float diff = fmax(dot(norm, light_dir), 0);
     
-    blend_scale(diffuse, diff);
+    blend_scale(diffuse, fmax(dot(norm, light_dir), 0));
+    blend_scale(diffuse, light->diffuse);
 
     /* specular */
     float damp = 10;
-    reflect(reflection_dir, norm, light_dir);
+    reflect_v(reflection_dir, norm, light_dir);   /* calculate reflection_dir */
     normalize(reflection_dir);
 
-    float shine = fmax(dot(reflection_dir, uniform->cam_pos), 0);
+    float shine = fmax(dot(reflection_dir, view_dir), 0);
     shine = powf(shine, damp);
 
-    blend_scale(specular, shine * 1);
+    blend_scale(specular, shine);
 
     /* attenuation */
+    float attenuation = 1 / (light->attn_const +
+                             light->attn_lin * dist + 
+                             light->attn_quad * dist * dist);
 
-    float attenuation = 1 / (light->const_attn +
-                             light->lin_attn * dist + 
-                             light->quad_attn * dist * dist);
+    blend_scale(ambient, attenuation * 5);
+    blend_scale(diffuse, attenuation * 5);
 
-    blend_scale(ambient, attenuation * 30);
-    blend_scale(diffuse, attenuation * 30);
-
+    /* combine all colors, then blend */
     blend_add(final_color, ambient);
     blend_add(final_color, diffuse);
     blend_add(final_color, specular);
     blend_multiply(final_color, base_color);
-    
-    return rgb_int(final_color);
 }
 
 /*********************************************************************
@@ -185,10 +210,9 @@ phong(struct sr_uniform* uniform,
  * in (3):
  *    float x, y, z;
  * 
- * out (10):
+ * out (7):
  *    float x, y, z, w;
- *    float wx, wy, wz;
- *    float nx, ny, nz;
+ *    float r, g, b;
  */
 
 /************
@@ -199,11 +223,8 @@ phong(struct sr_uniform* uniform,
 static void 
 color_vs(float* out, float* in, void* uniform)
 {
-    struct sr_uniform* sr_uniform = (struct sr_uniform*)uniform;
     clip_space(out, in, uniform);
-    matmul_v(out + 4, sr_uniform->model, in);
-    matmul_v(out + 7, sr_uniform->model, in);
-    normalize(out + 7);
+    memcpy(out + 4, in + 3, 3 * sizeof(float));
 }
 
 /************
@@ -214,12 +235,7 @@ color_vs(float* out, float* in, void* uniform)
 static void
 color_fs(uint32_t* out, float* in, void* uniform)
 {   
-    struct sr_uniform* sr_uniform = (struct sr_uniform*)uniform;
-    struct sr_point_light* light = sr_uniform->light;
-
-    float* pos = in + 4;
-    float* norm = in + 7;
-    *out = phong(sr_uniform, light, pos, norm, sr_uniform->base_color);
+    *out = rgb_int(in + 4);
 }
 
 /*********************************************************************
@@ -309,27 +325,41 @@ phong_vs(float* out, float* in, void* uniform)
     normalize(out + 9);
 }
 
+/********************
+ * phong_texture_fs *
+ ********************/
 
-/************
- * phong_fs *
- ************/
-
-/* uses argb coords to fit color representation */
+/* blends a phong sample with texture base */
 static void
-phong_fs(uint32_t* out, float* in, void* uniform)
+phong_texture_fs(uint32_t* out, float* in, void* uniform)
 {   
     struct sr_uniform* sr_uniform = (struct sr_uniform*)uniform;
 
     float* pos = in + 4;
     float* norm = in + 9;
     float base_color[3];
+    float final_color[3];
     
     rgb_float(base_color, sample_texture(sr_uniform->texture, in[7], in[8]));
-    *out = phong(sr_uniform, sr_uniform->light, pos, norm, base_color);
+    memset(final_color, 0, 3 * sizeof(float));
+
+    for (int i = 0; i < SR_MAX_LIGHT_COUNT; i++) {
+        if (sr_uniform->light_state & (1 << i)) {
+            struct light light = sr_uniform->lights[i];
+            float phong_color[3];
+            phong(phong_color, sr_uniform, &light, 
+                  pos, norm, base_color);
+            blend_add(final_color, phong_color);
+        }
+    }
+    *out = rgb_int(final_color);    
 }
 
+/******************
+ * phong_color_fs *
+ ******************/
 
-/* uses argb coords to fit color representation */
+/* blends a phong sample with color base */
 static void
 phong_color_fs(uint32_t* out, float* in, void* uniform)
 {   
@@ -338,12 +368,22 @@ phong_color_fs(uint32_t* out, float* in, void* uniform)
     float* pos = in + 4;
     float* norm = in + 9;
     float base_color[3];
+    float final_color[3];
 
- //   printf("%f %f %f\n", sr_uniform->cam_pos[0], sr_uniform->cam_pos[1], sr_uniform->cam_pos[2]);
+    memcpy(base_color, sr_uniform->base_color, 3 * sizeof(float));
+    memset(final_color, 0, 3 * sizeof(float));
 
-    *out = phong(sr_uniform, sr_uniform->light, pos, norm, sr_uniform->base_color);
+    for (int i = 0; i < SR_MAX_LIGHT_COUNT; i++) {
+        if (sr_uniform->light_state & (1 << i)) {
+            struct light light = sr_uniform->lights[i];
+            float phong_color[3];
+            phong(phong_color, sr_uniform, &light, 
+                  pos, norm, base_color);
+            blend_add(final_color, phong_color);
+        }
+    }
+    *out = rgb_int(final_color);
 }
-
 
 /*********************************************************************
  *                                                                   *
@@ -358,7 +398,7 @@ phong_color_fs(uint32_t* out, float* in, void* uniform)
 extern void
 sr_bind_color_vs()
 {
-    sr_bind_vs(color_vs, 10);
+    sr_bind_vs(color_vs, 7);
 }
 
 extern void
@@ -394,9 +434,9 @@ sr_bind_phong_vs()
 }
 
 extern void
-sr_bind_phong_fs()
+sr_bind_phong_texture_fs()
 {
-    sr_bind_fs(phong_fs);
+    sr_bind_fs(phong_texture_fs);
 }
 
 extern void
@@ -404,7 +444,3 @@ sr_bind_phong_color_fs()
 {
     sr_bind_fs(phong_color_fs);
 }
-
-
-
-

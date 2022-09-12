@@ -1,14 +1,15 @@
 
+#include <stdlib.h>
 
 #include "sr.h"
 #include "sr_math.h"
 #include "sr_lib.h"
 
 /**
- * sr_lib.c
+ * sr_lib.h
  * --------
- * an easy interface with the sr pipeline for
- * your average use case
+ * an easy interface with a fixed subset of the sr pipeline 
+ * for your average use case
  * 
  * provides a uniform with model view projection matrix,
  * and matrix stack-like operations to build it
@@ -45,7 +46,7 @@ struct mat4 view = {
     0, 0, 0, 1
 };
 
-/* peojection matrix */
+/* projection matrix */
 struct mat4 proj = {
     1, 0, 0, 0,
     0, 1, 0, 0,
@@ -62,19 +63,12 @@ struct mat4 mvp = {
 };
 
 struct mat4* cur_mat;  /* points to whichever matrix stack is being used */
+struct light_slot* cur_light;
 
-struct texture texture = {
+struct sr_texture texture = {
     .colors = 0,
     .width = 0,
     .height = 0
-};
-
-struct sr_point_light light = {
-    .pos = 0,
-    .color = 0,
-    .const_attn = 2,
-    .lin_attn = 3,
-    .quad_attn = 2
 };
 
 float cam_pos[3] = {
@@ -94,9 +88,6 @@ struct sr_uniform uniform = {
     .model = &model,
     .mvp = &mvp,
     .texture = &texture,
-    .light = &light,
-    .base_color = 0,
-    .cam_pos = cam_pos
 };
 
 /* pipeline state */
@@ -114,7 +105,38 @@ struct sr_pipeline pipe = {
 
 /*********************************************************************
  *                                                                   *
- *                        public definitions                         *
+ *                      public struct interface                      *
+ *                                                                   *
+ *********************************************************************/
+
+/***************
+ * sr_obj_free *
+ ***************/
+
+/* takes a heap allocated sr_obj struct and frees it and contents */
+extern void
+sr_obj_free(struct sr_obj* obj)
+{
+    free(obj->pts);
+    free(obj->indices);
+    free(obj);
+}
+
+/*******************
+ * sr_texture_free *
+ *******************/
+
+/* frees a heap allocated sr_texture struct */
+extern void
+sr_texture_free(struct sr_texture* texture)
+{
+   free(texture->colors);
+   free(texture);
+}
+
+/*********************************************************************
+ *                                                                   *
+ *                         render interface                          *
  *                                                                   *
  *********************************************************************/
 
@@ -126,13 +148,21 @@ struct sr_pipeline pipe = {
 extern void
 sr_renderl(int* indices, int n_indices, enum sr_primitive prim_type)
 {
-
+    /* create mvp */
     mvp = identity;
     matmul(&mvp, &proj);
     matmul(&mvp, &view);
     matmul(&mvp, &model);
+
+    /* send down the pipeline */
     sr_render(&pipe, indices, n_indices, prim_type);
 }
+
+/*********************************************************************
+ *                                                                   *
+ *                   pipeline and uniform bindings                   *
+ *                                                                   *
+ *********************************************************************/
 
 /***************
  * sr_bind_pts *
@@ -197,28 +227,108 @@ sr_bind_texture(uint32_t* colors, int width, int height)
     texture.height = height;
 }
 
-/***********************
- * sr_bind_point_light *
- ***********************/
-
-/* binds a texture to pipeline */
-extern void
-sr_bind_point_light(float* pos, float* color)
-{
-    light.pos = pos;
-    light.color = color;
-}
-
 /*****************
  * sr_bind_color *
  *****************/
 
 /* binds a base color to uniform */
 extern void
-sr_bind_base_color(float* color)
+sr_bind_base_color(float r, float g, float b)
 {
-    uniform.base_color = color;
+    uniform.base_color[0] = r;
+    uniform.base_color[1] = g;
+    uniform.base_color[2] = b;
 }
+
+/*********************************************************************
+ *                                                                   *
+ *                           light slot                              *
+ *                                                                   *
+ *********************************************************************/
+
+/************
+ * sr_light *
+ ************/
+
+/* binds a light to pipeline */
+extern void 
+sr_light(enum sr_light slot, enum sr_light_attr attr, float* data)
+{
+    /* split index */
+    int idx = 0;
+    switch(slot) {
+        case SR_LIGHT_1:
+            idx = 0;
+            break;
+        case SR_LIGHT_2:
+            idx = 1;
+            break;
+        case SR_LIGHT_3:
+            idx = 2;
+            break;
+        case SR_LIGHT_4:
+            idx = 3;
+            break;    
+        case SR_LIGHT_5:
+            idx = 4;
+            break;    
+        case SR_LIGHT_6:
+            idx = 5;
+            break;    
+        case SR_LIGHT_7:
+            idx = 6;
+            break;    
+        case SR_LIGHT_8:
+            idx = 7;
+            break;    
+    }
+
+    /* set one-hot state */
+    uniform.light_state |= 1 << idx;
+
+    /* split attribute data */
+    switch(attr) {
+        case SR_AMBIENT:
+            uniform.lights[idx].ambient = *data;
+            break;
+        case SR_DIFFUSE:
+            uniform.lights[idx].diffuse = *data;
+            break;
+        case SR_SPECULAR:
+            uniform.lights[idx].specular = *data;
+            break;
+        case SR_POSITION:
+            memcpy(uniform.lights[idx].pos, data, 3 * sizeof(float));
+            break;
+        case SR_COLOR:
+            memcpy(uniform.lights[idx].color, data, 3 * sizeof(float));
+            break;
+        case SR_SPOT_DIRECTION:
+            memcpy(uniform.lights[idx].spot_dir, data, 3 * sizeof(float));
+            break;
+        case SR_SPOT_EXPONENT:
+            uniform.lights[idx].spot_exp = *data;
+            break;
+        case SR_SPOT_CUTOFF:
+            uniform.lights[idx].spot_cutoff = *data;
+            break;
+        case SR_CONSTANT_ATTENUATION:
+            uniform.lights[idx].attn_const = *data;
+            break;
+        case SR_LINEAR_ATTENUATION:
+            uniform.lights[idx].attn_lin = *data;
+            break;
+        case SR_QUADRATIC_ATTENUATION:
+            uniform.lights[idx].attn_quad = *data;
+            break;
+    }
+}
+
+/*********************************************************************
+ *                                                                   *
+ *                      matrix stack operations                      *
+ *                                                                   *
+ *********************************************************************/
 
 /******************
  * sr_matrix_mode *
@@ -306,6 +416,12 @@ sr_load_identity()
 {
    *cur_mat = identity;
 }
+
+/*********************************************************************
+ *                                                                   *
+ *                              model                                *
+ *                                                                   *
+ *********************************************************************/
 
 /****************
  * sr_translate *
@@ -409,6 +525,12 @@ sr_scale(float sx, float sy, float sz)
     matmul(cur_mat, &s);
 }
 
+/*********************************************************************
+ *                                                                   *
+ *                              view                                 *
+ *                                                                   *
+ *********************************************************************/
+
 /**************
  * sr_look_at *
  **************/
@@ -448,12 +570,19 @@ sr_look_at(float ex, float ey, float ez,
         0,     0,     0,     1
     };
 
+    uniform.cam_pos[0] = ex;
+    uniform.cam_pos[1] = ey;
+    uniform.cam_pos[2] = ez;
+
     matmul(cur_mat, &m);
     sr_translate(-ex, -ey, -ez);
-    cam_pos[0] = ex;
-    cam_pos[1] = ey;
-    cam_pos[2] = ez;
 }
+
+/*********************************************************************
+ *                                                                   *
+ *                            projection                             *
+ *                                                                   *
+ *********************************************************************/
 
 /******************
  * sr_perspective *

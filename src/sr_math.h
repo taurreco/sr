@@ -27,10 +27,6 @@ struct mat4 {
     float e30, e31, e32, e33;
 };
 
-struct vec3 {
-    float x, y, z;
-};
-
 /*********************************************************************
  *                                                                   *
  *                        public declarations                        *
@@ -43,17 +39,20 @@ matmul(struct mat4* a, struct mat4* b);
 extern void
 matmul_v(float* a, struct mat4* b, float* c);
 
-extern float
-dot(float* a, float* b);
-
-extern void
-cross(float* a, float* b, float* c);
-
 extern void
 sub_v(float* a, float* b, float* c);
 
 extern void
 scale_v(float* a, float* b, float c);
+
+extern void
+reflect_v(float* r, float* n, float* v);
+
+extern float
+dot(float* a, float* b);
+
+extern void
+cross(float* a, float* b, float* c);
 
 extern float
 magnitude(float* a);

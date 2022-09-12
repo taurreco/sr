@@ -27,9 +27,7 @@ SR_SRC += src/sr_math.c
 
 # Example Targets
 EXAMPLES += examples/cube
-EXAMPLES += examples/phong
 EXAMPLES += examples/obj
-EXAMPLES += examples/texture
 EXAMPLES += examples/dragon
 
 # Tests Targets
