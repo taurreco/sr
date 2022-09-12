@@ -22,10 +22,27 @@ SR is a lightweight software rendering library written in C.  It provides a core
 * custom shaders
 * custom vertex attributes
 * obj loading
-* tga image loading!
+* tga image loading
 
+### Design Overview
+The core of the library is written in `sr_pipe.c`, where the rendering pipeline is implemented.  Its functionality depends on data organized into a struct called `sr_pipeline`:
+```c
+/* in sr.h */
 
-### Design Overview!
+struct sr_pipeline {
+    struct sr_framebuffer* fbuf;
+    void* uniform;        
+    vs_f vs;
+    fs_f fs;
+
+    float* pts_in;
+    int n_pts;
+    int n_attr_in;
+    int n_attr_out;
+
+    int winding;
+};
+```
 
 
 ### Build
