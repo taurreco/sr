@@ -45,8 +45,11 @@ struct sr_pipeline {
     int winding;
 };
 ```
-The framebuffer structure `fbuf` serves primarily as the product of an `sr_render` call.  Contained within it is an image buffer that the render function fills.  The next three fields, `uniform`, `vs`, and `fs` are the programmable parts of the rendering pipeline.  `vs` and `fs` are the vertex shader and fragment shader function pointers, respectivley.  Each one takes a reference to the `uniform`, which stores all data used by the shader that does not vary per vertex while rendering a mesh.  For example: textures, materials, bump maps, etc. are common fields of a uniform.  The next four fields are data specific to the model.
+The framebuffer structure `fbuf` serves primarily as the product of an `sr_render` call.  Contained within it is an image buffer that the render function fills.  
 
+The next three fields, `uniform`, `vs`, and `fs` are the programmable parts of the rendering pipeline.  `vs` and `fs` are the vertex shader and fragment shader function pointers, respectivley.  Each one takes a reference to the `uniform`, which stores all data used by the shader that does not vary per vertex while rendering a mesh like textures, materials, bump maps, etc.
+
+The next four fields are data specific to the model.
 SR uses one float buffer called `pts` to store the vertex attribute data for rendering.  Each vertex is laid out contiguously in the buffer, where the stride of each vertex is given by `n_attr` (number of attributes).  For example, for a vertex type with a position and color attribute, the pts buffer might look like this:
 ```c
 float pts[2 * 6] = {
