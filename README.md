@@ -1,14 +1,14 @@
-# software renderer
+# Software Renderer
 
 <p align="center">
   <img src="./screenshots/dragon.png" />
 </p>
 
-
-
 ### about
+sr is a software rendering library written in C which uses no dependencies.  It provides a core programmable pipeline in sr_pipe.c, and then builds on top of that a much easier to use rendering api that resembles fixed function OpenGL implementations.
 
-### design overview
+### design overview!
+
 
 ### documentation
 
