@@ -90,7 +90,7 @@ Go into the Makefile and change line 70 (the example rules) and add ```$(MINGW_F
 ```Make
     $(CC) $(CFLAGS) $(MINGW_FLAGS) $< $(SR_SRC) -o $@ $(SDL2_FLAGS) -Isrc -lm
 ```
-Make sure that the SDL2 .a files, headers, and binaries are in the ```C:\MinGW``` lib, include, and bin folders respectively, or change the MINGW_FLAGS variable to reflect where those folders are on your system.
+Make sure that the SDL2 .a files, headers, and binaries are in the ```C:\MinGW``` lib, include, and bin folders respectively, or change the ```MINGW_FLAGS``` variable to reflect where those folders are on your system.
 
 ### Makefile rules
 to make the examples go into the repository and type 
