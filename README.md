@@ -82,15 +82,15 @@ The library also supplies custom lighting for up to eight lights.  Within the un
 ### Build
 
 
-For Linux:
+#### For Linux:
 Should work out of the box, just run make and see the rules below for details
 
-For Windows (MinGW)
+#### For Windows (MinGW)
 Go into the Makefile and change line 70 (the example rules) and add ```$(MINGW_FLAGS)``` like so:
 ```Make
     $(CC) $(CFLAGS) $(MINGW_FLAGS) $< $(SR_SRC) -o $@ $(SDL2_FLAGS) -Isrc -lm
 ```
-Make sure that the SDL2 .a files, headers, and binaries are in the C:\MinGW lib, include, and bin folders respectively, or change the MINGW_FLAGS variable to reflect where those folders are on your system.
+Make sure that the SDL2 .a files, headers, and binaries are in the ```C:\MinGW``` lib, include, and bin folders respectively, or change the MINGW_FLAGS variable to reflect where those folders are on your system.
 
 ### Makefile rules
 to make the examples go into the repository and type 
