@@ -58,7 +58,7 @@ int cube_indices[12 * 3] = {
     20, 22, 23
 };
 
-int main(int argc, char *argv[]) {
+int main(int argv, char** args) {
 
     SDL_Init(SDL_INIT_VIDEO);
     

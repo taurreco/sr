@@ -313,13 +313,17 @@ phong_vs(float* out, float* in, void* uniform)
     clip_space(out, in, sr_uniform);
 
     /* calculate wx, wy, wz */
-    matmul_v(out + 4, sr_uniform->model, in);
+    float world[4];
+    matmul_v(world, sr_uniform->model, in);
+    memcpy(out + 4, world, 3 * sizeof(float));
 
     /* copy over texture cordinates */
     memcpy(out + 7, in + 3, 2 * sizeof(float));
 
-    /* send normals to world space */    
-    matmul_v(out + 9, sr_uniform->model, in + 5);
+    /* send normals to world space */
+    float normal[4];    
+    matmul_v(normal, sr_uniform->model, in + 5);
+    memcpy(out + 9, normal, 3 * sizeof(float));
 
     /* normalize them */
     normalize(out + 9);

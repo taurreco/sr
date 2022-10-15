@@ -10,10 +10,15 @@ CFLAGS += -Wextra
 CFLAGS += -Wshadow 
 CFLAGS += -std=gnu11 
 CFLAGS += -Wno-unused-parameter
-CFLAGS += -Iinclude
+CFLAGS += -Iinclude 
 CFLAGS += -O3
 #CFLAGS += -fsanitize=address
 
+MINGW_FLAGS += -IC:\MinGW\include\ 
+MINGW_FLAGS += -LC:\MinGW\lib 
+MINGW_FLAGS += -lmingw32 
+
+SDL2_FLAGS += -lSDL2main
 SDL2_FLAGS += -lSDL2
 
 SR_SRC += src/sr_lib.c
@@ -62,7 +67,7 @@ ALL_TESTS += $(MATH_TESTS)
 
 # Example Rules
 $(EXAMPLES): %: %.c
-	$(CC) $(CFLAGS) $< $(SR_SRC) -o $@ $(SDL2_FLAGS) -Isrc -lm
+	$(CC) $(CFLAGS) $(MINGW_FLAGS) $< $(SR_SRC) -o $@ $(SDL2_FLAGS) -Isrc -lm
 
 # Test Rules
 $(PIPE_TESTS): %: %.c
