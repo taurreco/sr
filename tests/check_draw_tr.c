@@ -34,6 +34,7 @@ struct sr_framebuffer g_fbuf = {
 struct raster_context g_rast = {
     .fbuf = &g_fbuf,
     .uniform = &g_color, 
+    .winding = SR_WINDING_ORDER_CCW,
     .fs = (fs_f)fs_color, 
     .n_attr = 4
 };
@@ -55,7 +56,7 @@ fs_attr(uint32_t* color_p, float* pt, void* uniform)
 /* the uniform data becomes the 'color' */
 
 static void 
-fs_color(uint32_t* color_p, float* pt, void* uniform, )
+fs_color(uint32_t* color_p, float* pt, void* uniform)
 {
     (*color_p) = *((uint32_t*)(uniform));
 }
@@ -105,7 +106,7 @@ basic_triangle()
     float tr[3 * 4] = {
         2.5, 1.15, 1, 1,         /* v0 */
         1.2, 2.73, 1, 1,         /* v1 */
-        4.0, 4.0, 1, 1            /* v2 */
+        4.0, 4.0, 1, 1           /* v2 */
     };
 
     draw_tr(&g_rast, tr, tr + 4, tr + 8);
@@ -382,8 +383,6 @@ fill_two_shared_edges()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
-
-
 
     TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_rast.fbuf->colors, 6 * 10);
 }

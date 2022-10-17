@@ -59,16 +59,12 @@ int main(int argc, char *argv[]) {
                            SDL_TEXTUREACCESS_STREAMING, 
                            rect.w, rect.h);
     
-    float dt = 0;
-    clock_t t;
     int cur_time = 0;
     int prev_time = 0;
     int frame = 0;
     int state = 1;
 
     while (1) {
-        
-        t = clock();
         frame++;
 
         for (int i = 0; i < WIDTH * HEIGHT; i++) {
@@ -110,8 +106,6 @@ int main(int argc, char *argv[]) {
             if (event.key.keysym.scancode == SDL_SCANCODE_SPACE)
                 state = !state;
         }
-
-        const uint8_t* keystate = SDL_GetKeyboardState(NULL);
 
         int p;
         uint32_t *pixels;

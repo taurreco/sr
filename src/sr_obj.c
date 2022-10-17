@@ -27,40 +27,6 @@ const int SIZES[23] = {
     60045577, 120091177, 240182359
 };
 
-char* 
-strtok_r(
-    char *str, 
-    const char *delim, 
-    char **nextp)
-{
-    char *ret;
-
-    if (str == NULL)
-    {
-        str = *nextp;
-    }
-
-    str += strspn(str, delim);
-
-    if (*str == '\0')
-    {
-        return NULL;
-    }
-
-    ret = str;
-
-    str += strcspn(str, delim);
-
-    if (*str)
-    {
-        *str++ = '\0';
-    }
-
-    *nextp = str;
-
-    return ret;
-}
-
 int SIZES_INDEX = 0;  /* current position in the array above */
 
 /*********************************************************************
@@ -168,9 +134,9 @@ hash_table_free(struct hash_table* ht)
  *                                                                   *
  *********************************************************************/
 
-/*********
+/**********
  * hash_1 *
- *********/
+ **********/
 
 static int
 hash_1(char* key)
@@ -184,7 +150,7 @@ hash_1(char* key)
     return (int)hash;
 }
 
-/***********
+/**********
  * hash_2 *
  **********/
 
@@ -321,6 +287,31 @@ grow(struct hash_table* ht)
  *                                                                   *
  *********************************************************************/
 
+/************
+ * strtok_r *
+ ************/
+
+/* implementation of strtok_r for non POSIX compliant C compilers */
+char*
+strtok_r(char *str, const char *delim, char **nextp)
+{
+    char *ret;
+
+    if (str == NULL)
+        str = *nextp;
+    str += strspn(str, delim);
+
+    if (*str == '\0')
+        return NULL;
+    ret = str;
+    str += strcspn(str, delim);
+
+    if (*str)
+        *str++ = '\0';
+    *nextp = str;
+    return ret;
+}
+
 /***************
  * push_stream *
  ***************/
@@ -351,7 +342,7 @@ push_stream(float* dest, char* stream, int n_str)
 static void
 split_indices(int* indices, char* raw, int8_t flags)
 {
-    char* save;
+    char* save = "";
     
     indices[0] = atoi(strtok_r(raw, "/", &save)) - 1;
 
@@ -574,3 +565,15 @@ sr_load_obj(char* file)
     return obj;
 }
 
+/***************
+ * sr_obj_free *
+ ***************/
+
+/* takes a heap allocated sr_obj struct and frees it and contents */
+extern void
+sr_obj_free(struct sr_obj* obj)
+{
+    free(obj->pts);
+    free(obj->indices);
+    free(obj);
+}

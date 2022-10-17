@@ -105,37 +105,6 @@ struct sr_pipeline pipe = {
 
 /*********************************************************************
  *                                                                   *
- *                      public struct interface                      *
- *                                                                   *
- *********************************************************************/
-
-/***************
- * sr_obj_free *
- ***************/
-
-/* takes a heap allocated sr_obj struct and frees it and contents */
-extern void
-sr_obj_free(struct sr_obj* obj)
-{
-    free(obj->pts);
-    free(obj->indices);
-    free(obj);
-}
-
-/*******************
- * sr_texture_free *
- *******************/
-
-/* frees a heap allocated sr_texture struct */
-extern void
-sr_texture_free(struct sr_texture* texture)
-{
-   free(texture->colors);
-   free(texture);
-}
-
-/*********************************************************************
- *                                                                   *
  *                         render interface                          *
  *                                                                   *
  *********************************************************************/

@@ -190,36 +190,6 @@ winding_order(int winding_order, float* v0, float* v1, float* v2)
     return (e01 + e12 + e20) * winding_order > 0;  /* same sign */
 }
 
-
-void
-fucky()
-{
-    float src[16 * SR_MAX_ATTRIBUTE_COUNT] = {
-        19.052557, -34.641014, 18.383839, 20.000000,
-         -51.961521, 51.961521, 41.848484, 43.000000,
-        -34.641014, 0.000000, 28.585859, 30.000000
-    };
-
-    uint8_t clip_flags = SR_CLIP_TOP_PLANE | SR_CLIP_BOTTOM_PLANE | SR_CLIP_LEFT_PLANE;
-    int num_pts = 3;
-
-    clip_poly(src, &num_pts, 4, clip_flags);
-
-    for (int i = 0; i < num_pts * 4; i++) {
-        if (i % 4 == 0) {
-            printf("\n");
-        }
-        printf("%f ", src[i]);
-    }
-
-
-    TEST_ASSERT_TRUE(winding_order(SR_WINDING_ORDER_CCW, src, src + 4, src + 8));
-    TEST_ASSERT_TRUE(winding_order(SR_WINDING_ORDER_CCW, src, src + 8, src + 12));
-
-}
-
-
-
 /*********************************************************************
  *                                                                   *
  *                              main                                 *
@@ -235,7 +205,6 @@ main()
     RUN_TEST(tr_intersects_left_near);
     RUN_TEST(tr_intersects_top_left_bottom);
     RUN_TEST(ln_intersects_top);
-    RUN_TEST(fucky);
     return UNITY_END();
 }
 

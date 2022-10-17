@@ -59,13 +59,6 @@ mmul()
     };
 
     matmul(&m1, &m2);
-    float* d = (float*)(&m1);
-
-    for (int i = 0; i < 16; i++) {
-        if (i % 4 == 0)
-            printf("\n");
-        printf("%f ", d[i]);
-    }
 
     TEST_ASSERT_EQUAL_MEMORY(&ans, &m1, sizeof(struct mat4));
 }
@@ -91,12 +84,6 @@ vmul()
     float out[4];
 
     matmul_v(out, &m, vec);
-
-    for (int i = 0; i < 4; i++) {
-        if (i % 4 == 0)
-            printf("\n");
-        printf("%f ", out[i]);
-    }
 
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(ans, out, 4);
 }

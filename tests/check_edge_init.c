@@ -43,7 +43,7 @@ outside_flat_edge()
     float pt[2] = {0.5, 1};
 
     struct edge e12;
-    float w0 = edge_init(&e12, v1, v2, pt);
+    float w0 = edge_init(&e12, SR_WINDING_ORDER_CCW, v1, v2, pt);
 
     TEST_ASSERT_TRUE(e12.is_tl);
     TEST_ASSERT_EQUAL_FLOAT(0, e12.step_x);
@@ -66,7 +66,7 @@ inside_flat_edge()
     float pt[2] = {0.5, 4};
 
     struct edge e12;
-    float w0 = edge_init(&e12, v1, v2, pt);
+    float w0 = edge_init(&e12, SR_WINDING_ORDER_CCW, v1, v2, pt);
 
     TEST_ASSERT_TRUE(e12.is_tl);
     TEST_ASSERT_EQUAL_FLOAT(0, e12.step_x);
@@ -88,7 +88,7 @@ inside_left_edge()
     float pt[2] = {2.7, 2.2};
 
     struct edge e20;
-    float w1 = edge_init(&e20, v2, v0, pt);
+    float w1 = edge_init(&e20, SR_WINDING_ORDER_CCW, v2, v0, pt);
 
     TEST_ASSERT_TRUE(e20.is_tl);
     TEST_ASSERT_EQUAL_FLOAT(4, e20.step_x);
@@ -109,7 +109,7 @@ void on_edge() {
     float pt[2] = {2.4, 3.2};
 
     struct edge e20;
-    float w1 = edge_init(&e20, v2, v0, pt);
+    float w1 = edge_init(&e20, SR_WINDING_ORDER_CCW, v2, v0, pt);
 
     TEST_ASSERT_TRUE(e20.is_tl);
     TEST_ASSERT_EQUAL_FLOAT(2, e20.step_x);

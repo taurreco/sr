@@ -251,11 +251,9 @@ int main(int argv, char** args) {
         int p;
         uint32_t *pixels;
         SDL_LockTexture(texture, &screenRect, (void**)&pixels, &p);
-        uint32_t startTicks = SDL_GetTicks();
 
         memcpy(pixels, colors, screenRect.h * screenRect.w * sizeof(uint32_t));
 
-        uint32_t endTicks = SDL_GetTicks();
         dt = (float)(clock() - t) / CLOCKS_PER_SEC;
         SDL_UnlockTexture(texture);
 
@@ -271,7 +269,5 @@ int main(int argv, char** args) {
         SDL_RenderCopy(renderer, texture, &screenRect, &screenRect);
         SDL_RenderPresent(renderer);
 
-        char title[32];
-        SDL_SetWindowTitle(window, SDL_itoa(endTicks - startTicks, title, 10));
     }
 }

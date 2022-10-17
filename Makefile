@@ -36,34 +36,27 @@ EXAMPLES += examples/obj
 EXAMPLES += examples/dragon
 
 # Tests Targets
-PIPE_TESTS += tests/check_draw_indexed
+PIPE_TESTS += tests/check_render
 PIPE_TESTS += tests/check_winding_order
 PIPE_DEPS += src/sr_clip.c 
 PIPE_DEPS += src/sr_rast.c 
 PIPE_DEPS += src/sr_math.c
 
-RAST_TESTS += tests/check_draw_tr
-RAST_TESTS += tests/check_draw_pt
-RAST_TESTS += tests/check_edge_init
-RAST_TESTS += tests/check_is_tl
+# Raster Tests
+TESTS += tests/check_draw_tr
+TESTS += tests/check_draw_pt
+TESTS += tests/check_edge_init
+TESTS += tests/check_is_tl
 
-OBJ_TESTS += tests/check_hash_table
-OBJ_TESTS += tests/check_load_obj
+# Clip Tests
+TESTS += tests/check_clip_poly
+TESTS += tests/check_clip_routine
+TESTS += tests/check_lerp
 
-TGA_TESTS += tests/check_load_tga
-
-CLIP_TESTS += tests/check_clip_poly
-CLIP_TESTS += tests/check_clip_routine
-CLIP_TESTS += tests/check_clip_test
-CLIP_TESTS += tests/check_lerp
-
-MATH_TESTS += tests/check_matmul
-
-ALL_TESTS += $(RASTER_TESTS) 
-ALL_TESTS += $(OBJ_TESTS) 
-ALL_TESTS += $(TGA_TESTS) 
-ALL_TESTS += $(CLIP_TESTS) 
-ALL_TESTS += $(MATH_TESTS)
+# Math Tests
+TESTS += tests/check_matmul
+TESTS += tests/check_hash_table
+TESTS += tests/check_clip_test
 
 # Example Rules
 $(EXAMPLES): %: %.c
@@ -73,16 +66,20 @@ $(EXAMPLES): %: %.c
 $(PIPE_TESTS): %: %.c
 	$(CC) $(CFLAGS) -Isrc -Iunity $< $(PIPE_DEPS) unity/unity.c -o $@ -lm
 
-$(ALL_TESTS): %: %.c
+$(TESTS): %: %.c
 	$(CC) $(CFLAGS) -Isrc -Iunity $< unity/unity.c -o $@ -lm
 
 examples: $(EXAMPLES)
-tests: $(PIPE_TESTS) $(ALL_TESTS)
+tests: $(PIPE_TESTS) $(TESTS)
+
+check-all: $(PIPE_TESTS) $(TESTS)
+	for t in $(PIPE_TESTS); do $$t; done
+	for t in $(TESTS); do $$t; done
 
 # Clean Up
 clean-tests:
 	for t in $(PIPE_TESTS); do rm $$t; done
-	for t in $(ALL_TESTS); do rm $$t; done
+	for t in $(TESTS); do rm $$t; done
 
 clean-examples:
 	for t in $(EXAMPLES); do rm $$t; done

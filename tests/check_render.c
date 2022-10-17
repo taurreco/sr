@@ -86,7 +86,7 @@ vs_transform(float* out, float* in, void* uniform)
 static void
 fs_basic(uint32_t* out, float* in, void* uniform)
 {
-    *out = ceil(in[4]);
+    *out = roundf(in[4]);
 }
 
 /*********************************************************************
@@ -107,7 +107,7 @@ one_point()
     g_pipe.pts_in = pts_in;
     g_pipe.n_pts = 1;
     int indices[1] = {0};
-    sr_render(&g_pipe, indices, 1, SR_PRIMITIVE_TYPE_POINT_LIST);
+    sr_render(&g_pipe, indices, 1, SR_POINT_LIST);
 
     uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -144,7 +144,7 @@ three_points()
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_POINT_LIST);
+    sr_render(&g_pipe, indices, 3, SR_POINT_LIST);
 
     uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -158,14 +158,6 @@ three_points()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
-
-    for (int i = 0; i < 10 * 10; i++) {
-        if (i % 10 == 0) {
-            printf("\n");
-        }
-        printf("%d ", g_colors[i]);
-    }
-    printf("\n");
 
     TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_colors, 10 * 10);
 }
@@ -190,7 +182,7 @@ one_triangle()
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 3, SR_TRIANGLE_LIST);
 
      uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -204,14 +196,6 @@ one_triangle()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
-
-    for (int i = 0; i < 10 * 10; i++) {
-        if (i % 10 == 0) {
-            printf("\n");
-        }
-        printf("%d ", g_colors[i]);
-    }
-    printf("\n");
 
     TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_colors, 10 * 10);
 }
@@ -242,29 +226,20 @@ three_triangles()
     g_pipe.n_pts = 9;
 
     int indices[9] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-    sr_render(&g_pipe, indices, 9, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 9, SR_TRIANGLE_LIST);
     
     uint32_t target_colors[10 * 10] = {
+        0, 0, 0, 0, 0, 0, 2, 0, 0, 0,
+        0, 0, 0, 0, 0, 2, 2, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 3, 0, 0, 0, 1, 0, 0, 0, 0,
+        0, 3, 3, 3, 3, 1, 1, 0, 0, 0,
+        0, 3, 3, 3, 3, 3, 0, 0, 0, 0,
+        0, 0, 3, 3, 3, 0, 0, 0, 0, 0,
+        0, 0, 3, 3, 0, 0, 0, 0, 0, 0,
+        0, 0, 3, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
-
-    for (int i = 0; i < 10 * 10; i++) {
-        if (i % 10 == 0) {
-            printf("\n");
-        }
-        printf("%d ", g_colors[i]);
-    }
-    printf("\n");
-
 
     TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_colors, 10 * 10);
 }
@@ -291,28 +266,20 @@ triangle_fan()
     g_pipe.n_pts = 5;
 
     int indices[9] = {0, 1, 2, 0, 2, 3, 0, 3, 4};
-    sr_render(&g_pipe, indices, 9, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 9, SR_TRIANGLE_LIST);
 
     uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+        0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
+        0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+        0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
-
-        for (int i = 0; i < 10 * 10; i++) {
-        if (i % 10 == 0) {
-            printf("\n");
-        }
-        printf("%d ", g_colors[i]);
-    }
-    printf("\n");
 
     TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_colors, 10 * 10);
 }
@@ -341,28 +308,20 @@ flat_depth()
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 3, SR_TRIANGLE_LIST);
 
-     uint32_t target_colors[10 * 10] = {
+    uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
+        0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
+        0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
+        0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
+        0, 0, 0, 0, 1, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 1, 1, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
-
-    for (int i = 0; i < 10 * 10; i++) {
-        if (i % 10 == 0) {
-            printf("\n");
-        }
-        printf("%d ", g_colors[i]);
-    }
-    printf("\n");
 
     TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_colors, 10 * 10);
 }
@@ -386,28 +345,20 @@ near_depth()
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 3, SR_TRIANGLE_LIST);
 
     uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+        0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
+        0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
+        0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
+        0, 0, 0, 0, 1, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 1, 1, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
-
-    for (int i = 0; i < 10 * 10; i++) {
-        if (i % 10 == 0) {
-            printf("\n");
-        }
-        printf("%d ", g_colors[i]);
-    }
-    printf("\n");
 
     TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_colors, 10 * 10);
 }
@@ -430,13 +381,13 @@ far_depth()
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 3, SR_TRIANGLE_LIST);
     
     uint32_t target_colors[10 * 10] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
+        0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
+        0, 0, 0, 0, 1, 1, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -444,14 +395,6 @@ far_depth()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
-
-      for (int i = 0; i < 10 * 10; i++) {
-        if (i % 10 == 0) {
-            printf("\n");
-        }
-        printf("%d ", g_colors[i]);
-    }
-    printf("\n");
 
     TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_colors, 10 * 10);
 }
@@ -492,41 +435,24 @@ projection_matrix()
         -20, 0, -30, 1, 2
     };
 
-    /**
-     *   float pts_in[5 * 6] = {
-            -3, 0, 12, 1.0, 2,
-            0.3, 0.1, 0.5, 1.0, 2,
-            -20, 10, 43, 1.0, 2
-        };
-     * 
-     */
-
     g_pipe.pts_in = pts_in;
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 3, SR_TRIANGLE_LIST);
 
     uint32_t target_colors[10 * 10] = {
-        1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 0, 1, 0, 0
+        2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        2, 2, 0, 0, 0, 0, 0, 0, 0, 0,
+        2, 2, 0, 0, 0, 0, 0, 0, 0, 0,
+        2, 2, 2, 0, 0, 0, 0, 0, 0, 0,
+        2, 2, 2, 2, 0, 0, 0, 0, 0, 0,
+        0, 2, 2, 2, 2, 0, 0, 0, 0, 0,
+        0, 0, 2, 2, 2, 0, 0, 0, 0, 0,
+        0, 0, 0, 2, 2, 2, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 2, 2, 0, 0, 0
     };
-
-    for (int i = 0; i < 10 * 10; i++) {
-        if (i % 10 == 0) {
-            printf("\n");
-        }
-        printf("%d ", g_colors[i]);
-    }
-    printf("\n");
 
     TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_colors, 10 * 10);
 }
@@ -566,74 +492,22 @@ another_projection_test()
     g_pipe.n_pts = 3;
 
     int indices[3] = {0, 1, 2};
-    sr_render(&g_pipe, indices, 3, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 3, SR_TRIANGLE_LIST);
 
     uint32_t target_colors[10 * 10] = {
-        1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 2, 2, 2, 0, 0, 0, 0,
+        0, 0, 0, 0, 2, 2, 0, 0, 0, 0,
+        0, 0, 0, 0, 2, 2, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 0, 1, 0, 0
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    for (int i = 0; i < 10 * 10; i++) {
-        if (i % 10 == 0) {
-            printf("\n");
-        }
-        printf("%d ", g_colors[i]);
-    }
-    printf("\n");
-
     TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_colors, 10 * 10);
-}
-
-/***************
- * view_matrix *
- ***************/
-
-/* vertex shader sends points from world space to clip space */
-void
-view_matrix() 
-{
-    
-}
-
-/*********************
- * mvw matrix *
- *********************/
-
-/* vertex shader sends points from model space to clip space */
-void
-mvw_matrix() 
-{
-    
-}
-
-/*******************
- * translate_point *
- *******************/
-
-/* output point is a translation of input */
-void 
-translate_point() 
-{
-
-}
-
-/**********************
- * translate_triangle *
- **********************/
-
-/* output triangle is a translation of input */
-void 
-translate_triangle() 
-{
-
 }
 
 /*********************************************************************
@@ -668,29 +542,20 @@ clip_three_triangles()
     g_pipe.n_pts = 9;
 
     int indices[9] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-    sr_render(&g_pipe, indices, 9, SR_PRIMITIVE_TYPE_TRIANGLE_LIST);
+    sr_render(&g_pipe, indices, 9, SR_TRIANGLE_LIST);
 
     uint32_t target_colors[10 * 10] = {
-        0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-        0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-
+        0, 0, 0, 0, 0, 0, 2, 2, 2, 2,
+        0, 0, 0, 0, 0, 0, 0, 2, 2, 2,
+        0, 0, 0, 0, 0, 0, 0, 2, 2, 2,
+        0, 0, 0, 0, 0, 0, 0, 2, 2, 2,
+        0, 0, 0, 0, 0, 0, 0, 0, 2, 2,
+        0, 0, 0, 0, 0, 1, 1, 0, 2, 2,
+        0, 0, 0, 1, 1, 0, 0, 0, 0, 2,
+        0, 0, 1, 1, 0, 0, 0, 0, 0, 2,
+        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     };
-
-        for (int i = 0; i < 10 * 10; i++) {
-        if (i % 10 == 0) {
-            printf("\n");
-        }
-        printf("%d ", g_colors[i]);
-    }
-    printf("\n");
 
     TEST_ASSERT_EQUAL_UINT32_ARRAY(target_colors, g_colors, 10 * 10);
 }
@@ -705,7 +570,6 @@ int
 main() 
 {
     UNITY_BEGIN();
-    RUN_TEST(three_triangles);
     RUN_TEST(one_point);
     RUN_TEST(three_points);
     RUN_TEST(one_triangle);
@@ -713,6 +577,7 @@ main()
     RUN_TEST(flat_depth);
     RUN_TEST(near_depth);
     RUN_TEST(far_depth);
+    RUN_TEST(three_triangles);
     RUN_TEST(clip_three_triangles);
     RUN_TEST(projection_matrix);
     RUN_TEST(another_projection_test);

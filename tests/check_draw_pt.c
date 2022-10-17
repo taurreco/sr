@@ -10,7 +10,7 @@
  *                                                                   *
  *********************************************************************/
 
-static void fs(uint32_t* color_p, float* pt void* uniform,);
+static void fs(uint32_t* color_p, float* pt, void* uniform);
 
 /*********************************************************************
  *                                                                   *

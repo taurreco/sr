@@ -5,12 +5,9 @@
 #include <math.h>
 
 #include "sr.h"
-#include "sr_math.h"
 
 int WIDTH = 1024;
 int HEIGHT = 1024;
-
-int slices = 12;
 
 int main(int argc, char *argv[]) {
 
@@ -99,7 +96,6 @@ int main(int argc, char *argv[]) {
                            SDL_TEXTUREACCESS_STREAMING, 
                            rect.w, rect.h);
     
-    clock_t t;
     int cur_time = 0;
     int prev_time = 0;
     int frame = 0;
@@ -109,7 +105,6 @@ int main(int argc, char *argv[]) {
 
     while (1) {
         
-        t = clock();
         frame++;
 
         SDL_Event event;

@@ -112,20 +112,20 @@ unpack(uint8_t* bytes, int n_bytes)
 static void
 read(struct tga* tga, FILE* fp)
 {
-
+   int n = 0;  // used to supress fread warnings :(
    /* fill header */
-   fread(&tga->header.id_len, 1, 1, fp);
-   fread(&tga->header.color_map_type, 1, 1, fp);
-   fread(&tga->header.data_type_code, 1, 1, fp);
-   fread(&tga->header.color_map_origin, 1, 2, fp);
-   fread(&tga->header.color_map_len, 1, 2, fp);
-   fread(&tga->header.color_map_depth, 1, 1, fp);
-   fread(&tga->header.x_origin, 1, 2, fp);
-   fread(&tga->header.y_origin, 1, 2, fp);
-   fread(&tga->header.width, 1, 2, fp);
-   fread(&tga->header.height, 1, 2, fp);
-   fread(&tga->header.bits_per_pixel, 1, 1, fp);
-   fread(&tga->header.image_descriptor, 1, 1, fp);
+   n += fread(&tga->header.id_len, 1, 1, fp);
+   n += fread(&tga->header.color_map_type, 1, 1, fp);
+   n += fread(&tga->header.data_type_code, 1, 1, fp);
+   n += fread(&tga->header.color_map_origin, 1, 2, fp);
+   n += fread(&tga->header.color_map_len, 1, 2, fp);
+   n += fread(&tga->header.color_map_depth, 1, 1, fp);
+   n += fread(&tga->header.x_origin, 1, 2, fp);
+   n += fread(&tga->header.y_origin, 1, 2, fp);
+   n += fread(&tga->header.width, 1, 2, fp);
+   n += fread(&tga->header.height, 1, 2, fp);
+   n += fread(&tga->header.bits_per_pixel, 1, 1, fp);
+   n += fread(&tga->header.image_descriptor, 1, 1, fp);
 
    int pixel_depth = tga->header.bits_per_pixel / 8;
    int color_depth = tga->header.color_map_depth / 8;
@@ -136,8 +136,8 @@ read(struct tga* tga, FILE* fp)
                                 pixel_depth, 1);
 
    fseek(fp, tga->header.id_len, SEEK_CUR);
-   fread(tga->color_map, 1, tga->header.color_map_len * color_depth, fp);
-   fread(tga->image_data, 1, 
+   n += fread(tga->color_map, 1, tga->header.color_map_len * color_depth, fp);
+   n += fread(tga->image_data, 1, 
          tga->header.width * 
          tga->header.height * 
          pixel_depth, 
@@ -198,38 +198,7 @@ sr_load_tga(char* file)
          }
          break;
 
-      case 9:    /* run length encoded color mapped */
-
-         packet = tga.image_data;
-         
-         for (int i = 0; i < tga.header.width * tga.header.height; i++) {
-
-            int len = (*packet & 0x7F) + 1;
-
-            if (*packet & 0x80) {     /* run length packet */
-
-               uint32_t color = unpack(tga.color_map + packet[1], color_depth);
-               for (int j = 0; j < len; j++) {
-                  colors[i + j] = color;
-               }
-
-               /* next packet */
-               packet += pixel_depth + 1;  
-            } else {                  /* raw packet */
-               color_tga = tga.color_map + packet[1];
-               for (int j = 0; j < len; j++) {
-                  colors[i + j] = unpack(color_tga, color_depth);
-                  color_tga += pixel_depth;
-               }
-
-                /* next packet */
-               packet += len * pixel_depth + 1;   
-            }
-
-            i += len - 1;
-         }
-         break;
-
+      case 9:    /* run length encoded & color mapped */
       case 10:   /* run length encoded RGB */
 
          packet = tga.image_data;
@@ -238,9 +207,12 @@ sr_load_tga(char* file)
 
             int len = (*packet & 0x7F) + 1;
 
+            int depth = tga.header.color_map_type ? color_depth : pixel_depth;
+            uint8_t* color_addr = tga.header.color_map_type ? tga.color_map + packet[1] : packet + 1;
+
             if (*packet & 0x80) {    /* run length packet */
 
-               uint32_t color = unpack(packet + 1, pixel_depth);
+               uint32_t color = unpack(color_addr, depth);
                for (int j = 0; j < len; j++) {
                   colors[i + j] = color;
                }
@@ -249,10 +221,9 @@ sr_load_tga(char* file)
                packet += pixel_depth + 1;  
             } else {                /* raw packet */
 
-               color_tga = packet + 1;
                for (int j = 0; j < len; j++) {
-                  colors[i + j] = unpack(color_tga, pixel_depth);
-                  color_tga += pixel_depth;
+                  colors[i + j] = unpack(color_addr, depth);
+                  color_addr += pixel_depth;
                }
 
                /* next packet */
@@ -279,4 +250,17 @@ sr_load_tga(char* file)
 
    return texture;
 }
+
+/*******************
+ * sr_texture_free *
+ *******************/
+
+/* frees a heap allocated sr_texture struct */
+extern void
+sr_texture_free(struct sr_texture* texture)
+{
+   free(texture->colors);
+   free(texture);
+}
+
 
