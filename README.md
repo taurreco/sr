@@ -80,8 +80,19 @@ To give control over the model view projection transform, the user can switch be
 The library also supplies custom lighting for up to eight lights.  Within the uniform is an array of lights whose fields can be set by the `sr_light` function.
 
 ### Build
-For linux:
 
+
+#### For Linux:
+Should work out of the box, just run make and see the rules below for details
+
+#### For Windows (MinGW)
+Go into the Makefile and change line 70 (the example rules) and add ```$(MINGW_FLAGS)``` like so:
+```Make
+    $(CC) $(CFLAGS) $(MINGW_FLAGS) $< $(SR_SRC) -o $@ $(SDL2_FLAGS) -Isrc -lm
+```
+Make sure that the SDL2 .a files, headers, and binaries are in the ```C:\MinGW``` lib, include, and bin folders respectively, or change the ```MINGW_FLAGS``` variable to reflect where those folders are on your system.
+
+### Makefile rules
 to make the examples go into the repository and type 
 ```
 $ make examples
