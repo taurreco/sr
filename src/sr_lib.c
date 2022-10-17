@@ -38,6 +38,14 @@ struct mat4 model = {
     0, 0, 0, 1
 };
 
+/* normal model matrix */
+struct mat4 normal_model = {
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1
+};
+
 /* camera view matrix */
 struct mat4 view = {
     1, 0, 0, 0,
@@ -86,6 +94,7 @@ struct sr_framebuffer fbuf = {
 /* uniform */
 struct sr_uniform uniform = {
     .model = &model,
+    .normal_model = &normal_model,
     .mvp = &mvp,
     .texture = &texture,
 };
@@ -122,6 +131,11 @@ sr_renderl(int* indices, int n_indices, enum sr_primitive prim_type)
     matmul(&mvp, &proj);
     matmul(&mvp, &view);
     matmul(&mvp, &model);
+
+    /* create normal model matrix */
+    normal_model = model;
+    mat3(&normal_model);
+    invert(&normal_model);
 
     /* send down the pipeline */
     sr_render(&pipe, indices, n_indices, prim_type);
@@ -512,31 +526,46 @@ sr_scale(float sx, float sy, float sz)
  */
 extern void
 sr_look_at(float ex, float ey, float ez, 
-           float tx, float ty, float tz, 
+           float lx, float ly, float lz, 
            float ux, float uy, float uz)
 {
-    float f[3] = {
-        tx - ex, ty - ey, tz - ez  /* forward vector */
+    /* eye vector */
+    float eye[3] = {
+        ex, ey, ez
     };
 
-    float tmp_u[3] = {   /* temporary up vector */
+    /* look vector */
+    float look[3] = {
+        lx, ly, lz
+    };
+
+    /* up vector */
+    float up[3] = {
         ux, uy, uz
     };
 
-    normalize(f);
-    normalize(tmp_u);
+    /* backward vector, w */
+    float w[3];
+    sub_v(w, eye, look);
+    normalize(w);
 
-    float s[3], u[3];
+    /* side vector, u */
+    float u[3];
+    cross(u, up, w);   
+    normalize(u);
 
-    cross(s, f, tmp_u);   /* orthonormal to f and up */
-    normalize(s);
-    cross(u, s, f);  /* orthonormal up */
+    /* new up vector, v */
+    float v[3];
+    float up_proj_w[3]; /* up projected onto w */
+    scale_v(up_proj_w, w, dot(up, w));
+    sub_v(v, up, up_proj_w);
+    normalize(v);
     
     struct mat4 m = {
-        s[0],  s[1],  s[2],  0,
-        u[0],  u[1],  u[2],  0,
-        -f[0], -f[1], -f[2], 0,
-        0,     0,     0,     1
+        u[0], u[1], u[2], 0,
+        v[0], v[1], v[2], 0,
+        w[0], w[1], w[2], 0,
+        0,    0,    0,    1
     };
 
     uniform.cam_pos[0] = ex;

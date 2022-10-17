@@ -322,7 +322,7 @@ phong_vs(float* out, float* in, void* uniform)
 
     /* send normals to world space */
     float normal[4];    
-    matmul_v(normal, sr_uniform->model, in + 5);
+    matmul_v(normal, sr_uniform->normal_model, in + 5);
     memcpy(out + 9, normal, 3 * sizeof(float));
 
     /* normalize them */

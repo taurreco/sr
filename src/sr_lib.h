@@ -51,6 +51,7 @@ struct light {
 /* the uniform variables for the fixed lib shaders */
 struct sr_uniform {
     struct mat4* model;
+    struct mat4* normal_model;
     struct mat4* mvp;
     struct sr_texture* texture;
     

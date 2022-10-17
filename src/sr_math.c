@@ -44,6 +44,200 @@ matmul(struct mat4* a, struct mat4* b)
     *a = tmp;
 };
 
+/**********
+ * invert *
+ **********/
+
+/* inverts a 4x4 matrix, returns 0 if non invertible */
+extern int
+invert(struct mat4* a)
+{
+    struct mat4 tmp;
+
+    tmp.e00 = a->e11  * a->e22 * a->e33 - 
+              a->e11  * a->e23 * a->e32 - 
+              a->e21  * a->e12  * a->e33 + 
+              a->e21  * a->e13  * a->e32 +
+              a->e31 * a->e12  * a->e23 - 
+              a->e31 * a->e13  * a->e22;
+
+    tmp.e10 = -a->e10  * a->e22 * a->e33 + 
+              a->e10  * a->e23 * a->e32 + 
+              a->e20  * a->e12  * a->e33 - 
+              a->e20  * a->e13  * a->e32 - 
+              a->e30 * a->e12  * a->e23 + 
+              a->e30 * a->e13  * a->e22;
+
+    tmp.e20 = a->e10  * a->e21 * a->e33 - 
+              a->e10  * a->e23 * a->e31 - 
+              a->e20  * a->e11 * a->e33 + 
+              a->e20  * a->e13 * a->e31 + 
+              a->e30 * a->e11 * a->e23 - 
+              a->e30 * a->e13 * a->e21;
+
+    tmp.e30 = -a->e10  * a->e21 * a->e32 + 
+               a->e10 * a->e22 * a->e31 +
+               a->e20  * a->e11 * a->e32 - 
+               a->e20  * a->e12 * a->e31 - 
+               a->e30 * a->e11 * a->e22 + 
+               a->e30 * a->e12 * a->e21;
+
+    tmp.e01 = -a->e01  * a->e22 * a->e33 + 
+              a->e01  * a->e23 * a->e32 + 
+              a->e21  * a->e02 * a->e33 - 
+              a->e21  * a->e03 * a->e32 - 
+              a->e31 * a->e02 * a->e23 + 
+              a->e31 * a->e03 * a->e22;
+
+    tmp.e11 = a->e00  * a->e22 * a->e33 - 
+              a->e00  * a->e23 * a->e32 - 
+              a->e20  * a->e02 * a->e33 + 
+              a->e20  * a->e03 * a->e32 + 
+              a->e30 * a->e02 * a->e23 - 
+              a->e30 * a->e03 * a->e22;
+
+    tmp.e21 = -a->e00  * a->e21 * a->e33 + 
+              a->e00  * a->e23 * a->e31 + 
+              a->e20  * a->e01 * a->e33 - 
+              a->e20  * a->e03 * a->e31 - 
+              a->e30 * a->e01 * a->e23 + 
+              a->e30 * a->e03 * a->e21;
+
+    tmp.e31 = a->e00  * a->e21 * a->e32 - 
+              a->e00  * a->e22 * a->e31 - 
+              a->e20  * a->e01 * a->e32 + 
+              a->e20  * a->e02 * a->e31 + 
+              a->e30 * a->e01 * a->e22 - 
+              a->e30 * a->e02 * a->e21;
+
+    tmp.e02 = a->e01  * a->e12 * a->e33 - 
+              a->e01  * a->e13 * a->e32 - 
+              a->e11  * a->e02 * a->e33 + 
+              a->e11  * a->e03 * a->e32 + 
+              a->e31 * a->e02 * a->e13 - 
+              a->e31 * a->e03 * a->e12;
+
+    tmp.e12 = -a->e00  * a->e12 * a->e33 + 
+              a->e00  * a->e13 * a->e32 + 
+              a->e10  * a->e02 * a->e33 - 
+              a->e10  * a->e03 * a->e32 - 
+              a->e30 * a->e02 * a->e13 + 
+              a->e30 * a->e03 * a->e12;
+
+    tmp.e22 = a->e00  * a->e11 * a->e33 - 
+              a->e00  * a->e13 * a->e31 - 
+              a->e10  * a->e01 * a->e33 + 
+              a->e10  * a->e03 * a->e31 + 
+              a->e30 * a->e01 * a->e13 - 
+              a->e30 * a->e03 * a->e11;
+
+    tmp.e32 = -a->e00  * a->e11 * a->e32 + 
+              a->e00  * a->e12 * a->e31 + 
+              a->e10  * a->e01 * a->e32 - 
+              a->e10  * a->e02 * a->e31 - 
+              a->e30 * a->e01 * a->e12 + 
+              a->e30 * a->e02 * a->e11;
+
+    tmp.e03 = -a->e01 * a->e12 * a->e23 + 
+              a->e01 * a->e13 * a->e22 + 
+              a->e11 * a->e02 * a->e23 - 
+              a->e11 * a->e03 * a->e22 - 
+              a->e21 * a->e02 * a->e13 + 
+              a->e21 * a->e03 * a->e12;
+
+    tmp.e13 = a->e00 * a->e12 * a->e23 - 
+              a->e00 * a->e13 * a->e22 - 
+              a->e10 * a->e02 * a->e23 + 
+              a->e10 * a->e03 * a->e22 + 
+              a->e20 * a->e02 * a->e13 - 
+              a->e20 * a->e03 * a->e12;
+
+    tmp.e23 = -a->e00 * a->e11 * a->e23 + 
+              a->e00 * a->e13 * a->e21 + 
+              a->e10 * a->e01 * a->e23 - 
+              a->e10 * a->e03 * a->e21 - 
+              a->e20 * a->e01 * a->e13 + 
+              a->e20 * a->e03 * a->e11;
+
+    tmp.e33 = a->e00 * a->e11 * a->e22 - 
+              a->e00 * a->e12 * a->e21 - 
+              a->e10 * a->e01 * a->e22 + 
+              a->e10 * a->e02 * a->e21 + 
+              a->e20 * a->e01 * a->e12 - 
+              a->e20 * a->e02 * a->e11;
+
+    float det = a->e00 * tmp.e00 + a->e01 * tmp.e10 + 
+                a->e02 * tmp.e20 + a->e03 * tmp.e30;
+
+    if (det == 0)
+        return 0;
+
+    det = 1.0 / det;
+
+    tmp.e00 *= det;
+    tmp.e01 *= det;
+    tmp.e02 *= det;
+    tmp.e03 *= det;
+    tmp.e10 *= det;
+    tmp.e12 *= det;
+    tmp.e13 *= det;
+    tmp.e20 *= det;
+    tmp.e21 *= det;
+    tmp.e22 *= det;
+    tmp.e23 *= det;
+    tmp.e30 *= det;
+    tmp.e31 *= det;
+    tmp.e32 *= det;
+    tmp.e33 *= det;
+
+    *a = tmp;
+
+    return 1;
+}
+
+/*************
+ * transpose *
+ *************/
+
+/* transpose of a 4x4 matrix */
+extern void
+transpose(struct mat4* a) {
+    struct mat4 tmp;
+    tmp.e00 = a->e00;
+    tmp.e01 = a->e10;
+    tmp.e02 = a->e20;
+    tmp.e03 = a->e30;
+    tmp.e10 = a->e01;
+    tmp.e11 = a->e11;
+    tmp.e12 = a->e21;
+    tmp.e13 = a->e31;
+    tmp.e20 = a->e02;
+    tmp.e21 = a->e12;
+    tmp.e22 = a->e22;
+    tmp.e23 = a->e32;
+    tmp.e30 = a->e03;
+    tmp.e31 = a->e13;
+    tmp.e32 = a->e23;
+    tmp.e33 = a->e33;
+    *a = tmp;
+}
+
+/********
+ * mat3 *
+ ********/
+
+/* converts 4x4 matrix to its upper 3x3 matrix by filling 0s*/
+extern void
+mat3(struct mat4* a) {
+    a->e03 = 0;
+    a->e13 = 0;
+    a->e23 = 0;
+    a->e30 = 0;
+    a->e31 = 0;
+    a->e32 = 0;
+    a->e33 = 0;
+}
+
 /************
  * matmul_v *
  ************/

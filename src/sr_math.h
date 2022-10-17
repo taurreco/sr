@@ -36,6 +36,15 @@ struct mat4 {
 extern void 
 matmul(struct mat4* a, struct mat4* b);
 
+extern int
+invert(struct mat4* a);
+
+extern void
+transpose(struct mat4* a);
+
+extern void
+mat3(struct mat4* a);
+
 extern void
 matmul_v(float* a, struct mat4* b, float* c);
 
