@@ -9,7 +9,7 @@
 SR is a lightweight software rendering library written in C.  It exposes the main algorithms, data structures, and math behind the standard real-time rendering model used in popular graphics api's like OpenGL and DirectX3D.  This project is entirely educational, and is free for anyone to use / adapt.  SR is tested with the [Unity Framework](http://www.throwtheswitch.org/unity) and the examples use SDL2 in order to display its output buffer.
 
 ### Features
-<p align="right">
+<p align="center">
   <img align="right" src="https://user-images.githubusercontent.com/8971799/189619522-cc23a50b-4dfd-4391-95c2-3a930e215c3d.png" />
 </p>
 
