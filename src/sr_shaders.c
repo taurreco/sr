@@ -24,7 +24,6 @@
  *********/
 
 /* clamps float value between 0 and 1 */
-
 static float
 clamp(float v)
 {
@@ -207,7 +206,7 @@ phong(float* color, float* pos, float* normal, struct sr_uniform* uniform)
                 vec3_sub(tmp, pos, light.pos);
                 normalize(tmp);
                 normalize(light_dir);
-                float x = acos(dot(a, tmp));
+                float x = acos(dot(light_dir, tmp));
                 float inner = light.spot_angle - light.spot_penumbra;
                 float outer = light.spot_angle;
                 if (x <= inner) {
