@@ -11,7 +11,7 @@ CFLAGS += -Wshadow
 CFLAGS += -std=gnu11 
 CFLAGS += -Wno-unused-parameter
 CFLAGS += -Iinclude 
-CFLAGS += -O3
+#CFLAGS += -O3
 #CFLAGS += -fsanitize=address
 
 MINGW_FLAGS += -IC:\MinGW\include\ 
@@ -31,9 +31,8 @@ SR_SRC += src/sr_shaders.c
 SR_SRC += src/sr_math.c
 
 # Example Targets
-EXAMPLES += examples/cube
-EXAMPLES += examples/obj
-EXAMPLES += examples/dragon
+EXAMPLES += examples/basic_triangle
+EXAMPLES += examples/bunny
 
 # Tests Targets
 PIPE_TESTS += tests/check_render
@@ -60,7 +59,7 @@ TESTS += tests/check_clip_test
 
 # Example Rules
 $(EXAMPLES): %: %.c
-	$(CC) $(CFLAGS) $< $(SR_SRC) -o $@ $(SDL2_FLAGS) -Isrc -lm
+	$(CC) $(CFLAGS) examples/driver.c $(SR_SRC) $< -o $@ $(SDL2_FLAGS) -Isrc -lm
 
 # Test Rules
 $(PIPE_TESTS): %: %.c

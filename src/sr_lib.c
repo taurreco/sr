@@ -23,7 +23,7 @@
  *********************************************************************/
 
 /* identity matrix */
-const struct mat4 identity = {
+static const struct mat4 identity = {
     1, 0, 0, 0,
     0, 1, 0, 0,
     0, 0, 1, 0,
@@ -31,15 +31,15 @@ const struct mat4 identity = {
 };
 
 /* model matrix */
-struct mat4 model = {
+static struct mat4 model = {
     1, 0, 0, 0,
     0, 1, 0, 0,
     0, 0, 1, 0,
     0, 0, 0, 1
 };
 
-/* normal model matrix */
-struct mat4 normal_model = {
+/* normal transform matrix */
+static struct mat4 normal_transform = {
     1, 0, 0, 0,
     0, 1, 0, 0,
     0, 0, 1, 0,
@@ -47,7 +47,7 @@ struct mat4 normal_model = {
 };
 
 /* camera view matrix */
-struct mat4 view = {
+static struct mat4 view = {
     1, 0, 0, 0,
     0, 1, 0, 0,
     0, 0, 1, 0,
@@ -55,7 +55,7 @@ struct mat4 view = {
 };
 
 /* projection matrix */
-struct mat4 proj = {
+static struct mat4 proj = {
     1, 0, 0, 0,
     0, 1, 0, 0,
     0, 0, 1, 0,
@@ -63,28 +63,27 @@ struct mat4 proj = {
 };
 
 /* model view projection matrix */
-struct mat4 mvp = {
+static struct mat4 mvp = {
     1, 0, 0, 0,
     0, 1, 0, 0,
     0, 0, 1, 0,
     0, 0, 0, 1
 };
 
-struct mat4* cur_mat;  /* points to whichever matrix stack is being used */
-struct light_slot* cur_light;
+static struct light g_lights[SR_MAX_LIGHT_COUNT];
 
-struct sr_texture texture = {
+static struct material g_material;
+
+static struct mat4* cur_mat;  /* points to whichever matrix stack is being used */
+
+static struct sr_texture g_texture = {
     .colors = 0,
     .width = 0,
     .height = 0
 };
 
-float cam_pos[3] = {
-    0, 0, 0
-};
-
 /* framebuffer */
-struct sr_framebuffer fbuf = {
+static struct sr_framebuffer g_fbuf = {
     .width = 0,
     .height = 0,
     .colors = 0,
@@ -92,17 +91,24 @@ struct sr_framebuffer fbuf = {
 };
 
 /* uniform */
-struct sr_uniform uniform = {
+static struct sr_uniform g_uniform = {
     .model = &model,
-    .normal_model = &normal_model,
+    .normal_transform = &normal_transform,
     .mvp = &mvp,
-    .texture = &texture,
+    .has_material = 0,
+    .has_texture = 0,
+    .material = &g_material,
+    .texture = &g_texture,
+    .lights = g_lights,
+    .ka = 1,
+    .kd = 1,
+    .ks = 1
 };
 
 /* pipeline state */
-struct sr_pipeline pipe = {
-    .fbuf = &fbuf,
-    .uniform = (void*)(&uniform),
+static struct sr_pipeline g_pipe = {
+    .fbuf = &g_fbuf,
+    .uniform = (void*)(&g_uniform),
     .vs = 0,
     .fs = 0,
     .pts_in = 0,
@@ -132,13 +138,22 @@ sr_renderl(int* indices, int n_indices, enum sr_primitive prim_type)
     matmul(&mvp, &view);
     matmul(&mvp, &model);
 
-    /* create normal model matrix */
-    normal_model = model;
-    mat3(&normal_model);
-    invert(&normal_model);
+    /* create normal transform matrix */
+    normal_transform = model;
+    upper_3x3(&normal_transform);
+    transpose(&normal_transform);
+    invert(&normal_transform);
+
+    /* camera position */
+    float origin[4] = {0, 0, 0, 1};
+    float tmp[4];
+    struct mat4 view_inverse = view;
+    invert(&view_inverse);
+    vec4_matmul(tmp, &view_inverse, origin);
+    memcpy(g_uniform.cam_pos, tmp, 3 * sizeof(float));
 
     /* send down the pipeline */
-    sr_render(&pipe, indices, n_indices, prim_type);
+    sr_render(&g_pipe, indices, n_indices, prim_type);
 }
 
 /*********************************************************************
@@ -155,9 +170,9 @@ sr_renderl(int* indices, int n_indices, enum sr_primitive prim_type)
 extern void
 sr_bind_pts(float* pts, int n_pts, int n_attr)
 {
-    pipe.pts_in = pts;
-    pipe.n_pts = n_pts;
-    pipe.n_attr_in = n_attr;
+    g_pipe.pts_in = pts;
+    g_pipe.n_pts = n_pts;
+    g_pipe.n_attr_in = n_attr;
 }
 
 /***********************
@@ -168,10 +183,32 @@ sr_bind_pts(float* pts, int n_pts, int n_attr)
 extern void
 sr_bind_framebuffer(int width, int height, uint32_t* colors, float* depths)
 {
-    fbuf.width = width;
-    fbuf.height = height;
-    fbuf.colors = colors;
-    fbuf.depths = depths;
+    g_fbuf.width = width;
+    g_fbuf.height = height;
+    g_fbuf.colors = colors;
+    g_fbuf.depths = depths;
+}
+
+/*******************
+ * sr_bind_uniform *
+ *******************/
+
+/* loads a custom uniform */
+extern void
+sr_bind_uniform(void* uniform)
+{
+    g_pipe.uniform = uniform;
+}
+
+/**********************
+ * sr_restore_uniform *
+ **********************/
+
+/* loads default uniform */
+extern void
+sr_restore_uniform()
+{
+    g_pipe.uniform = &g_uniform;
 }
 
 /**************
@@ -182,8 +219,8 @@ sr_bind_framebuffer(int width, int height, uint32_t* colors, float* depths)
 extern void
 sr_bind_vs(vs_f vs, int n_attr_out)
 {
-    pipe.vs = vs;
-    pipe.n_attr_out = n_attr_out;
+    g_pipe.vs = vs;
+    g_pipe.n_attr_out = n_attr_out;
 }
 
 /**************
@@ -194,7 +231,7 @@ sr_bind_vs(vs_f vs, int n_attr_out)
 extern void
 sr_bind_fs(fs_f fs)
 {
-    pipe.fs = fs;
+    g_pipe.fs = fs;
 }
 
 /*******************
@@ -205,22 +242,9 @@ sr_bind_fs(fs_f fs)
 extern void
 sr_bind_texture(uint32_t* colors, int width, int height)
 {
-    texture.colors = colors;
-    texture.width = width;
-    texture.height = height;
-}
-
-/*****************
- * sr_bind_color *
- *****************/
-
-/* binds a base color to uniform */
-extern void
-sr_bind_base_color(float r, float g, float b)
-{
-    uniform.base_color[0] = r;
-    uniform.base_color[1] = g;
-    uniform.base_color[2] = b;
+    g_texture.colors = colors;
+    g_texture.width = width;
+    g_texture.height = height;
 }
 
 /*********************************************************************
@@ -228,6 +252,35 @@ sr_bind_base_color(float r, float g, float b)
  *                           light slot                              *
  *                                                                   *
  *********************************************************************/
+
+/***************
+ * split_light *
+ ***************/
+
+static int
+split_light(enum sr_light slot) {
+        switch(slot) {
+        case SR_LIGHT_1:
+            return 0;
+        case SR_LIGHT_2:
+            return 1;
+        case SR_LIGHT_3:
+            return 2;
+        case SR_LIGHT_4:
+            return 3;
+        case SR_LIGHT_5:
+            return 4;
+        case SR_LIGHT_6:
+            return 5;
+        case SR_LIGHT_7:
+            return 6;
+        case SR_LIGHT_8:
+            return 7;
+        default:
+            return -1;
+    }
+    
+}
 
 /************
  * sr_light *
@@ -238,73 +291,156 @@ extern void
 sr_light(enum sr_light slot, enum sr_light_attr attr, float* data)
 {
     /* split index */
-    int idx = 0;
-    switch(slot) {
-        case SR_LIGHT_1:
-            idx = 0;
-            break;
-        case SR_LIGHT_2:
-            idx = 1;
-            break;
-        case SR_LIGHT_3:
-            idx = 2;
-            break;
-        case SR_LIGHT_4:
-            idx = 3;
-            break;    
-        case SR_LIGHT_5:
-            idx = 4;
-            break;    
-        case SR_LIGHT_6:
-            idx = 5;
-            break;    
-        case SR_LIGHT_7:
-            idx = 6;
-            break;    
-        case SR_LIGHT_8:
-            idx = 7;
-            break;    
-    }
-
-    /* set one-hot state */
-    uniform.light_state |= 1 << idx;
+    int idx = split_light(slot);
 
     /* split attribute data */
     switch(attr) {
-        case SR_AMBIENT:
-            uniform.lights[idx].ambient = *data;
-            break;
-        case SR_DIFFUSE:
-            uniform.lights[idx].diffuse = *data;
-            break;
-        case SR_SPECULAR:
-            uniform.lights[idx].specular = *data;
-            break;
         case SR_POSITION:
-            memcpy(uniform.lights[idx].pos, data, 3 * sizeof(float));
+            memcpy(g_lights[idx].pos, data, 3 * sizeof(float));
+            break;
+        case SR_DIRECTION:
+            memcpy(g_lights[idx].dir, data, 3 * sizeof(float));
             break;
         case SR_COLOR:
-            memcpy(uniform.lights[idx].color, data, 3 * sizeof(float));
+            memcpy(g_lights[idx].color, data, 4 * sizeof(float));
             break;
-        case SR_SPOT_DIRECTION:
-            memcpy(uniform.lights[idx].spot_dir, data, 3 * sizeof(float));
+        case SR_SPOT_ANGLE:
+            g_lights[idx].spot_angle = *data;
             break;
-        case SR_SPOT_EXPONENT:
-            uniform.lights[idx].spot_exp = *data;
-            break;
-        case SR_SPOT_CUTOFF:
-            uniform.lights[idx].spot_cutoff = *data;
+        case SR_SPOT_PENUMBRA:
+            g_lights[idx].spot_penumbra = *data;
             break;
         case SR_CONSTANT_ATTENUATION:
-            uniform.lights[idx].attn_const = *data;
+            g_lights[idx].attn_const = *data;
             break;
         case SR_LINEAR_ATTENUATION:
-            uniform.lights[idx].attn_lin = *data;
+            g_lights[idx].attn_lin = *data;
             break;
         case SR_QUADRATIC_ATTENUATION:
-            uniform.lights[idx].attn_quad = *data;
+            g_lights[idx].attn_quad = *data;
+            break;
+        default:
+            return;
+    }
+}
+
+/*************
+ * sr_glight *
+ *************/
+
+/* binds global light data to uniform */
+extern void 
+sr_glight(enum sr_light_attr attr, float* data)
+{
+    /* split attribute data */
+    switch(attr) {
+        case SR_AMBIENT:
+            g_uniform.ka = *data;
+            break;
+        case SR_DIFFUSE:
+            g_uniform.kd = *data;
+            break;
+        case SR_SPECULAR:
+            g_uniform.ks = *data;
+            break;
+        default:
+            return;
+    }
+}
+
+/*****************
+ * sr_light_type *
+ *****************/
+
+/* binds light type to slot */
+extern void 
+sr_light_type(enum sr_light slot, enum sr_light_type type)
+{
+    int idx = split_light(slot);
+    switch (type) {
+        case SR_DIRECTIONAL:
+            g_lights[idx].type = 1 << 0;
+            break;
+        case SR_POINT:
+            g_lights[idx].type = 1 << 1;
+            break;
+        case SR_SPOT:
+            g_lights[idx].type = 1 << 2;
             break;
     }
+}
+
+
+/*******************
+ * sr_light_enable *
+ *******************/
+
+/* enables light at specified slot */
+extern void 
+sr_light_enable(enum sr_light slot)
+{
+    int idx = split_light(slot);
+    g_uniform.light_state |= 1 << idx;
+}
+
+/********************
+ * sr_light_disable *
+ ********************/
+
+/* disables light at specified slot */
+extern void 
+sr_light_disable(enum sr_light slot)
+{
+    int idx = split_light(slot);
+    g_uniform.light_state &= ~(1 << idx);
+}
+
+/***************
+ * sr_material *
+ ***************/
+
+/* binds a material to pipeline */
+extern void
+sr_material(enum sr_light_attr attr, float* data)
+{
+    switch(attr) {
+        case SR_AMBIENT:
+            memcpy(g_material.ambient, data, 4 * sizeof(float));
+            break;
+        case SR_DIFFUSE:
+            memcpy(g_material.diffuse, data, 4 * sizeof(float));
+            break;
+        case SR_SPECULAR:
+            memcpy(g_material.specular, data, 4 * sizeof(float));
+            break;
+        case SR_SHININESS:
+            g_material.shininess = *data;
+            break;
+        default:
+            return;
+    }
+}
+
+/**********************
+ * sr_material_enable *
+ **********************/
+
+/* enables use of material */
+extern void
+sr_material_enable()
+{
+    g_uniform.has_material = 1;
+}
+
+/***********************
+ * sr_material_disable *
+ ***********************/
+
+/* disables use of material */
+extern void
+sr_material_disable()
+{
+    g_uniform.has_material = 0;
 }
 
 /*********************************************************************
@@ -448,9 +584,6 @@ sr_rotate_x(float t)
 /***************
  * sr_rotate_y *
  ***************/
-float camera_pos[3] = {
-    0, 0, 0
-};
 
 /* pushes a matrix rotating about the y axis by t radians */
 extern void
@@ -546,7 +679,7 @@ sr_look_at(float ex, float ey, float ez,
 
     /* backward vector, w */
     float w[3];
-    sub_v(w, eye, look);
+    vec3_sub(w, eye, look);
     normalize(w);
 
     /* side vector, u */
@@ -557,8 +690,8 @@ sr_look_at(float ex, float ey, float ez,
     /* new up vector, v */
     float v[3];
     float up_proj_w[3]; /* up projected onto w */
-    scale_v(up_proj_w, w, dot(up, w));
-    sub_v(v, up, up_proj_w);
+    vec3_scale(up_proj_w, w, dot(up, w));
+    vec3_sub(v, up, up_proj_w);
     normalize(v);
     
     struct mat4 m = {
@@ -567,10 +700,6 @@ sr_look_at(float ex, float ey, float ez,
         w[0], w[1], w[2], 0,
         0,    0,    0,    1
     };
-
-    uniform.cam_pos[0] = ex;
-    uniform.cam_pos[1] = ey;
-    uniform.cam_pos[2] = ez;
 
     matmul(cur_mat, &m);
     sr_translate(-ex, -ey, -ez);

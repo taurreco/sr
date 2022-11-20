@@ -44,17 +44,25 @@ enum sr_light {
 };
 
 enum sr_light_attr {
+    SR_TYPE,
     SR_POSITION,
     SR_COLOR,
     SR_AMBIENT,
     SR_DIFFUSE,
     SR_SPECULAR,
-    SR_SPOT_DIRECTION,
-    SR_SPOT_EXPONENT,
-    SR_SPOT_CUTOFF,
+    SR_SHININESS,
+    SR_DIRECTION,
+    SR_SPOT_ANGLE,
+    SR_SPOT_PENUMBRA,
     SR_CONSTANT_ATTENUATION,
     SR_LINEAR_ATTENUATION,
     SR_QUADRATIC_ATTENUATION
+};
+
+enum sr_light_type {
+    SR_DIRECTIONAL,
+    SR_POINT,
+    SR_SPOT
 };
 
 /*********************************************************************
@@ -172,6 +180,14 @@ sr_bind_framebuffer(int width, int height, uint32_t* colors, float* depths);
 extern void
 sr_bind_vs(vs_f vs, int n_attr_out);
 
+/* WARNING can't use matrix stack, default shaders, or lights if called */
+extern void
+sr_bind_uniform(void* uniform);
+
+/* restores default uniform if sr_bind_uniform was called */
+extern void
+sr_restore_uniform();
+
 extern void
 sr_bind_fs(fs_f fs);
 
@@ -196,6 +212,27 @@ sr_render(struct sr_pipeline* pipe, int* indices,
 
 extern void
 sr_light(enum sr_light slot, enum sr_light_attr attr, float* data);
+
+extern void 
+sr_glight(enum sr_light_attr attr, float* data);
+
+extern void 
+sr_light_type(enum sr_light slot, enum sr_light_type type);
+
+extern void
+sr_light_enable(enum sr_light slot);
+
+extern void
+sr_light_disable(enum sr_light slot);
+
+extern void
+sr_material(enum sr_light_attr attr, float* data);
+
+extern void
+sr_material_enable();
+
+extern void
+sr_material_disable();
 
 /*********************************************************************
  *                                                                   *
@@ -261,12 +298,9 @@ extern void
 sr_bind_texture_fs();
 
 extern void
-sr_bind_phong_vs();
+sr_bind_std_vs();
 
 extern void
-sr_bind_phong_texture_fs();
-
-extern void
-sr_bind_phong_color_fs();
+sr_bind_phong_fs();
 
 #endif /* SR_H */

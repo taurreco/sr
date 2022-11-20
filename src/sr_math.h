@@ -43,19 +43,31 @@ extern void
 transpose(struct mat4* a);
 
 extern void
-mat3(struct mat4* a);
+upper_3x3(struct mat4* a);
 
 extern void
-matmul_v(float* a, struct mat4* b, float* c);
+vec4_matmul(float* a, struct mat4* b, float* c);
 
 extern void
-sub_v(float* a, float* b, float* c);
+vec4_mul(float* a, float* b, float* c);
 
 extern void
-scale_v(float* a, float* b, float c);
+vec4_add(float* a, float* b, float* c);
 
 extern void
-reflect_v(float* r, float* n, float* v);
+vec4_scale(float* a, float* b, float c);
+
+extern void
+vec3_sub(float* a, float* b, float* c);
+
+extern void
+vec3_add(float* a, float* b, float* c);
+
+extern void
+vec3_scale(float* a, float* b, float c);
+
+extern void
+reflect(float* r, float* n, float* v);
 
 extern float
 dot(float* a, float* b);

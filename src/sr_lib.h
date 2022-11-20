@@ -28,20 +28,28 @@
 
 /* holds light data */
 struct light {
+    uint8_t type;
     float pos[3];
-    float color[3];
+    float color[4];
 
-    float ambient;
-    float diffuse;
-    float specular;
-
-    float spot_dir[3];
-    float spot_exp;
-    float spot_cutoff;
+    float dir[3];
+    float spot_angle;
+    float spot_penumbra;
 
     float attn_const;
     float attn_lin;
-    float attn_quad; 
+    float attn_quad;
+};
+
+/************
+ * material *
+ ************/
+
+struct material {
+    float ambient[4];
+    float diffuse[4];
+    float specular[4];
+    float shininess;
 };
 
 /**************
@@ -50,16 +58,25 @@ struct light {
 
 /* the uniform variables for the fixed lib shaders */
 struct sr_uniform {
+
+    /* geometry */
     struct mat4* model;
-    struct mat4* normal_model;
+    struct mat4* normal_transform;
     struct mat4* mvp;
-    struct sr_texture* texture;
-    
-    float base_color[3];
     float cam_pos[3];
 
+    /* material */
+    int has_material;
+    int has_texture;
+    struct material* material;
+    struct sr_texture* texture;
+
+    /* light */
     uint8_t light_state;
-    struct light lights[SR_MAX_LIGHT_COUNT];
+    struct light* lights;
+    float ka;
+    float kd;
+    float ks;
 };
 
 #endif  /* SR_LIB_H */

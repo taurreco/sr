@@ -54,38 +54,38 @@ invert(struct mat4* a)
 {
     struct mat4 tmp;
 
-    tmp.e00 = a->e11  * a->e22 * a->e33 - 
-              a->e11  * a->e23 * a->e32 - 
-              a->e21  * a->e12  * a->e33 + 
-              a->e21  * a->e13  * a->e32 +
-              a->e31 * a->e12  * a->e23 - 
-              a->e31 * a->e13  * a->e22;
+    tmp.e00 = a->e11 * a->e22 * a->e33 - 
+              a->e11 * a->e23 * a->e32 - 
+              a->e21 * a->e12 * a->e33 + 
+              a->e21 * a->e13 * a->e32 +
+              a->e31 * a->e12 * a->e23 - 
+              a->e31 * a->e13 * a->e22;
 
-    tmp.e10 = -a->e10  * a->e22 * a->e33 + 
-              a->e10  * a->e23 * a->e32 + 
-              a->e20  * a->e12  * a->e33 - 
-              a->e20  * a->e13  * a->e32 - 
-              a->e30 * a->e12  * a->e23 + 
-              a->e30 * a->e13  * a->e22;
+    tmp.e10 = -a->e10 * a->e22 * a->e33 + 
+              a->e10 * a->e23 * a->e32 + 
+              a->e20 * a->e12 * a->e33 - 
+              a->e20 * a->e13 * a->e32 - 
+              a->e30 * a->e12 * a->e23 + 
+              a->e30 * a->e13 * a->e22;
 
-    tmp.e20 = a->e10  * a->e21 * a->e33 - 
-              a->e10  * a->e23 * a->e31 - 
-              a->e20  * a->e11 * a->e33 + 
-              a->e20  * a->e13 * a->e31 + 
+    tmp.e20 = a->e10 * a->e21 * a->e33 - 
+              a->e10 * a->e23 * a->e31 - 
+              a->e20 * a->e11 * a->e33 + 
+              a->e20 * a->e13 * a->e31 + 
               a->e30 * a->e11 * a->e23 - 
               a->e30 * a->e13 * a->e21;
 
-    tmp.e30 = -a->e10  * a->e21 * a->e32 + 
+    tmp.e30 = -a->e10 * a->e21 * a->e32 + 
                a->e10 * a->e22 * a->e31 +
-               a->e20  * a->e11 * a->e32 - 
-               a->e20  * a->e12 * a->e31 - 
+               a->e20 * a->e11 * a->e32 - 
+               a->e20 * a->e12 * a->e31 - 
                a->e30 * a->e11 * a->e22 + 
                a->e30 * a->e12 * a->e21;
 
-    tmp.e01 = -a->e01  * a->e22 * a->e33 + 
-              a->e01  * a->e23 * a->e32 + 
-              a->e21  * a->e02 * a->e33 - 
-              a->e21  * a->e03 * a->e32 - 
+    tmp.e01 = -a->e01 * a->e22 * a->e33 + 
+              a->e01 * a->e23 * a->e32 + 
+              a->e21 * a->e02 * a->e33 - 
+              a->e21 * a->e03 * a->e32 - 
               a->e31 * a->e02 * a->e23 + 
               a->e31 * a->e03 * a->e22;
 
@@ -103,38 +103,38 @@ invert(struct mat4* a)
               a->e30 * a->e01 * a->e23 + 
               a->e30 * a->e03 * a->e21;
 
-    tmp.e31 = a->e00  * a->e21 * a->e32 - 
-              a->e00  * a->e22 * a->e31 - 
-              a->e20  * a->e01 * a->e32 + 
-              a->e20  * a->e02 * a->e31 + 
+    tmp.e31 = a->e00 * a->e21 * a->e32 - 
+              a->e00 * a->e22 * a->e31 - 
+              a->e20 * a->e01 * a->e32 + 
+              a->e20 * a->e02 * a->e31 + 
               a->e30 * a->e01 * a->e22 - 
               a->e30 * a->e02 * a->e21;
 
-    tmp.e02 = a->e01  * a->e12 * a->e33 - 
-              a->e01  * a->e13 * a->e32 - 
-              a->e11  * a->e02 * a->e33 + 
-              a->e11  * a->e03 * a->e32 + 
+    tmp.e02 = a->e01 * a->e12 * a->e33 - 
+              a->e01 * a->e13 * a->e32 - 
+              a->e11 * a->e02 * a->e33 + 
+              a->e11 * a->e03 * a->e32 + 
               a->e31 * a->e02 * a->e13 - 
               a->e31 * a->e03 * a->e12;
 
-    tmp.e12 = -a->e00  * a->e12 * a->e33 + 
-              a->e00  * a->e13 * a->e32 + 
-              a->e10  * a->e02 * a->e33 - 
-              a->e10  * a->e03 * a->e32 - 
+    tmp.e12 = -a->e00 * a->e12 * a->e33 + 
+              a->e00 * a->e13 * a->e32 + 
+              a->e10 * a->e02 * a->e33 - 
+              a->e10 * a->e03 * a->e32 - 
               a->e30 * a->e02 * a->e13 + 
               a->e30 * a->e03 * a->e12;
 
-    tmp.e22 = a->e00  * a->e11 * a->e33 - 
-              a->e00  * a->e13 * a->e31 - 
-              a->e10  * a->e01 * a->e33 + 
-              a->e10  * a->e03 * a->e31 + 
+    tmp.e22 = a->e00 * a->e11 * a->e33 - 
+              a->e00 * a->e13 * a->e31 - 
+              a->e10 * a->e01 * a->e33 + 
+              a->e10 * a->e03 * a->e31 + 
               a->e30 * a->e01 * a->e13 - 
               a->e30 * a->e03 * a->e11;
 
-    tmp.e32 = -a->e00  * a->e11 * a->e32 + 
-              a->e00  * a->e12 * a->e31 + 
-              a->e10  * a->e01 * a->e32 - 
-              a->e10  * a->e02 * a->e31 - 
+    tmp.e32 = -a->e00 * a->e11 * a->e32 + 
+              a->e00 * a->e12 * a->e31 + 
+              a->e10 * a->e01 * a->e32 - 
+              a->e10 * a->e02 * a->e31 - 
               a->e30 * a->e01 * a->e12 + 
               a->e30 * a->e02 * a->e11;
 
@@ -222,13 +222,13 @@ transpose(struct mat4* a) {
     *a = tmp;
 }
 
-/********
- * mat3 *
- ********/
+/*************
+ * upper_3x3 *
+ *************/
 
 /* converts 4x4 matrix to its upper 3x3 matrix by filling 0s*/
 extern void
-mat3(struct mat4* a) {
+upper_3x3(struct mat4* a) {
     a->e03 = 0;
     a->e13 = 0;
     a->e23 = 0;
@@ -238,13 +238,20 @@ mat3(struct mat4* a) {
     a->e33 = 0;
 }
 
-/************
- * matmul_v *
- ************/
+
+/*********************************************************************
+ *                                                                   *
+ *                           vec4 operations                         *
+ *                                                                   *
+ *********************************************************************/
+
+/***************
+ * vec4_matmul *
+ ***************/
 
 /* applys the matrix 'b' to vector 'c', stores result in vector 'a' */ 
 extern void
-matmul_v(float* a, struct mat4* b, float* c)
+vec4_matmul(float* a, struct mat4* b, float* c)
 {
     a[0] = c[0] * b->e00 + c[1] * b->e01 + c[2] * b->e02 + c[3] * b->e03;
     a[1] = c[0] * b->e10 + c[1] * b->e11 + c[2] * b->e12 + c[3] * b->e13;
@@ -252,49 +259,110 @@ matmul_v(float* a, struct mat4* b, float* c)
     a[3] = c[0] * b->e30 + c[1] * b->e31 + c[2] * b->e32 + c[3] * b->e33;
 }
 
+/************
+ * vec4_mul *
+ ************/
+
+/* multiplies vec4 'b' and 'c' componentwise, result in 'a' */
+extern void
+vec4_mul(float* a, float* b, float* c)
+{
+    a[0] = b[0] * c[0];
+    a[1] = b[1] * c[1];
+    a[2] = b[2] * c[2];
+    a[3] = b[3] * c[3];
+}
+
+/************
+ * vec4_add *
+ ***********/
+
+/* adds vec4 'b' to 'c' and stores result in 'a' */
+extern void
+vec4_add(float* a, float* b, float* c)
+{
+    a[0] = b[0] + c[0];
+    a[1] = b[1] + c[1];
+    a[2] = b[2] + c[2];
+    a[3] = b[3] + c[3];
+}
+
+/**************
+ * vec4_scale *
+ **************/
+
+/* multiplies vec4 'b' by scalar 'c' and stores result in 'a' */
+extern void
+vec4_scale(float* a, float* b, float c)
+{
+    a[0] = b[0] * c;
+    a[1] = b[1] * c;
+    a[2] = b[2] * c;
+    a[3] = b[3] * c;
+}
+
 /*********************************************************************
  *                                                                   *
- *                              vectors                              *
+ *                           vec3 operations                         *
  *                                                                   *
  *********************************************************************/
 
-/*********
- * sub_v *
- *********/
+/************
+ * vec3_sub *
+ ************/
 
 /* subtracts vec3 'c' from 'b' and stores result in 'a' */
 extern void
-sub_v(float* a, float* b, float* c)
+vec3_sub(float* a, float* b, float* c)
 {
     a[0] = b[0] - c[0];
     a[1] = b[1] - c[1];
     a[2] = b[2] - c[2];
 }
 
-/***********
- * scale_v *
+/************
+ * vec3_add *
  ***********/
+
+/* adds vec3 'b' to 'c' and stores result in 'a' */
+extern void
+vec3_add(float* a, float* b, float* c)
+{
+    a[0] = b[0] + c[0];
+    a[1] = b[1] + c[1];
+    a[2] = b[2] + c[2];
+}
+
+/**************
+ * vec3_scale *
+ **************/
 
 /* multiplies vec3 'b' by scalar 'c' and stores result in 'a' */
 extern void
-scale_v(float* a, float* b, float c)
+vec3_scale(float* a, float* b, float c)
 {
     a[0] = b[0] * c;
     a[1] = b[1] * c;
     a[2] = b[2] * c;
 }
 
-/*************
- * reflect_v *
- *************/
+/*********************************************************************
+ *                                                                   *
+ *                              geometry                             *
+ *                                                                   *
+ *********************************************************************/
 
-/* reflects a vec3 'v' across a normal 'n', result in 'r' */
+/***********
+ * reflect *
+ ***********/
+
+/* reflects a vec3 'l' across a normal 'n', result in 'r' */
 extern void
-reflect_v(float* r, float* n, float* v)
+reflect(float* r, float* l, float* n)
 {
-    float w[3];
-    scale_v(w, n, 2 * dot(v, n));
-    sub_v(r, w, v);
+    float tmp[3];
+    vec3_scale(tmp, n, 2 * dot(l, n));
+    vec3_sub(r, tmp, l);
 }
 
 /*******
