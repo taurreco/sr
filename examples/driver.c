@@ -5,6 +5,12 @@
 
 #include "driver.h"
 
+/*********************************************************************
+ *                                                                   *
+ *                          initialize data                          *
+ *                                                                   *
+ *********************************************************************/
+
 int SCREEN_WIDTH = 1024;
 int SCREEN_HEIGHT = 768;
 
@@ -13,7 +19,7 @@ float* depths;
 
 /*********************************************************************
  *                                                                   *
- *                             placeholder                           *
+ *                            render loop                            *
  *                                                                   *
  *********************************************************************/
 
@@ -25,10 +31,14 @@ float* depths;
 int 
 main(int argc, char* args[])
 {
+    /* allocate frame buffers */
+
     colors = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(uint32_t));
     depths = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(float));
 
-    start();
+    start();     /* call example's start code */
+
+    /* SDL setup magic */
 
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -45,14 +55,19 @@ main(int argc, char* args[])
                            SDL_PIXELFORMAT_ARGB8888, 
                            SDL_TEXTUREACCESS_STREAMING, 
                            SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    /* the loop */
     
     int quit = 0;
     int cur_time = 0;
+    int prev_sec = 0;
     int prev_time = 0;
     int frame = 0;
 
     while (!quit) {
 
+        cur_time = SDL_GetTicks();
+        
         /* check if quit */
 
         SDL_Event event;
@@ -69,7 +84,10 @@ main(int argc, char* args[])
             colors[i] = 0;
             depths[i] = 1000;
         }
-        update(0.4);
+        float dt = (cur_time - prev_time) / (float) 1000;
+
+     
+        update(dt);   /* call example's update code */
 
         SDL_UpdateTexture(texture, NULL, colors, SCREEN_WIDTH * 4);
         SDL_RenderCopy(renderer, texture, NULL, NULL);
@@ -77,17 +95,19 @@ main(int argc, char* args[])
 
         /* display fps */
 
-        cur_time = SDL_GetTicks();
-        if (cur_time > prev_time + 1000) {
+        if (cur_time > prev_sec + 1000) {
             printf("FPS: %d\n", frame);
             frame = 0;
-            prev_time = cur_time;
+            prev_sec = cur_time;
         }
+
+        prev_time = cur_time;
         frame++;
     }
 
-    /* free example memory */
-    end();
+    /* free program memory */
+
+    end();  /* call example's end code */
     free(colors);
     free(depths);
     

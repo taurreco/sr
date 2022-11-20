@@ -4,15 +4,42 @@
 #include <stdlib.h>
 #include "sr.h"
 
+/**
+ * bunny.c
+ * --------
+ * this is the minimal code needed to load an .obj
+ * file and render it with a single directional light
+ * 
+ */
+
+/*********************************************************************
+ *                                                                   *
+ *                           vertex data                             *
+ *                                                                   *
+ *********************************************************************/
+
 struct sr_obj* obj;
 
+/*********************************************************************
+ *                                                                   *
+ *                         prepare context                           *
+ *                                                                   *
+ *********************************************************************/
+
+/*********
+ * start *
+ *********/
+
+/* runs only once in the begining */
 extern void
 start()
 {
-    for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
-        colors[i] = 1;
-        depths[i] = 1000;
-    }
+
+/*********************************************************************
+ *                                                                   *
+ *                           light data                              *
+ *                                                                   *
+ *********************************************************************/
 
     float light_dir[3] = {0, -1, 0};
     float light_color[4] = {1, 1, 1, 1};
@@ -29,6 +56,12 @@ start()
     float kd = 0.5;
     float ks = 0.5;
 
+/*********************************************************************
+ *                                                                   *
+ *                         light bindings                            *
+ *                                                                   *
+ *********************************************************************/
+
     sr_glight(SR_AMBIENT, &ka);
     sr_glight(SR_DIFFUSE, &kd);
     sr_glight(SR_SPECULAR, &ks);
@@ -41,13 +74,30 @@ start()
     sr_light(SR_LIGHT_1, SR_QUADRATIC_ATTENUATION, &light_attn_quad);
     sr_light_enable(SR_LIGHT_1);
 
+/*********************************************************************
+ *                                                                   *
+ *                         material bindings                         *
+ *                                                                   *
+ *********************************************************************/
+
     sr_material(SR_AMBIENT, material_ambient);
     sr_material(SR_DIFFUSE, material_diffuse);
     sr_material(SR_SPECULAR, material_specular);
     sr_material(SR_SHININESS, &material_shininess);
-    sr_material_enable();
+
+/*********************************************************************
+ *                                                                   *
+ *                      load obj file into RAM                       *
+ *                                                                   *
+ *********************************************************************/
 
     obj = sr_load_obj("./assets/bunny.obj");
+
+/*********************************************************************
+ *                                                                   *
+ *                        prepare sr context                         *
+ *                                                                   *
+ *********************************************************************/
 
     sr_bind_pts(obj->pts, obj->n_pts, obj->n_attr);
     sr_bind_framebuffer(SCREEN_WIDTH, SCREEN_HEIGHT, colors, depths);
@@ -61,12 +111,35 @@ start()
     sr_rotate_y(0.6);
 }
 
+/*********************************************************************
+ *                                                                   *
+ *                           render image                            *
+ *                                                                   *
+ *********************************************************************/
+
+/**********
+ * update *
+ **********/
+
+/* runs every frame */
 extern void
 update(float dt)
 {
     sr_renderl(obj->indices, obj->n_indices, SR_TRIANGLE_LIST);
+    sr_rotate_y(dt);
 }
 
+/*********************************************************************
+ *                                                                   *
+ *                        free program data                          *
+ *                                                                   *
+ *********************************************************************/
+
+/*******
+ * end *
+ *******/
+
+/* runs once at the end of the program */
 extern void
 end()
 {

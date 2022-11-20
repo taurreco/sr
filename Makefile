@@ -11,7 +11,7 @@ CFLAGS += -Wshadow
 CFLAGS += -std=gnu11 
 CFLAGS += -Wno-unused-parameter
 CFLAGS += -Iinclude 
-#CFLAGS += -O3
+CFLAGS += -O3
 #CFLAGS += -fsanitize=address
 
 MINGW_FLAGS += -IC:\MinGW\include\ 
