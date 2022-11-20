@@ -77,12 +77,6 @@ To give control over the model view projection transform, the user can switch be
 
 The library also supplies custom lighting for up to eight lights.  Within the uniform is an array of lights whose fields can be set by the `sr_light` function.
 
-
-### Example Usage
-
-Here is a step by step explianation for how to use the sr library to render a triangle (following ```examples/basic_triangle.c```).
-
-
 ### Build
 
 
