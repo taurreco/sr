@@ -26,7 +26,13 @@ SR is a lightweight software rendering library written in C.  It exposes the mai
 * obj loading
 * tga image loading
 
-### Design Overview
+### Example Usage
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/8971799/202895241-8e513647-bbf7-421d-b77d-959a0b34184d.png" />
+</p>
+
+Here is a step by step explianation for how to use the sr library to render a triangle (following ```examples/basic_triangle.c```).
 
 
 ### Build
