@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/8971799/189614240-9449b3fe-372d-4796-8f32-3b13309ca629.png" />
-  <img src="https://user-images.githubusercontent.com/8971799/202895688-2ad0918a-7b16-4d94-b058-d2d58c62100d.png" />
+  <img src="https://user-images.githubusercontent.com/8971799/202895798-c0c504d7-bb69-4845-a8c0-5eec05b0c02e.png" />
 </p>
 
 ### About
@@ -27,7 +27,7 @@ SR is a lightweight software rendering library written in C.  It exposes the mai
 ### Example Usage
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/8971799/202895241-8e513647-bbf7-421d-b77d-959a0b34184d.png" />
+  <img src="https://user-images.githubusercontent.com/8971799/202895820-5cf94f05-e69b-4c88-9f3f-9e31c854b72e.png" />
 </p>
 
 Here is a step by step explianation for how to use the sr library to render a triangle (following ```examples/basic_triangle.c```).
