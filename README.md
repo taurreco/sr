@@ -2,12 +2,14 @@
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/8971799/189614240-9449b3fe-372d-4796-8f32-3b13309ca629.png" />
+  <img src="https://user-images.githubusercontent.com/8971799/202896058-9cb22703-8c2a-4758-8834-32e43173c337.png" />
 </p>
 
 ### About
 SR is a lightweight software rendering library written in C.  It exposes the main algorithms, data structures, and math behind the standard real-time rendering model used in popular graphics api's like OpenGL and DirectX3D.  This project is entirely educational, and is free for anyone to use / adapt.  SR is tested with the [Unity Framework](http://www.throwtheswitch.org/unity) and the examples use SDL2 in order to display its output buffer.
 
 ### Features
+
 <p align="right">
   <img align="right" src="https://user-images.githubusercontent.com/8971799/189619522-cc23a50b-4dfd-4391-95c2-3a930e215c3d.png" />
 </p>
@@ -17,12 +19,11 @@ SR is a lightweight software rendering library written in C.  It exposes the mai
 
 * perspective-correct interpolation
 * texture mapping
-* matrix stack
-* phong lighting
+* spot, point, & directional lighting
 * clipping
 * depth buffer
 * color blending
-* custom shaders
+* programmable shading stages
 * custom vertex attributes
 * obj loading
 * tga image loading
@@ -31,7 +32,6 @@ SR is a lightweight software rendering library written in C.  It exposes the mai
 The core of the library is written in `sr_pipe.c`, where the rendering pipeline is implemented.  Its functionality depends on data organized into a struct called `sr_pipeline`:
 ```c
 /* sr.h */
-
 struct sr_pipeline {
     
     struct sr_framebuffer* fbuf;
@@ -39,12 +39,10 @@ struct sr_pipeline {
     void* uniform;        
     vs_f vs;
     fs_f fs;
-
     float* pts_in;
     int n_pts;
     int n_attr_in;
     int n_attr_out;
-
     int winding;
 };
 ```
