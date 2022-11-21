@@ -106,9 +106,8 @@ start()
     sr_matrix_mode(SR_PROJECTION_MATRIX);
     sr_perspective(1, (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 2, 1000);
     sr_matrix_mode(SR_VIEW_MATRIX);
-    sr_look_at(0, 3, 5, -0.5, 0.5, 0, 0, 1, 0);
+    sr_look_at(0, 0, 5, 0, 0, 0, 0, 1, 0);
     sr_matrix_mode(SR_MODEL_MATRIX);
-    sr_rotate_y(0.6);
 }
 
 /*********************************************************************

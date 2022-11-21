@@ -5,6 +5,15 @@
 
 #include "driver.h"
 
+/**
+ * driver.c
+ * --------
+ * acts as a backend for all example code--
+ * boots up SDL and creates a nice API (start, update, end) 
+ * to abstract all the nasty SDL specifics away
+ * 
+ */
+
 /*********************************************************************
  *                                                                   *
  *                          initialize data                          *

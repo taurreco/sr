@@ -334,22 +334,40 @@ push_stream(float* dest, char* stream, int n_str)
     }
 }
 
+/***************
+ * num_to_desc *
+ ***************/
+
+/* converts number to index in respective buffer */
+static int
+to_index(int buf_len, int num) {
+    if (num > 0)
+        return num - 1;
+    return buf_len + num;
+}
+
 /*****************
  * split_indices *
  *****************/
 
 /* converts raw obj point indices into readable indices */
 static void
-split_indices(int* indices, char* raw, int8_t flags)
+split_indices(struct obj_desc* obj_desc, int* indices, char* raw, int8_t flags)
 {
     char* save = "";
     
-    indices[0] = atoi(strtok_r(raw, "/", &save)) - 1;
+    int tmp = atoi(strtok_r(raw, "/", &save));
+    indices[0] = to_index(obj_desc->n_v, tmp);
+    
+    if (flags & VT) {
+        tmp  = atoi(strtok_r(NULL, "/", &save));
+        indices[1] = to_index(obj_desc->n_vt, tmp);
+    }
 
-    if (flags & VT)
-        indices[1] = atoi(strtok_r(NULL, "/", &save)) - 1;
-    if (flags & VN)
-        indices[2] = atoi(strtok_r(NULL, "/", &save)) - 1;
+    if (flags & VN) {
+        tmp  = atoi(strtok_r(NULL, "/", &save));
+        indices[2] = to_index(obj_desc->n_vn, tmp);
+    }
 }
 
 /*********************************************************************
@@ -476,7 +494,7 @@ second_pass(struct obj_desc* obj_desc, float* pts, int* indices, FILE* fp)
                     if (search(ht, tokens[i]) == -1) {    /* haven't seen this point */
 
                         strcpy(tmp, tokens[i]);
-                        split_indices(token_indices, tmp, flags);  /* convert to indices */
+                        split_indices(obj_desc, token_indices, tmp, flags);  /* convert to indices */
 
                         /* fill pts buffer with the vertex attributes */
                         
