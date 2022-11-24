@@ -57,7 +57,7 @@ rgb_float(float* a, uint32_t b)
     a[0] = ((b & 0xFF000000) >> 24) / (float)255;
     a[1] = ((b & 0x00FF0000) >> 16) / (float)255;
     a[2] = ((b & 0x0000FF00) >> 8) / (float)255;
-    a[2] = (b & 0x000000FF) / (float)255;
+    a[3] = (b & 0x000000FF) / (float)255;
 }
 
 /*********************************************************************
@@ -130,7 +130,7 @@ static void
 sample_texture(struct sr_texture* texture, float* color, float u, float v)
 {
     int x = floorf(u * texture->width);
-    int y = texture->height - floorf(v * texture->height);
+    int y = texture->height - 1 - floorf(v * texture->height);
     rgb_float(color, texture->colors[y * texture->width + x]);
 }
 
@@ -154,7 +154,8 @@ falloff(float x, float inner, float outer) {
  * with a base color 
  */
 static void
-phong(float* color, float* pos, float* normal, struct sr_uniform* uniform)
+phong(float* color, float* pos, float* uv, 
+      float* normal, struct sr_uniform* uniform)
 {   
     memset(color, 0, 4 * sizeof(float));
     
@@ -222,8 +223,13 @@ phong(float* color, float* pos, float* normal, struct sr_uniform* uniform)
             normalize(L);
 
             /* diffuse color */
-            vec4_scale(tmp, Od, clamp(dot(normal, L)));
-            vec4_scale(tmp, tmp, kd);
+            vec4_scale(tmp, Od, kd);
+            if (uniform->has_texture) {
+                float tex_color[4];
+                sample_texture(uniform->texture, tex_color, uv[0], uv[1]);
+                lerp(tmp, tmp, tex_color, uniform->material->blend);
+            }
+            vec4_scale(tmp, tmp, clamp(dot(normal, L)));
             vec4_mul(tmp, tmp, I);
             vec4_scale(tmp, tmp, fatt);
             vec4_add(color, color, tmp);
@@ -317,7 +323,7 @@ static void
 texture_fs(uint32_t* out, float* in, void* uniform)
 {   
     struct sr_uniform* sr_uniform = (struct sr_uniform*)uniform;
-    float color[3];
+    float color[4];
     sample_texture(sr_uniform->texture, color, in[4], in[5]); 
     *out = rgb_int(color);  /* frag color */
 }
@@ -379,7 +385,7 @@ phong_fs(uint32_t* out, float* in, void* uniform)
 
     float color[4];
     normalize(in + 9);
-    phong(color, in + 4, in + 9, sr_uniform);
+    phong(color, in + 4, in + 7, in + 9, sr_uniform);
     *out = rgb_int(color);
 }
 

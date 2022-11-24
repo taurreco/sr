@@ -301,6 +301,20 @@ vec4_scale(float* a, float* b, float c)
     a[3] = b[3] * c;
 }
 
+/*************
+ * vec4_lerp *
+ *************/
+
+/* linear interpolation for vec4s, result in 'a' */
+extern void
+lerp(float* a, float* b, float* c, float alpha)
+{
+    a[0] = b[0] + (c[0] - b[0]) * alpha;
+    a[1] = b[1] + (c[1] - b[1]) * alpha;
+    a[2] = b[2] + (c[2] - b[2]) * alpha;
+    a[3] = b[3] + (c[3] - b[3]) * alpha;
+}
+
 /*********************************************************************
  *                                                                   *
  *                           vec3 operations                         *

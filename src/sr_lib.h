@@ -49,6 +49,7 @@ struct material {
     float ambient[4];
     float diffuse[4];
     float specular[4];
+    float blend;
     float shininess;
 };
 
@@ -66,7 +67,6 @@ struct sr_uniform {
     float cam_pos[3];
 
     /* material */
-    int has_material;
     int has_texture;
     struct material* material;
     struct sr_texture* texture;

@@ -50,6 +50,7 @@ enum sr_light_attr {
     SR_AMBIENT,
     SR_DIFFUSE,
     SR_SPECULAR,
+    SR_BLEND,
     SR_SHININESS,
     SR_DIRECTION,
     SR_SPOT_ANGLE,
@@ -227,12 +228,6 @@ sr_light_disable(enum sr_light slot);
 
 extern void
 sr_material(enum sr_light_attr attr, float* data);
-
-extern void
-sr_material_enable();
-
-extern void
-sr_material_disable();
 
 /*********************************************************************
  *                                                                   *

@@ -58,6 +58,9 @@ extern void
 vec4_scale(float* a, float* b, float c);
 
 extern void
+lerp(float* a, float* b, float* c, float alpha);
+
+extern void
 vec3_sub(float* a, float* b, float* c);
 
 extern void

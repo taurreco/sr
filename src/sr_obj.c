@@ -6,6 +6,7 @@
 #include <math.h>
 
 #include "sr.h"
+#include "sr_math.h"
 
 /**
  * sr_obj.c
@@ -334,9 +335,9 @@ push_stream(float* dest, char* stream, int n_str)
     }
 }
 
-/***************
- * num_to_desc *
- ***************/
+/************
+ * to_index *
+ ************/
 
 /* converts number to index in respective buffer */
 static int
@@ -370,6 +371,20 @@ split_indices(struct obj_desc* obj_desc, int* indices, char* raw, int8_t flags)
     }
 }
 
+/**************
+ * get_normal *
+ **************/
+
+/* calculates face normal from three points */
+static void
+get_normal(float* normal, float* v0, float* v1, float* v2) {
+    float e10[3];
+    float e20[3];
+    vec3_sub(e10, v1, v0);
+    vec3_sub(e20, v2, v0);
+    cross(normal, e10, e20);
+}
+
 /*********************************************************************
  *                                                                   *
  *                  (private) obj memory & parsing                   *
@@ -392,20 +407,20 @@ first_pass(struct obj_desc* obj_desc, FILE* fp)
         char* r = strchr(line, '\r');
         if (r)
             *r = 0;
-
         token = strtok(line, "\n");
-        if (token == NULL)
-            continue;
         token = strtok(line, " ");
-        if (strcmp(token, "v") == 0) {
+
+        if (!token) continue;
+
+        if (strcmp(token, "v") == 0)
             obj_desc->n_v++;
-        }
-        if (strcmp(token, "vt") == 0) {
+
+        if (strcmp(token, "vt") == 0)
             obj_desc->n_vt++;
-        }
-        if (strcmp(token, "vn") == 0) {
+
+        if (strcmp(token, "vn") == 0)
             obj_desc->n_vn++;
-        }
+
         if (strcmp(token, "f") == 0) {
             int i = 0;
             token = strtok(NULL, " ");
@@ -455,10 +470,10 @@ second_pass(struct obj_desc* obj_desc, float* pts, int* indices, FILE* fp)
             *r = 0;
 
         token = strtok(line, "\n");
-        if (token == NULL)
-            continue;
-
         token = strtok(line, " ");
+
+        if (!token) continue;
+
         if (strcmp(token, "v") == 0) {
             push_stream(v + v_idx * 3, strtok(NULL, "\n"), 3);
             v_idx++;
@@ -483,27 +498,36 @@ second_pass(struct obj_desc* obj_desc, float* pts, int* indices, FILE* fp)
             tokens[1] = strtok(NULL, " ");
             tokens[2] = strtok(NULL, " ");
 
-            int token_indices[3];   /* stores indexes into v, vt, vn */
+            int token_indices[3];    /* stores indexes into v, vt, vn */
             char tmp[255];
 
             while (tokens[2] != NULL) {
+                
+                float normal[3];    /* stores face normal */
+                float* v012[3];    /* stores locations of v0, v1, v2 */
+                float* normals_dest[3] = {0, 0, 0};     /* stores where normal goes */
 
-                for (int i = 0; i < 3; i++) {
-                    float* cur = pts + n_pts * 8;  /* current point */
+                for (int i = 0; i < 3; i++) {    /* per triangle */
+                    float* cur = pts + n_pts * 8;    /* current point */
 
                     if (search(ht, tokens[i]) == -1) {    /* haven't seen this point */
 
                         strcpy(tmp, tokens[i]);
                         split_indices(obj_desc, token_indices, tmp, flags);  /* convert to indices */
-
+                        
+                        v012[i] = v + token_indices[0] * 3;
+                        normals_dest[i] = cur + 5;
+                        
                         /* fill pts buffer with the vertex attributes */
                         
                         memcpy(cur, v + token_indices[0] * 3, 
                                3 * sizeof(float));
+
                         if (flags & VT) {
                             memcpy(cur + 3, vt + token_indices[1] * 2, 
                                    2 * sizeof(float));
                         }
+
                         if (flags & VN) {
                             memcpy(cur + 5, vn + token_indices[2] * 3, 
                                    3 * sizeof(float));
@@ -511,10 +535,20 @@ second_pass(struct obj_desc* obj_desc, float* pts, int* indices, FILE* fp)
 
                         insert(ht, tokens[i], n_pts);
                         n_pts++;
+                    } else {
+                        v012[i] = pts + search(ht, tokens[i]) * 8;  /* potential for horrible error */
                     }
                 }
 
-                for (int i = 0; i < 3; i++)
+                if (!(flags & VN)) {    /* if no explicit normals, calculate new ones */
+                    get_normal(normal, v012[0], v012[1], v012[2]);
+                    for (int i = 0; i < 3; i++) {
+                        if (normals_dest[i])
+                            memcpy(normals_dest[i], normal, 3 * sizeof(float));
+                    }
+                }
+
+                for (int i = 0; i < 3; i++)    /* index buffer fill */
                     indices[tr_idx * 3 + i] = search(ht, tokens[i]);
 
                 tokens[1] = tokens[2];

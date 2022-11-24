@@ -95,7 +95,6 @@ static struct sr_uniform g_uniform = {
     .model = &model,
     .normal_transform = &normal_transform,
     .mvp = &mvp,
-    .has_material = 0,
     .has_texture = 0,
     .material = &g_material,
     .texture = &g_texture,
@@ -242,6 +241,7 @@ sr_bind_fs(fs_f fs)
 extern void
 sr_bind_texture(uint32_t* colors, int width, int height)
 {
+    g_uniform.has_texture = 1;
     g_texture.colors = colors;
     g_texture.width = width;
     g_texture.height = height;
@@ -413,34 +413,15 @@ sr_material(enum sr_light_attr attr, float* data)
         case SR_SPECULAR:
             memcpy(g_material.specular, data, 4 * sizeof(float));
             break;
+        case SR_BLEND:
+            g_material.blend = *data;
+            break;
         case SR_SHININESS:
             g_material.shininess = *data;
             break;
         default:
             return;
     }
-}
-
-/**********************
- * sr_material_enable *
- **********************/
-
-/* enables use of material */
-extern void
-sr_material_enable()
-{
-    g_uniform.has_material = 1;
-}
-
-/***********************
- * sr_material_disable *
- ***********************/
-
-/* disables use of material */
-extern void
-sr_material_disable()
-{
-    g_uniform.has_material = 0;
 }
 
 /*********************************************************************
