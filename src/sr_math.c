@@ -179,6 +179,7 @@ invert(struct mat4* a)
     tmp.e02 *= det;
     tmp.e03 *= det;
     tmp.e10 *= det;
+    tmp.e11 *= det;
     tmp.e12 *= det;
     tmp.e13 *= det;
     tmp.e20 *= det;
@@ -235,7 +236,7 @@ upper_3x3(struct mat4* a) {
     a->e30 = 0;
     a->e31 = 0;
     a->e32 = 0;
-    a->e33 = 0;
+    a->e33 = 1;
 }
 
 

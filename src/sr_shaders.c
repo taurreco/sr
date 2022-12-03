@@ -238,6 +238,8 @@ phong(float* color, float* pos, float* uv,
             reflect(R, L, normal);
             vec3_sub(V, uniform->cam_pos, pos);
             normalize(V);
+            normalize(R);
+            
             vec4_scale(tmp, Os, powf(clamp(dot(R, V)), n));
             vec4_scale(tmp, tmp, ks);
             vec4_mul(tmp, tmp, I);

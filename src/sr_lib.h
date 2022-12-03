@@ -1,4 +1,7 @@
 
+#ifndef SR_LIB_H
+#define SR_LIB_H
+
 #include "sr.h"
 #include "sr_math.h"
 
@@ -12,9 +15,6 @@
  * and matrix stack-like operations to build it
  * 
  */
-
-#ifndef SR_LIB_H
-#define SR_LIB_H
 
 /*********************************************************************
  *                                                                   *

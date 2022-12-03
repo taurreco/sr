@@ -11,7 +11,7 @@ CFLAGS += -Wshadow
 CFLAGS += -std=gnu11 
 CFLAGS += -Wno-unused-parameter
 CFLAGS += -Iinclude 
-#CFLAGS += -O3
+CFLAGS += -O3
 #CFLAGS += -fsanitize=address
 
 MINGW_FLAGS += -IC:\MinGW\include\ 
@@ -55,7 +55,6 @@ TESTS += tests/check_lerp
 
 # Math Tests
 TESTS += tests/check_matmul
-TESTS += tests/check_hash_table
 TESTS += tests/check_clip_test
 
 # Example Rules

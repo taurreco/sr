@@ -78,7 +78,7 @@ vs_basic(float* out, float* in, void* uniform)
 static void
 vs_transform(float* out, float* in, void* uniform)
 {
-    matmul_v(out, (struct mat4*)uniform, in);
+    vec4_matmul(out, (struct mat4*)uniform, in);
     out[4] = in[4];
 }
 

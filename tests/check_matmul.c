@@ -81,9 +81,12 @@ vmul()
         97, 100, 47, 109
     };
 
+
+
+
     float out[4];
 
-    matmul_v(out, &m, vec);
+    vec4_matmul(out, &m, vec);
 
     TEST_ASSERT_EQUAL_FLOAT_ARRAY(ans, out, 4);
 }

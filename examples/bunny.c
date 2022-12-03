@@ -41,7 +41,7 @@ start()
  *                                                                   *
  *********************************************************************/
 
-    float light_dir[3] = {0, -1, 0};
+    float light_dir[3] = {0.5, 0, -1};
     float light_color[4] = {1, 1, 1, 1};
     float light_attn_const = 0.8;
     float light_attn_lin = 0.2;
@@ -91,7 +91,7 @@ start()
  *                                                                   *
  *********************************************************************/
 
-    obj = sr_load_obj("./assets/teapot.obj");
+    obj = sr_load_obj("./assets/bunny.obj");
 
 /*********************************************************************
  *                                                                   *
@@ -106,9 +106,11 @@ start()
     sr_matrix_mode(SR_PROJECTION_MATRIX);
     sr_perspective(1, (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 2, 1000);
     sr_matrix_mode(SR_VIEW_MATRIX);
-    sr_look_at(0, 2, 4, 0, 0, 0, 0, 1, 0);
+    sr_look_at(0, 6, 11, -3, 0, 0, 0, 1, 0);
     sr_matrix_mode(SR_MODEL_MATRIX);
-    sr_scale(0.5, 0.5, 0.5);
+    sr_scale(0.5, 2, 1.3);
+    sr_translate(-3, 0, 0);
+    sr_rotate_z(0.6);
 }
 
 /*********************************************************************
