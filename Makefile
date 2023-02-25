@@ -1,4 +1,7 @@
 
+# Install Path
+INSTALL_PATH = /usr/local/
+
 # Compiler
 CC = gcc
 
@@ -12,15 +15,25 @@ CFLAGS += -std=gnu11
 CFLAGS += -Wno-unused-parameter
 CFLAGS += -Iinclude 
 CFLAGS += -O3
+CFLAGS += -lm
 #CFLAGS += -fsanitize=address
 
 MINGW_FLAGS += -IC:\MinGW\include\ 
 MINGW_FLAGS += -LC:\MinGW\lib 
-MINGW_FLAGS += -lmingw32 
+MINGW_FLAGS += -lmingw32
 
+# SDL2 Library Flags
 SDL2_FLAGS += -lSDL2main
 SDL2_FLAGS += -lSDL2
 
+# SR Library Targets
+SR = src/sr.o
+SR_LIB_DIR = $(addprefix $(INSTALL_PATH), lib/sr/)
+SR_HEADERS_DIR = $(addprefix $(INSTALL_PATH), include/sr/)
+SR_LIB = $(addprefix $(SR_LIB_DIR), libsr.so)
+SR_HEADER = $(addprefix $(SR_HEADERS_DIR), sr.h)
+
+# Source Files
 SR_SRC += src/sr_lib.c
 SR_SRC += src/sr_pipe.c
 SR_SRC += src/sr_obj.c
@@ -30,10 +43,8 @@ SR_SRC += src/sr_rast.c
 SR_SRC += src/sr_shaders.c
 SR_SRC += src/sr_math.c
 
-SR_OBJ = $(patsubst %.c, %.o, $(SR_SRC))
-
-# SR library
-SR += src/sr.o
+# Object Files
+SR_OBJS = $(patsubst %.c, %.o, $(SR_SRC))
 
 # Example Targets
 EXAMPLES += examples/basic_triangle
@@ -62,35 +73,53 @@ TESTS += tests/check_lerp
 TESTS += tests/check_matmul
 TESTS += tests/check_clip_test
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -lm -o $@
+all: $(SR) examples tests
 
-$(SR): $(SR_OBJ)
-	ld -r $(SR_OBJ) -o $@
+%.o: %.c
+	$(CC) $(CFLAGS) -fPIC -c $< -o $@
+
+# Compile SR Library
+$(SR): $(SR_OBJS)
+	ld -r $(SR_OBJS) -o $@
 
 # Example Rules
 $(EXAMPLES): %: %.c $(SR)
-	$(CC) $(CFLAGS) examples/driver.c $(SR) $< -o $@ $(SDL2_FLAGS) -Isrc -lm
+	$(CC) $(CFLAGS) examples/driver.c $(SR) $< -o $@ $(SDL2_FLAGS)
 
 # Test Rules
 $(PIPE_TESTS): %: %.c
-	$(CC) $(CFLAGS) -Isrc -Iunity $< $(PIPE_DEPS) unity/unity.c -o $@ -lm
+	$(CC) $(CFLAGS) -Isrc -Iunity $< $(PIPE_DEPS) unity/unity.c -o $@
 
 $(TESTS): %: %.c
-	$(CC) $(CFLAGS) -Isrc -Iunity $< unity/unity.c -o $@ -lm
+	$(CC) $(CFLAGS) -Isrc -Iunity $< unity/unity.c -o $@
 
-install: $(SR)
-uninstall:
+# Local
 examples: $(EXAMPLES)
+
 tests: $(PIPE_TESTS) $(TESTS)
 
 check-all: $(PIPE_TESTS) $(TESTS)
 	for t in $(PIPE_TESTS); do $$t; done
 	for t in $(TESTS); do $$t; done
 
+# Install
+install: $(SR) | $(SR_LIB_DIR) $(SR_HEADERS_DIR)
+	$(CC) -shared $(SR) -o $(SR_LIB)
+	cp include/sr.h $(SR_HEADER)
+
+uninstall:
+	rm -rf $(SR_LIB_DIR)
+	rm -rf $(SR_HEADERS_DIR)
+
+$(SR_LIB_DIR):
+	mkdir -p $@
+
+$(SR_HEADERS_DIR):
+	mkdir -p $@
+
 # Clean Up
 clean:
-	for t in $(SR_OBJ); do rm $$t; done
+	for t in $(SR_OBJS); do rm $$t; done
 	rm $(SR)
 
 clean-tests:
