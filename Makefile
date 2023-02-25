@@ -30,6 +30,11 @@ SR_SRC += src/sr_rast.c
 SR_SRC += src/sr_shaders.c
 SR_SRC += src/sr_math.c
 
+SR_OBJ = $(patsubst %.c, %.o, $(SR_SRC))
+
+# SR library
+SR += src/sr.o
+
 # Example Targets
 EXAMPLES += examples/basic_triangle
 EXAMPLES += examples/bunny
@@ -57,9 +62,15 @@ TESTS += tests/check_lerp
 TESTS += tests/check_matmul
 TESTS += tests/check_clip_test
 
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -lm -o $@
+
+$(SR): $(SR_OBJ)
+	ld -r $(SR_OBJ) -o $@
+
 # Example Rules
-$(EXAMPLES): %: %.c
-	$(CC) $(CFLAGS) examples/driver.c $(SR_SRC) $< -o $@ $(SDL2_FLAGS) -Isrc -lm
+$(EXAMPLES): %: %.c $(SR)
+	$(CC) $(CFLAGS) examples/driver.c $(SR) $< -o $@ $(SDL2_FLAGS) -Isrc -lm
 
 # Test Rules
 $(PIPE_TESTS): %: %.c
@@ -68,6 +79,8 @@ $(PIPE_TESTS): %: %.c
 $(TESTS): %: %.c
 	$(CC) $(CFLAGS) -Isrc -Iunity $< unity/unity.c -o $@ -lm
 
+install: $(SR)
+uninstall:
 examples: $(EXAMPLES)
 tests: $(PIPE_TESTS) $(TESTS)
 
@@ -76,6 +89,10 @@ check-all: $(PIPE_TESTS) $(TESTS)
 	for t in $(TESTS); do $$t; done
 
 # Clean Up
+clean:
+	for t in $(SR_OBJ); do rm $$t; done
+	rm $(SR)
+
 clean-tests:
 	for t in $(PIPE_TESTS); do rm $$t; done
 	for t in $(TESTS); do rm $$t; done
@@ -83,4 +100,4 @@ clean-tests:
 clean-examples:
 	for t in $(EXAMPLES); do rm $$t; done
 
-clean-all: clean-examples clean-tests
+clean-all: clean clean-examples clean-tests
