@@ -499,6 +499,7 @@ second_pass(struct obj_desc* obj_desc, float* pts, int* indices, FILE* fp)
             tokens[2] = strtok(NULL, " ");
 
             int token_indices[3];    /* stores indexes into v, vt, vn */
+            memset(token_indices, 0, 3 * sizeof(int));
             char tmp[255];
 
             while (tokens[2] != NULL) {

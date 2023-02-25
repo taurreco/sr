@@ -28,10 +28,10 @@ SDL2_FLAGS += -lSDL2
 
 # SR Library Targets
 SR = src/sr.o
-SR_LIB_DIR = $(addprefix $(INSTALL_PATH), lib/sr/)
-SR_HEADERS_DIR = $(addprefix $(INSTALL_PATH), include/sr/)
-SR_LIB = $(addprefix $(SR_LIB_DIR), libsr.so)
-SR_HEADER = $(addprefix $(SR_HEADERS_DIR), sr.h)
+SR_LIB_DIR = $(INSTALL_PATH)lib/sr/
+SR_HEADERS_DIR = $(INSTALL_PATH)include/sr/
+SR_LIB = libsr.so
+SR_HEADER = sr.h
 
 # Source Files
 SR_SRC += src/sr_lib.c
@@ -73,14 +73,17 @@ TESTS += tests/check_lerp
 TESTS += tests/check_matmul
 TESTS += tests/check_clip_test
 
-all: $(SR) examples tests
+all: $(SR) $(SR_LIB) examples tests
 
 %.o: %.c
 	$(CC) $(CFLAGS) -fPIC -c $< -o $@
 
-# Compile SR Library
 $(SR): $(SR_OBJS)
 	ld -r $(SR_OBJS) -o $@
+
+# Compile SR Library
+$(SR_LIB): $(SR)
+	$(CC) -shared $(SR) -o $(SR_LIB)
 
 # Example Rules
 $(EXAMPLES): %: %.c $(SR)
@@ -94,6 +97,8 @@ $(TESTS): %: %.c
 	$(CC) $(CFLAGS) -Isrc -Iunity $< unity/unity.c -o $@
 
 # Local
+sr: $(SR_LIB)
+
 examples: $(EXAMPLES)
 
 tests: $(PIPE_TESTS) $(TESTS)
@@ -103,9 +108,9 @@ check-all: $(PIPE_TESTS) $(TESTS)
 	for t in $(TESTS); do $$t; done
 
 # Install
-install: $(SR) | $(SR_LIB_DIR) $(SR_HEADERS_DIR)
-	$(CC) -shared $(SR) -o $(SR_LIB)
-	cp include/sr.h $(SR_HEADER)
+install: $(SR_LIB) | $(SR_LIB_DIR) $(SR_HEADERS_DIR)
+	cp $(SR_LIB) $(SR_LIB_DIR)$(SR_LIB)
+	cp include/sr.h $(SR_HEADERS_DIR)$(SR_HEADER)
 
 uninstall:
 	rm -rf $(SR_LIB_DIR)
@@ -118,15 +123,16 @@ $(SR_HEADERS_DIR):
 	mkdir -p $@
 
 # Clean Up
-clean:
+clean-sr:
 	for t in $(SR_OBJS); do rm $$t; done
 	rm $(SR)
+	rm $(SR_LIB)
+
+clean-examples:
+	for t in $(EXAMPLES); do rm $$t; done
 
 clean-tests:
 	for t in $(PIPE_TESTS); do rm $$t; done
 	for t in $(TESTS); do rm $$t; done
 
-clean-examples:
-	for t in $(EXAMPLES); do rm $$t; done
-
-clean-all: clean clean-examples clean-tests
+clean: clean-sr clean-examples clean-tests
