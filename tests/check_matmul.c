@@ -1,8 +1,9 @@
 
+#include "unity.h"
+#include "smath.c"
+
 #include <stdlib.h>
 #include <string.h>
-#include "unity.h"
-#include "sr_math.c"
 
 /*********************************************************************
  *                                                                   *

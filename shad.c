@@ -1,10 +1,11 @@
 
-#include <stdlib.h>
 
 #include "sr.h"
-#include "sr_lib.h"
-#include "sr_math.h"
-#include "stdio.h"
+#include "api.h"
+#include "smath.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 
 /**
  * sr_shaders.c

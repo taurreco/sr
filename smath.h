@@ -2,9 +2,10 @@
 #ifndef SR_MATH_H
 #define SR_MATH_H
 
+#include "sr.h"
+
 #include <string.h>
 #include <math.h>
-#include "sr.h"
 
 /**
  * sr_math.h

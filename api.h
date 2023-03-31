@@ -3,7 +3,7 @@
 #define SR_LIB_H
 
 #include "sr.h"
-#include "sr_math.h"
+#include "smath.h"
 
 /**
  * sr_lib.h

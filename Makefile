@@ -13,7 +13,7 @@ CFLAGS += -Wextra
 CFLAGS += -Wshadow 
 CFLAGS += -std=gnu11 
 CFLAGS += -Wno-unused-parameter
-CFLAGS += -Iinclude 
+CFLAGS += -I. 
 CFLAGS += -O3
 CFLAGS += -lm
 #CFLAGS += -fsanitize=address
@@ -27,21 +27,21 @@ SDL2_FLAGS += -lSDL2main
 SDL2_FLAGS += -lSDL2
 
 # SR Library Targets
-SR = src/sr.o
+SR = sr.o
 SR_LIB_DIR = $(INSTALL_PATH)lib/sr/
-SR_HEADERS_DIR = $(INSTALL_PATH)include/sr/
+SR_HEADERS_DIR = $(INSTALL_PATH)include/sr.h
 SR_LIB = libsr.so
 SR_HEADER = sr.h
 
 # Source Files
-SR_SRC += src/sr_lib.c
-SR_SRC += src/sr_pipe.c
-SR_SRC += src/sr_obj.c
-SR_SRC += src/sr_tga.c
-SR_SRC += src/sr_clip.c
-SR_SRC += src/sr_rast.c
-SR_SRC += src/sr_shaders.c
-SR_SRC += src/sr_math.c
+SR_SRC += api.c
+SR_SRC += pipe.c
+SR_SRC += obj.c
+SR_SRC += tga.c
+SR_SRC += clip.c
+SR_SRC += rast.c
+SR_SRC += shad.c
+SR_SRC += smath.c
 
 # Object Files
 SR_OBJS = $(patsubst %.c, %.o, $(SR_SRC))
@@ -54,9 +54,9 @@ EXAMPLES += examples/texture
 # Tests Targets
 PIPE_TESTS += tests/check_render
 PIPE_TESTS += tests/check_winding_order
-PIPE_DEPS += src/sr_clip.c 
-PIPE_DEPS += src/sr_rast.c 
-PIPE_DEPS += src/sr_math.c
+PIPE_DEPS += clip.c 
+PIPE_DEPS += rast.c 
+PIPE_DEPS += smath.c
 
 # Raster Tests
 TESTS += tests/check_draw_tr

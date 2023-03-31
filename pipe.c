@@ -3,8 +3,8 @@
 #include <string.h>
 
 #include "sr.h"
-#include "sr_rast.h"
-#include "sr_clip.h"
+#include "rast.h"
+#include "clip.h"
 
 /**
  * sr_pipe.c

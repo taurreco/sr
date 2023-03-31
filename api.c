@@ -2,11 +2,11 @@
 #include <stdlib.h>
 
 #include "sr.h"
-#include "sr_math.h"
-#include "sr_lib.h"
+#include "smath.h"
+#include "api.h"
 
 /**
- * sr_lib.h
+ * api.c
  * --------
  * an easy interface with a fixed subset of the sr pipeline 
  * for your average use case

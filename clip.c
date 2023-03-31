@@ -5,7 +5,7 @@
 #include <stddef.h>
 
 #include "sr.h"
-#include "sr_clip.h"
+#include "clip.h"
 
 /**
  * sr_clip.c

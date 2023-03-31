@@ -1,7 +1,9 @@
+
+#include "unity.h"
+#include "clip.c"
+
 #include <stdlib.h>
 #include <string.h>
-#include "unity.h"
-#include "sr_clip.c"
 
 /*********************************************************************
  *                                                                   *

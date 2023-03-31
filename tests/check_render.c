@@ -1,11 +1,12 @@
 
+
+#include "unity.h"
+#include "pipe.c"
+#include "smath.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
-#include "unity.h"
-#include "sr_pipe.c"
-#include "sr_math.h"
 
 /*********************************************************************
  *                                                                   *

@@ -1,6 +1,6 @@
 
+#include "smath.h"
 #include <math.h>
-#include "sr_math.h"
 
 /**
  * sr_math.c

@@ -6,7 +6,7 @@
 #include <math.h>
 
 #include "sr.h"
-#include "sr_math.h"
+#include "smath.h"
 
 /**
  * sr_obj.c
@@ -204,18 +204,24 @@ static void
 insert(struct hash_table* ht, char* key, int val) 
 {
     int load = ht->n_pairs * 100 / ht->size;
+
     if (load > 70) {
         grow(ht);
     }
+
     struct kv_pair* pair = kv_pair_alloc(key, val);
+    
     int index = double_hash(pair->key, ht->size, 0);
+    
     struct kv_pair* cur_pair = ht->pairs[index];
+    
     int i = 1;
-    while (cur_pair != NULL) {
+    while (cur_pair) {
         index = double_hash(pair->key, ht->size, i);
         cur_pair = ht->pairs[index]; /* collided item */
         i++;
     }
+
     ht->pairs[index] = pair;
     ht->n_pairs++;
 }
@@ -229,16 +235,17 @@ static int
 search(struct hash_table* ht, char* key)
 {
     int index = double_hash(key, ht->size, 0);
+    
     struct kv_pair* cur_pair = ht->pairs[index];
+    
     int i = 1;
-    while (cur_pair != NULL) {
-        if (strcmp(cur_pair->key, key) == 0) {
-            return cur_pair->val;
-        }
+    while (cur_pair) {
+	if (!strcmp(cur_pair->key, key)) return cur_pair->val;
         index = double_hash(key, ht->size, i);
         cur_pair = ht->pairs[index];
         i++;
     }
+
     return -1;
 }
 
@@ -261,12 +268,12 @@ grow(struct hash_table* ht)
 {
     SIZES_INDEX++;
     struct hash_table* new_ht = hash_table_alloc();
+
     for (int i = 0; i < ht->size; i++) {
         struct kv_pair* pair = ht->pairs[i];
-        if (pair != NULL) {
-            insert(new_ht, pair->key, pair->val);
-        }
+        if (pair) insert(new_ht, pair->key, pair->val);
     }
+
     ht->size = new_ht->size;
     ht->n_pairs = new_ht->n_pairs;
 
@@ -298,17 +305,17 @@ strtok_r(char *str, const char *delim, char **nextp)
 {
     char *ret;
 
-    if (str == NULL)
-        str = *nextp;
+    if (!str) str = *nextp;
+    
     str += strspn(str, delim);
 
-    if (*str == '\0')
-        return NULL;
+    if (*str == '\0') return NULL;
+    
     ret = str;
     str += strcspn(str, delim);
 
-    if (*str)
-        *str++ = '\0';
+    if (*str) *str++ = '\0';
+    
     *nextp = str;
     return ret;
 }
@@ -326,9 +333,9 @@ push_stream(float* dest, char* stream, int n_str)
 {
     char* start = stream;
     char* end;
+
     for (int i = 0; i < n_str; i++) {
-        float val = strtof(start, &end);
-        dest[i] = val;
+        dest[i] = strtof(start, &end);
         char* tmp = start;
         start = end;
         end = tmp;
@@ -342,8 +349,7 @@ push_stream(float* dest, char* stream, int n_str)
 /* converts number to index in respective buffer */
 static int
 to_index(int buf_len, int num) {
-    if (num > 0)
-        return num - 1;
+    if (num > 0) return num - 1;
     return buf_len + num;
 }
 

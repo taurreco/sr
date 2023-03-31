@@ -2,7 +2,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include "sr_rast.h"
+#include "rast.h"
 
 /**
  * sr_rast.c
