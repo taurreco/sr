@@ -2,7 +2,7 @@
 
 #include "unity.h"
 #include "pipe.c"
-#include "smath.h"
+#include "mat.h"
 
 #include <stdlib.h>
 #include <string.h>

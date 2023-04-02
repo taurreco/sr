@@ -1,6 +1,6 @@
 
 #include "unity.h"
-#include "smath.c"
+#include "mat.c"
 
 #include <stdlib.h>
 #include <string.h>

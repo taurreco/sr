@@ -2,8 +2,8 @@
 #include <stdlib.h>
 
 #include "sr.h"
-#include "smath.h"
-#include "api.h"
+#include "mat.h"
+#include "state.h"
 
 /**
  * api.c

@@ -34,14 +34,14 @@ SR_LIB = libsr.so
 SR_HEADER = sr.h
 
 # Source Files
-SR_SRC += api.c
+SR_SRC += state.c
 SR_SRC += pipe.c
 SR_SRC += obj.c
 SR_SRC += tga.c
 SR_SRC += clip.c
 SR_SRC += rast.c
 SR_SRC += shad.c
-SR_SRC += smath.c
+SR_SRC += mat.c
 
 # Object Files
 SR_OBJS = $(patsubst %.c, %.o, $(SR_SRC))
@@ -56,7 +56,7 @@ PIPE_TESTS += tests/check_render
 PIPE_TESTS += tests/check_winding_order
 PIPE_DEPS += clip.c 
 PIPE_DEPS += rast.c 
-PIPE_DEPS += smath.c
+PIPE_DEPS += mat.c
 
 # Raster Tests
 TESTS += tests/check_draw_tr

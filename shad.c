@@ -1,8 +1,8 @@
 
 
 #include "sr.h"
-#include "api.h"
-#include "smath.h"
+#include "state.h"
+#include "mat.h"
 
 #include <stdio.h>
 #include <stdlib.h>

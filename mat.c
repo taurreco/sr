@@ -1,5 +1,5 @@
 
-#include "smath.h"
+#include "mat.h"
 #include <math.h>
 
 /**

@@ -6,7 +6,7 @@
 #include <math.h>
 
 #include "sr.h"
-#include "smath.h"
+#include "mat.h"
 
 /**
  * sr_obj.c
