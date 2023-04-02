@@ -110,7 +110,7 @@ check-all: $(PIPE_TESTS) $(TESTS)
 # Install
 install: $(SR_LIB) | $(SR_LIB_DIR) $(SR_HEADERS_DIR)
 	cp $(SR_LIB) $(SR_LIB_DIR)$(SR_LIB)
-	cp include/sr.h $(SR_HEADERS_DIR)$(SR_HEADER)
+	cp sr.h $(SR_HEADERS_DIR)$(SR_HEADER)
 
 uninstall:
 	rm -rf $(SR_LIB_DIR)
