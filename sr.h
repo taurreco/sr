@@ -81,29 +81,63 @@ typedef void (*fs_f)(uint32_t* out, float* in, void* uniform);
  *                                                                   *
  *********************************************************************/
 
+/*********
+ * light *
+ *********/
+
+/* holds light data */
+struct light {
+    uint8_t type;
+    float pos[3];
+    float color[4];
+
+    float dir[3];
+    float spot_angle;
+    float spot_penumbra;
+
+    float attn_const;
+    float attn_lin;
+    float attn_quad;
+};
+
+/************
+ * material *
+ ************/
+
+struct material {
+    float ambient[4];
+    float diffuse[4];
+    float specular[4];
+    float blend;
+    float shininess;
+};
+
 /**************
- * sr_texture *
+ * sr_uniform *
  **************/
 
-/* holds texture data */
-struct sr_texture {
-    uint32_t* colors;
-    int width;
-    int height;
+/* the uniform variables for the fixed lib shaders */
+struct sr_uniform {
+
+    /* geometry */
+    struct mat4* model;
+    struct mat4* normal_transform;
+    struct mat4* mvp;
+    float cam_pos[3];
+
+    /* material */
+    int has_texture;
+    struct material* material;
+    struct sr_texture* texture;
+
+    /* light */
+    uint8_t light_state;
+    struct light* lights;
+    float ka;
+    float kd;
+    float ks;
 };
 
-/**********
- * sr_obj *
- **********/
-
-/* holds 3D object data (loaded from wavefront obj) */
-struct sr_obj {
-    float* pts;
-    int* indices;
-    int n_pts;
-    int n_attr;
-    int n_indices;
-};
 
 /******************
  * sr_framebuffer *
@@ -146,11 +180,6 @@ struct sr_pipeline {
  *                                                                   *
  *********************************************************************/
 
-extern struct sr_obj*
-sr_load_obj(char* file);
-
-extern struct sr_texture*
-sr_load_tga(char* file);
 
 /*********************************************************************
  *                                                                   *
@@ -158,11 +187,6 @@ sr_load_tga(char* file);
  *                                                                   *
  *********************************************************************/
 
-extern void
-sr_obj_free(struct sr_obj* obj);
-
-extern void
-sr_texture_free(struct sr_texture* texture);
 
 /*********************************************************************
  *                                                                   *
