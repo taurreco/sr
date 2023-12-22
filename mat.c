@@ -21,7 +21,8 @@
  **********/
 
 /* multiplies two 4x4 matrices, 'a' and 'b', stores the result in 'a' */
-extern void 
+
+void 
 matmul(struct mat4* a, struct mat4* b)
 {
     struct mat4 tmp;
@@ -49,7 +50,8 @@ matmul(struct mat4* a, struct mat4* b)
  **********/
 
 /* inverts a 4x4 matrix, returns 0 if non invertible */
-extern int
+
+int
 invert(struct mat4* a)
 {
     struct mat4 tmp;
@@ -201,7 +203,8 @@ invert(struct mat4* a)
  *************/
 
 /* transpose of a 4x4 matrix */
-extern void
+
+void
 transpose(struct mat4* a) {
     struct mat4 tmp;
     tmp.e00 = a->e00;
@@ -227,8 +230,9 @@ transpose(struct mat4* a) {
  * upper_3x3 *
  *************/
 
-/* converts 4x4 matrix to its upper 3x3 matrix by filling 0s*/
-extern void
+/* converts 4x4 matrix to its upper 3x3 matrix by filling 0s */
+
+void
 upper_3x3(struct mat4* a) {
     a->e03 = 0;
     a->e13 = 0;
@@ -251,7 +255,8 @@ upper_3x3(struct mat4* a) {
  ***************/
 
 /* applys the matrix 'b' to vector 'c', stores result in vector 'a' */ 
-extern void
+
+void
 vec4_matmul(float* a, struct mat4* b, float* c)
 {
     a[0] = c[0] * b->e00 + c[1] * b->e01 + c[2] * b->e02 + c[3] * b->e03;
@@ -265,7 +270,8 @@ vec4_matmul(float* a, struct mat4* b, float* c)
  ************/
 
 /* multiplies vec4 'b' and 'c' componentwise, result in 'a' */
-extern void
+
+void
 vec4_mul(float* a, float* b, float* c)
 {
     a[0] = b[0] * c[0];
@@ -279,7 +285,8 @@ vec4_mul(float* a, float* b, float* c)
  ***********/
 
 /* adds vec4 'b' to 'c' and stores result in 'a' */
-extern void
+
+void
 vec4_add(float* a, float* b, float* c)
 {
     a[0] = b[0] + c[0];
@@ -293,7 +300,8 @@ vec4_add(float* a, float* b, float* c)
  **************/
 
 /* multiplies vec4 'b' by scalar 'c' and stores result in 'a' */
-extern void
+
+void
 vec4_scale(float* a, float* b, float c)
 {
     a[0] = b[0] * c;
@@ -307,7 +315,8 @@ vec4_scale(float* a, float* b, float c)
  *************/
 
 /* linear interpolation for vec4s, result in 'a' */
-extern void
+
+void
 lerp(float* a, float* b, float* c, float alpha)
 {
     a[0] = b[0] + (c[0] - b[0]) * alpha;
@@ -327,7 +336,8 @@ lerp(float* a, float* b, float* c, float alpha)
  ************/
 
 /* subtracts vec3 'c' from 'b' and stores result in 'a' */
-extern void
+
+void
 vec3_sub(float* a, float* b, float* c)
 {
     a[0] = b[0] - c[0];
@@ -340,7 +350,8 @@ vec3_sub(float* a, float* b, float* c)
  ***********/
 
 /* adds vec3 'b' to 'c' and stores result in 'a' */
-extern void
+
+void
 vec3_add(float* a, float* b, float* c)
 {
     a[0] = b[0] + c[0];
@@ -353,7 +364,8 @@ vec3_add(float* a, float* b, float* c)
  **************/
 
 /* multiplies vec3 'b' by scalar 'c' and stores result in 'a' */
-extern void
+
+void
 vec3_scale(float* a, float* b, float c)
 {
     a[0] = b[0] * c;
@@ -372,7 +384,8 @@ vec3_scale(float* a, float* b, float c)
  ***********/
 
 /* reflects a vec3 'l' across a normal 'n', result in 'r' */
-extern void
+
+void
 reflect(float* r, float* l, float* n)
 {
     float tmp[3];
@@ -385,7 +398,8 @@ reflect(float* r, float* l, float* n)
  *******/
 
 /* dot product of two vec3s */
-extern float
+
+float
 dot(float* a, float* b)
 {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
@@ -396,7 +410,8 @@ dot(float* a, float* b)
  *********/
 
 /* applys the cross product 'b' x 'c', stores result in 'a' */
-extern void
+
+void
 cross(float* a, float* b, float* c)
 {
     a[0] = (b[1] * c[2]) - (b[2] * c[1]);
@@ -409,7 +424,8 @@ cross(float* a, float* b, float* c)
  *************/
 
 /* returns the magnitude of a vec3 */
-extern float
+
+float
 magnitude(float* a)
 {
     return sqrt(pow(a[0], 2) + pow(a[1], 2) + pow(a[2], 2));
@@ -420,7 +436,8 @@ magnitude(float* a)
  *************/
 
 /* normalizes vec3 in place */
-extern void
+
+void
 normalize(float* a)
 {
     float m = magnitude(a);
@@ -440,7 +457,8 @@ normalize(float* a)
  ***********/
 
 /* converts degrees to radians */
-extern float 
+
+float 
 radians(float deg) 
 {
     return deg * (M_PI / 180);

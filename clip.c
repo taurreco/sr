@@ -26,6 +26,7 @@
  ********/
 
 /* swaps what the pointers point to */
+
 static void
 swap(float** a, float** b)
 {
@@ -39,6 +40,7 @@ swap(float** a, float** b)
  ********/
 
 /* interpolates a point some length up an edge */
+
 static void
 lerp(float* dest, float* from, float* to, float a, int n_attr)
 {
@@ -55,6 +57,7 @@ lerp(float* dest, float* from, float* to, float a, int n_attr)
  * a variant of cohen-sutherland for one plane
  * as determined by an axis and a sign to indicate direction
  */
+
 static void
 clip_routine(float* dest, float* src, 
              int* n_pts, int n_attr, 
@@ -107,7 +110,8 @@ clip_routine(float* dest, float* src,
  * matches a one-hot clip flag to its clip routine
  * updates source points to the clipped ones in place
  */
-extern void
+
+void
 clip_poly(float* src, int* n_pts, 
           int n_attr, uint8_t clip_flags)
 {
@@ -150,7 +154,8 @@ clip_poly(float* src, int* n_pts,
  *************/
 
 /* assigns proper clip flags to a point */
-extern void
+
+void
 clip_test(float* pt, uint8_t* flags)
 {
     uint8_t left = (pt[3] + pt[0] < 0) << 0;

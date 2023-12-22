@@ -253,71 +253,40 @@ sr_bind_texture(uint32_t* colors, int width, int height)
  *                                                                   *
  *********************************************************************/
 
-/***************
- * split_light *
- ***************/
-
-static int
-split_light(enum sr_light slot) {
-        switch(slot) {
-        case SR_LIGHT_1:
-            return 0;
-        case SR_LIGHT_2:
-            return 1;
-        case SR_LIGHT_3:
-            return 2;
-        case SR_LIGHT_4:
-            return 3;
-        case SR_LIGHT_5:
-            return 4;
-        case SR_LIGHT_6:
-            return 5;
-        case SR_LIGHT_7:
-            return 6;
-        case SR_LIGHT_8:
-            return 7;
-        default:
-            return -1;
-    }
-    
-}
-
 /************
  * sr_light *
  ************/
 
 /* binds a light to pipeline */
+
 extern void 
 sr_light(enum sr_light slot, enum sr_light_attr attr, float* data)
 {
-    /* split index */
-    int idx = split_light(slot);
-
     /* split attribute data */
     switch(attr) {
         case SR_POSITION:
-            memcpy(g_lights[idx].pos, data, 3 * sizeof(float));
+            memcpy(g_lights[slot].pos, data, 3 * sizeof(float));
             break;
         case SR_DIRECTION:
-            memcpy(g_lights[idx].dir, data, 3 * sizeof(float));
+            memcpy(g_lights[slot].dir, data, 3 * sizeof(float));
             break;
         case SR_COLOR:
-            memcpy(g_lights[idx].color, data, 4 * sizeof(float));
+            memcpy(g_lights[slot].color, data, 4 * sizeof(float));
             break;
         case SR_SPOT_ANGLE:
-            g_lights[idx].spot_angle = *data;
+            g_lights[slot].spot_angle = *data;
             break;
         case SR_SPOT_PENUMBRA:
-            g_lights[idx].spot_penumbra = *data;
+            g_lights[slot].spot_penumbra = *data;
             break;
         case SR_CONSTANT_ATTENUATION:
-            g_lights[idx].attn_const = *data;
+            g_lights[slot].attn_const = *data;
             break;
         case SR_LINEAR_ATTENUATION:
-            g_lights[idx].attn_lin = *data;
+            g_lights[slot].attn_lin = *data;
             break;
         case SR_QUADRATIC_ATTENUATION:
-            g_lights[idx].attn_quad = *data;
+            g_lights[slot].attn_quad = *data;
             break;
         default:
             return;
@@ -353,6 +322,7 @@ sr_glight(enum sr_light_attr attr, float* data)
  *****************/
 
 /* binds light type to slot */
+
 extern void 
 sr_light_type(enum sr_light slot, enum sr_light_type type)
 {
@@ -370,17 +340,16 @@ sr_light_type(enum sr_light slot, enum sr_light_type type)
     }
 }
 
-
 /*******************
  * sr_light_enable *
  *******************/
 
 /* enables light at specified slot */
+
 extern void 
 sr_light_enable(enum sr_light slot)
 {
-    int idx = split_light(slot);
-    g_uniform.light_state |= 1 << idx;
+    g_uniform.light_state |= 1 << slot;
 }
 
 /********************
@@ -391,8 +360,7 @@ sr_light_enable(enum sr_light slot)
 extern void 
 sr_light_disable(enum sr_light slot)
 {
-    int idx = split_light(slot);
-    g_uniform.light_state &= ~(1 << idx);
+    g_uniform.light_state &= ~(1 << slot);
 }
 
 /***************
@@ -407,7 +375,7 @@ sr_material(enum sr_light_attr attr, float* data)
         case SR_AMBIENT:
             memcpy(g_material.ambient, data, 4 * sizeof(float));
             break;
-        case SR_DIFFUSE:
+       case SR_DIFFUSE:
             memcpy(g_material.diffuse, data, 4 * sizeof(float));
             break;
         case SR_SPECULAR:
@@ -567,7 +535,8 @@ sr_rotate_x(float t)
  ***************/
 
 /* pushes a matrix rotating about the y axis by t radians */
-extern void
+
+void
 sr_rotate_y(float t)
 {
     float c = cos(t);
@@ -588,7 +557,8 @@ sr_rotate_y(float t)
  ***************/
 
 /* pushes a matrix rotating about the z axis by t radians */
-extern void
+
+void
 sr_rotate_z(float t)
 {
     float c = cos(t);
@@ -609,7 +579,7 @@ sr_rotate_z(float t)
  ************/
 
 /* pushes a scale matrix by sx, sy, sz */
-extern void
+void
 sr_scale(float sx, float sy, float sz)
 {
     struct mat4 s = {
@@ -632,13 +602,14 @@ sr_scale(float sx, float sy, float sz)
  * sr_look_at *
  **************/
 
-/* 
+/** 
  * constructs a view matrix from three vectors :
  * the eye vector, camera position in world space
  * the target vector, the position of view target in world space
  * the up vector, pointing to whats generally above the camera
  */
-extern void
+
+void
 sr_look_at(float ex, float ey, float ez, 
            float lx, float ly, float lz, 
            float ux, float uy, float uz)
@@ -697,7 +668,8 @@ sr_look_at(float ex, float ey, float ez,
  ******************/
 
 /* pushes a perspective matrix specified by fov */
-extern void
+
+void
 sr_perspective(float fovy, float aspect, float near, float far)
 {
     float f = 1 / (tan(fovy / 2));
@@ -720,7 +692,8 @@ sr_perspective(float fovy, float aspect, float near, float far)
  **************/
 
 /* pushes a projection matrix based on frustum */
-extern void
+
+void
 sr_frustum(float left, float right, float bottom, 
            float top, float near, float far)
 {

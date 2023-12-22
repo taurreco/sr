@@ -25,6 +25,7 @@
  *****************/
 
 /* false for triangles against the winding order */
+
 static int
 winding_order(int winding, float* v0, float* v1, float* v2)
 {
@@ -40,6 +41,7 @@ winding_order(int winding, float* v0, float* v1, float* v2)
  *************/
 
 /* matches the correct drawing routine with the primitive type */
+
 static void 
 draw_prim(struct raster_context* rast, float* pts, 
           int n_pts, enum sr_primitive prim_type)
@@ -79,6 +81,7 @@ draw_prim(struct raster_context* rast, float* pts,
  **************/
 
 /* fills relevant traversal data about a primitive type */
+
 static void
 split_prim(enum sr_primitive prim_type, int* prim_size)
 {
@@ -104,6 +107,7 @@ split_prim(enum sr_primitive prim_type, int* prim_size)
  ****************/
 
 /* moves coordinates from clip space to screen space */
+
 static void
 screen_space(struct sr_framebuffer* fbuf, float* pt)
 {
@@ -134,7 +138,8 @@ screen_space(struct sr_framebuffer* fbuf, float* pt)
  * entry point of the sr pipeline, 
  * refines indexed vertex data to be sent to rasterizer
  */
-extern void
+
+void
 sr_render(struct sr_pipeline* pipe, int* indices, 
           int n_indices, enum sr_primitive prim_type)
 {

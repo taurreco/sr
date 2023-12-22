@@ -2,7 +2,8 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include "rast.h"
+
+#include "sr_priv.h"
 
 /**
  * sr_rast.c
@@ -22,6 +23,7 @@
  ***************/
 
 /* holds the steps sizes / data for barycentric weight for an edge */
+
 struct edge {
     float step_x;    /* steps to increment to get the det at new pt */
     float step_y;    
@@ -33,6 +35,7 @@ struct edge {
  ***************/
 
 /* holds the upper and lower bounds of the triangle */
+
 struct bbox {
     float min_x; 
     float min_y;
@@ -54,6 +57,7 @@ struct bbox {
  * determines whether an edge is top or left 
  * where the edge is directed, starting at v0 pointing to v1
  */
+
 static int 
 is_tl(float* v0, float* v1) 
 {
@@ -73,6 +77,7 @@ is_tl(float* v0, float* v1)
  *************/
 
 /* make an edge struct instance, return the initial determinant */
+
 static float 
 edge_init(struct edge* edge, int winding, 
           float* v0, float* v1, float* pt)
@@ -100,6 +105,7 @@ edge_init(struct edge* edge, int winding,
  *************/
 
 /* define a pixel-aligned bounding box for triangle rasterization */
+
 static void
 bbox_init(struct bbox* bbox, float* v0, float* v1, float* v2)
 {    
@@ -129,7 +135,8 @@ bbox_init(struct bbox* bbox, float* v0, float* v1, float* v2)
  ***********/
 
 /* render point to framebuffer */
-extern void 
+
+void 
 draw_pt(struct raster_context* rast, float* pt)
 {
     uint32_t color = 0; /* color dest */
@@ -147,7 +154,8 @@ draw_pt(struct raster_context* rast, float* pt)
  ***********/
 
 /* rasterize a triangle to framebuffer */
-extern void 
+
+void 
 draw_tr(struct raster_context* rast, float* v0, float* v1, float* v2)
 {   
     /* find bounding box */

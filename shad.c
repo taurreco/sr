@@ -1,11 +1,9 @@
 
-
-#include "sr.h"
-#include "state.h"
-#include "mat.h"
-
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "sr.h"
+#include "sr_priv.h"
 
 /**
  * sr_shaders.c
@@ -157,25 +155,23 @@ falloff(float x, float inner, float outer) {
 static void
 phong(float* color, float* pos, float* uv, 
       float* normal, struct sr_uniform* uniform)
-{   
-    memset(color, 0, 4 * sizeof(float));
-    
-    float tmp[4];
-    float fatt = 1;
-    float intensity = 1;
-    float I[4];
-    float L[3];
-    float R[3];
-    float V[3];
-    float dist;
+{       
+    float fatt, intensity, dist;
+    float I[4], L[3], R[3], V[3], tmp[4];
+    float *Oa, *Od, *Os;
+    float n, ka, kd, ks;
 
-    float* Oa = uniform->material->ambient;
-    float* Od = uniform->material->diffuse;
-    float* Os = uniform->material->specular;
-    float n = uniform->material->shininess;
-    float ka = uniform->ka;
-    float kd = uniform->kd;
-    float ks = uniform->ks;
+    memset(color, 0, 4 * sizeof(float));
+    fatt = 1;
+    intensity = 1;
+
+    Oa = uniform->material->ambient;
+    Od = uniform->material->diffuse;
+    Os = uniform->material->specular;
+    n = uniform->material->shininess;
+    ka = uniform->ka;
+    kd = uniform->kd;
+    ks = uniform->ks;
 
     /* ambient */
     vec4_scale(tmp, Oa, ka);
@@ -402,13 +398,13 @@ phong_fs(uint32_t* out, float* in, void* uniform)
  * color *
  *********/
 
-extern void
+void
 sr_bind_color_vs()
 {
     sr_bind_vs(color_vs, 7);
 }
 
-extern void
+void
 sr_bind_color_fs()
 {
     sr_bind_fs(color_fs);
@@ -418,13 +414,13 @@ sr_bind_color_fs()
  * texture *
  ***********/
 
-extern void
+void
 sr_bind_texture_vs()
 {
     sr_bind_vs(texture_vs, 6);
 }
 
-extern void
+void
 sr_bind_texture_fs()
 {
     sr_bind_fs(texture_fs);
@@ -434,13 +430,13 @@ sr_bind_texture_fs()
  * phong *
  *********/
 
-extern void
+void
 sr_bind_std_vs()
 {
     sr_bind_vs(std_vs, 12);
 }
 
-extern void
+void
 sr_bind_phong_fs()
 {
     sr_bind_fs(phong_fs);
