@@ -5,11 +5,11 @@
 #include "gl.h"
 #include "mat.h"
 
-/***************************************************************
- *                                                             *
- *                     private structures                      *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                        private structures                        *
+ *                                                                  *
+ ********************************************************************/
 
 struct texture {
     uint32_t *colors;
@@ -53,11 +53,11 @@ struct light {
     float attn_quad;
 };
 
-/***************************************************************
- *                                                             *
- *                      global variables                       *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                         global variables                         *
+ *                                                                  *
+ ********************************************************************/
 
 
 /* identity matrix */
@@ -153,17 +153,18 @@ static struct gl_pipeline g_pipe = {
     .winding          = GL_WINDING_ORDER_CCW,
 };
 
-/***************************************************************
- *                                                             *
- *                      render interface                       *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                         render interface                         *
+ *                                                                  *
+ ********************************************************************/
 
 /**************
  * gl_renderl *
  **************/
 
 /* builds the mvp and renders the global state */
+
 extern void
 gl_renderl(int *indices, int n_indices, enum gl_primitive prim_type)
 {
@@ -191,17 +192,18 @@ gl_renderl(int *indices, int n_indices, enum gl_primitive prim_type)
     gl_render(&g_pipe, indices, n_indices, prim_type);
 }
 
-/***************************************************************
- *                                                             *
- *               pipeline and uniform bindings                 *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                  pipeline and uniform bindings                   *
+ *                                                                  *
+ ********************************************************************/
 
-/***************
- * gl_bind_pts *
- ***************/
+/********************
+ * gl_bind_vertices *
+ ********************/
 
 /* sets points */
+
 extern void
 gl_bind_vertices(float *pts, int n_pts, int n_attr)
 {
@@ -215,6 +217,7 @@ gl_bind_vertices(float *pts, int n_pts, int n_attr)
  ***********************/
 
 /* attaches color and depth buffers to global framebuffer */
+
 extern void
 gl_bind_framebuffer(int width, int height, uint32_t *colors, float *depths)
 {
@@ -229,6 +232,7 @@ gl_bind_framebuffer(int width, int height, uint32_t *colors, float *depths)
  *******************/
 
 /* loads a custom uniform */
+
 extern void
 gl_bind_uniform(void *uniform)
 {
@@ -240,17 +244,19 @@ gl_bind_uniform(void *uniform)
  **********************/
 
 /* loads default uniform */
+
 extern void
 gl_restore_uniform()
 {
     g_pipe.uniform = &g_uniform;
 }
 
-/**************
+/*********************
  * gl_bind_custom_vs *
- **************/
+ *********************/
 
 /* sets the vertex shader */
+
 extern void
 gl_bind_custom_vs(vs_f vs, int n_attr_out)
 {
@@ -258,11 +264,12 @@ gl_bind_custom_vs(vs_f vs, int n_attr_out)
     g_pipe.n_attr_out = n_attr_out;
 }
 
-/**************
+/*********************
  * gl_bind_custom_fs *
- **************/
+ *********************/
 
 /* sets the fragment shader */
+
 extern void
 gl_bind_custom_fs(fs_f fs)
 {
@@ -274,6 +281,7 @@ gl_bind_custom_fs(fs_f fs)
  *******************/
 
 /* binds a texture to pipeline */
+
 extern void
 gl_bind_texture(uint32_t *colors, int width, int height)
 {
@@ -283,11 +291,11 @@ gl_bind_texture(uint32_t *colors, int width, int height)
     g_texture.height      = height;
 }
 
-/***************************************************************
- *                                                             *
- *                          light slot                         *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                            light slot                            *
+ *                                                                  *
+ ********************************************************************/
 
 /***************
  * split_light *
@@ -302,7 +310,7 @@ split_light(enum gl_light_slot slot)
 } 
 
 /************
- * gl_light_slot *
+ * gl_light *
  ************/
 
 /* binds a light to pipeline */
@@ -346,6 +354,7 @@ gl_light(enum gl_light_slot slot, enum gl_light_attr attr, float *data)
  *************/
 
 /* binds global light data to uniform */
+
 extern void 
 gl_glight(enum gl_light_attr attr, float *data)
 {
@@ -407,6 +416,7 @@ gl_light_enable(enum gl_light_slot slot)
  ********************/
 
 /* disables light at specified slot */
+
 extern void 
 gl_light_disable(enum gl_light_slot slot)
 {
@@ -418,6 +428,7 @@ gl_light_disable(enum gl_light_slot slot)
  ***************/
 
 /* binds a material to pipeline */
+
 extern void
 gl_material(enum gl_light_attr attr, float *data)
 {
@@ -442,17 +453,18 @@ gl_material(enum gl_light_attr attr, float *data)
     }
 }
 
-/***************************************************************
- *                                                             *
- *                    matrix stack operations                  *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                     matrix stack operations                      *
+ *                                                                  *
+ ********************************************************************/
 
 /******************
  * gl_matrix_mode *
  ******************/
 
 /* sets current matrix stack */
+
 extern void
 gl_matrix_mode(enum gl_matrix_mode mode)
 {
@@ -472,11 +484,12 @@ gl_matrix_mode(enum gl_matrix_mode mode)
     }
 }
 
-/***************
- * gl_dump_mat *
- ***************/
+/******************
+ * gl_dump_matrix *
+ ******************/
 
 /* dumps contents of current matrix to given buffer in row major order */
+
 extern void
 gl_dump_matrix(float *dest)
 {
@@ -503,6 +516,7 @@ gl_dump_matrix(float *dest)
  ******************/
 
 /* loads the entries in a 16 length row major float array to current matrix */
+
 extern void
 gl_load_matrix(float *glc)
 {
@@ -529,23 +543,25 @@ gl_load_matrix(float *glc)
  ********************/
 
 /* sets current matrix to the identity */
+
 extern void
 gl_load_identity()
 {
    *cur_mat = identity;
 }
 
-/***************************************************************
- *                                                             *
- *                            model                            *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                              model                               *
+ *                                                                  *
+ ********************************************************************/
 
 /****************
  * gl_translate *
  ****************/
 
 /* pushes an affine transformation with translation of x, y, z */
+
 extern void
 gl_translate(float x, float y, float z)
 {
@@ -564,6 +580,7 @@ gl_translate(float x, float y, float z)
  ***************/
 
 /* pushes a matrix rotating about the x axis by t radians */
+
 extern void
 gl_rotate_x(float t)
 {
@@ -629,6 +646,7 @@ gl_rotate_z(float t)
  ************/
 
 /* pushes a scale matrix by sx, sy, sz */
+
 void
 gl_scale(float sx, float sy, float sz)
 {
@@ -642,11 +660,11 @@ gl_scale(float sx, float sy, float sz)
     matmul(cur_mat, &s);
 }
 
-/***************************************************************
- *                                                             *
- *                             view                            *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                               view                               *
+ *                                                                  *
+ ********************************************************************/
 
 /**************
  * gl_look_at *
@@ -707,11 +725,11 @@ gl_look_at(float ex, float ey, float ez,
     gl_translate(-ex, -ey, -ez);
 }
 
-/***************************************************************
- *                                                             *
- *                          projection                         *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                            projection                            *
+ *                                                                  *
+ ********************************************************************/
 
 /******************
  * gl_perspective *
@@ -768,11 +786,11 @@ gl_frustum(float left, float right, float bottom,
     matmul(cur_mat, &p);
 }
 
-/***************************************************************
- *                                                             *
- *                      color & blending                       *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                         color & blending                         *
+ *                                                                  *
+ ********************************************************************/
 
 /*********
  * clamp *
@@ -787,7 +805,7 @@ clamp(float v)
 }
 
 /***********
- * argb_int *
+ * rgb_int *
  ***********/
 
 /* converts a float representation of a color into an int */
@@ -804,7 +822,7 @@ rgb_int(float *color)
 }
 
 /*************
- * argb_float *
+ * rgb_float *
  *************/
 
 /* converts one int into a float representation of a color */
@@ -818,11 +836,11 @@ rgb_float(float *a, uint32_t b)
     a[3] = ( b & 0x000000FF)        / (float)255;
 }
 
-/***************************************************************
- *                                                             *
- *                        shader helpers                       *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                          shader helpers                          *
+ *                                                                  *
+ ********************************************************************/
 
 /**************
  * clip_space *
@@ -1014,11 +1032,11 @@ phong(
     }
 }
 
-/***************************************************************
- *                                                             *
- *                            color                            *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                              color                               *
+ *                                                                  *
+ ********************************************************************/
 
 /**
  * in (3):
@@ -1047,6 +1065,7 @@ color_vs(float *out, float *in, void *uniform)
  ************/
 
 /* uses argb coords to fit color representation */
+
 static void
 color_fs(uint32_t *out, float *in, void *uniform)
 {
@@ -1054,11 +1073,11 @@ color_fs(uint32_t *out, float *in, void *uniform)
     *out = rgb_int(color);  /* frag color */
 }
 
-/***************************************************************
- *                                                             *
- *                           texture                           *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                             texture                              *
+ *                                                                  *
+ ********************************************************************/
 
 /**
  * in (5):
@@ -1099,11 +1118,11 @@ texture_fs(uint32_t *out, float *in, void *uniform)
     *out = rgb_int(color);  /* frag color */
 }
 
-/***************************************************************
- *                                                             *
- *                           phong                             *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                              phong                               *
+ *                                                                  *
+ ********************************************************************/
 
 /**
  * in (8):
@@ -1165,11 +1184,11 @@ phong_fs(uint32_t *out, float *in, void *uniform)
     *out = rgb_int(color);
 }
 
-/***************************************************************
- *                                                             *
- *                         bindings                            *
- *                                                             *
- ***************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                             bindings                             *
+ *                                                                  *
+ ********************************************************************/
 
 /*********
  * color *

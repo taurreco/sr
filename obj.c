@@ -14,11 +14,11 @@
 
 #define MAX_LINE_SIZE 1000
 
-/*********************************************************************
- *                                                                   *
- *                              structs                              *
- *                                                                   *
- *********************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                             structs                              *
+ *                                                                  *
+ ********************************************************************/
 
 struct obj_desc {                  
     int n_v; 
@@ -28,17 +28,18 @@ struct obj_desc {
     int n_tr;
 };
 
-/*********************************************************************
- *                                                                   *
- *                   (private) obj parsing helpers                   *
- *                                                                   *
- *********************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                  (private) obj parsing helpers                   *
+ *                                                                  *
+ ********************************************************************/
 
 /************
  * strtok_r *
  ************/
 
 /* implementation of strtok_r for non POSIX compliant C compilers */
+
 char*
 strtok_r(char *str, const char *delim, char **nextp)
 {
@@ -67,6 +68,7 @@ strtok_r(char *str, const char *delim, char **nextp)
  * takes a stream of whitespace seperated strings, converts 
  * them to floats, and copies it to the dest buffer
  */
+
 static void
 push_stream(float* dest, char* stream, int n_str) 
 {
@@ -86,6 +88,7 @@ push_stream(float* dest, char* stream, int n_str)
  ************/
 
 /* converts number to index in respective buffer */
+
 static int
 to_index(int buf_len, int num) {
     if (num > 0)
@@ -98,6 +101,7 @@ to_index(int buf_len, int num) {
  *****************/
 
 /* converts raw obj point indices into readable indices */
+
 static void
 split_indices(struct obj_desc* obj_desc, int* indices, char* raw, int8_t flags)
 {
@@ -122,6 +126,7 @@ split_indices(struct obj_desc* obj_desc, int* indices, char* raw, int8_t flags)
  **************/
 
 /* calculates face normal from three points */
+
 static void
 get_normal(float* normal, float* v0, float* v1, float* v2) {
     float e10[3];
@@ -131,17 +136,18 @@ get_normal(float* normal, float* v0, float* v1, float* v2) {
     cross(normal, e10, e20);
 }
 
-/*********************************************************************
- *                                                                   *
- *                  (private) obj memory & parsing                   *
- *                                                                   *
- *********************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                  (private) obj memory & parsing                  *
+ *                                                                  *
+ ********************************************************************/
 
 /**************
  * first_pass *
  **************/
 
 /* reads over the file to find buffer sizes */
+
 static void
 first_pass(struct obj_desc* obj_desc, FILE* fp)
 {
@@ -189,6 +195,7 @@ first_pass(struct obj_desc* obj_desc, FILE* fp)
  * moves data from file into its respective buffers, 
  * returns precise length of vertex buffer 'pts' 
  */
+
 static int
 second_pass(struct obj_desc* obj_desc, float* pts, int* indices, FILE* fp) 
 {
@@ -311,17 +318,18 @@ second_pass(struct obj_desc* obj_desc, float* pts, int* indices, FILE* fp)
     return n_pts;
 }
 
-/*********************************************************************
- *                                                                   *
- *                       (public) obj loading                        *
- *                                                                   *
- *********************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                       (public) obj loading                       *
+ *                                                                  *
+ ********************************************************************/
 
 /***************
- * sr_load_obj *
+ * gl_load_obj *
  ***************/
 
 /* reads obj file data from path into an indexed triangle list */
+
 extern struct gl_obj*
 gl_load_obj(char* file)
 {
@@ -363,11 +371,12 @@ gl_load_obj(char* file)
     return obj;
 }
 
-/***************
- * gl_obj_free *
- ***************/
+/******************
+ * gl_destroy_obj *
+ ******************/
 
 /* takes a heap allocated gl_obj struct and frees it and contents */
+
 extern void
 gl_destroy_obj(struct gl_obj* obj)
 {

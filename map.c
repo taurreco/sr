@@ -15,11 +15,11 @@ const int SIZES[23] = {
 
 int SIZES_INDEX = 0;  /* current position in the array above */
 
-/*********************************************************************
- *                                                                   *
- *                              structs                              *
- *                                                                   *
- *********************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                             structs                              *
+ *                                                                  *
+ ********************************************************************/
 
 struct kv_pair {
     char* key;
@@ -32,17 +32,18 @@ struct hash_table {
     int size;                       /* number of buckets in ht */
 };
 
-/*********************************************************************
- *                                                                   *
- *                (private) kv_pair memory management                *
- *                                                                   *
- *********************************************************************/
+/********************************************************************
+ *                                                                  *
+ *               (private) kv_pair memory management                *
+ *                                                                  *
+ ********************************************************************/
 
 /*****************
  * kv_pair_alloc *
  *****************/
 
 /* allocates a key value pair */
+
 static struct kv_pair* 
 kv_pair_alloc(char* key, int val)
 {
@@ -57,6 +58,7 @@ kv_pair_alloc(char* key, int val)
  ****************/
 
 /* frees kv_pair */
+
 static void
 kv_pair_free(struct kv_pair* pair) 
 {
@@ -64,17 +66,18 @@ kv_pair_free(struct kv_pair* pair)
     free(pair);
 }
 
-/*********************************************************************
- *                                                                   *
- *             (private) hash table memory management                *
- *                                                                   *
- *********************************************************************/
+/********************************************************************
+ *                                                                  *
+ *              (public) hash table memory management               *
+ *                                                                  *
+ ********************************************************************/
 
 /********************
  * hash_table_alloc *
  ********************/
 
 /* allocates empty hashtable of current size */
+
 struct hash_table* 
 hash_table_alloc()
 {
@@ -90,6 +93,7 @@ hash_table_alloc()
  *******************/
 
 /* frees hashtable */
+
 void
 hash_table_free(struct hash_table* ht) 
 {
@@ -103,11 +107,11 @@ hash_table_free(struct hash_table* ht)
     free(ht);
 }
 
-/*********************************************************************
- *                                                                   *
- *             (private) open addressed string hashing               *
- *                                                                   *
- *********************************************************************/
+/********************************************************************
+ *                                                                  *
+ *             (private) open addressed string hashing              *
+ *                                                                  *
+ ********************************************************************/
 
 /**********
  * hash_1 *
@@ -155,6 +159,7 @@ hash_2(char* key)
  * sends a string through two hash functions, useses them with an 
  * attempt counter to find a determenistic index into the hash table
  */
+
 static int
 double_hash(char* string, int size, int attempt)
 {
@@ -163,16 +168,11 @@ double_hash(char* string, int size, int attempt)
     return abs(hash_a + (attempt * (hash_b + 1))) % size;
 }
 
-/*********************************************************************
- *                                                                   *
- *             (private) hash table interface functions              *
- *                                                                   *
- *********************************************************************/
-/*********************************************************************
- *                                                                   *
- *                    (private) hash table helpers                   *
- *                                                                   *
- *********************************************************************/
+/********************************************************************
+ *                                                                  *
+ *                   (private) hash table helpers                   *
+ *                                                                  *
+ ********************************************************************/
 
 /********
  * grow *
@@ -182,6 +182,7 @@ double_hash(char* string, int size, int attempt)
  * nearly doubles the capacity of hashtable
  * it finds new size by indexing into a global sizes array
  */
+
 static void 
 grow(struct hash_table* ht)
 {
@@ -208,11 +209,18 @@ grow(struct hash_table* ht)
     hash_table_free(new_ht);
 }
 
+/********************************************************************
+ *                                                                  *
+ *             (public) hash table interface functions              *
+ *                                                                  *
+ ********************************************************************/
+
 /**********
  * insert *
  **********/
 
 /* inserts key into hash table */
+
 void
 insert(struct hash_table* ht, char* key, int val) 
 {
@@ -238,6 +246,7 @@ insert(struct hash_table* ht, char* key, int val)
  **********/
 
 /* returns val of key or -1 if it isn't in the hash table */
+
 int
 search(struct hash_table* ht, char* key)
 {
